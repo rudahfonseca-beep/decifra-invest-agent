@@ -1,0 +1,20 @@
+---
+description: Every session must produce an AAR markdown and refresh the human HTML dashboard
+alwaysApply: true
+---
+
+# Session AAR documentation (mandatory)
+
+At the end of every decifra-invest-agent agent session (and after automation runs):
+
+1. Write `docs/aar/YYYY-MM-DD-<slug>.md` from `docs/aar/_TEMPLATE.md` with sections:
+   - Plan / purpose / objective
+   - What actually happened
+   - Gaps
+   - Lessons
+   - Improvements
+2. Update `docs/aar/INDEX.md` and append follow-ups to `docs/improvements/LOG.md`.
+3. Add useful prompts to `docs/prompts/FUTURE_AGENTS.md` when lessons suggest them.
+4. Run `.\.venv\Scripts\python.exe scripts/update_session_dashboard.py`.
+
+Automation traces go under `docs/aar/automation/`. See `docs/workflows/session-closeout.md` and skill `decifra-aar`.

@@ -1,0 +1,11 @@
+---
+description: decifra-invest-agent data sources and product boundaries
+alwaysApply: true
+---
+
+# Data sources truth
+
+- Local lake under `data/companies/{TICKER}/` (gitignored) + `data/cache/cvm/` + `data/universe/`.
+- Sources: **B3** (Ibovespa + CNPJ), **CVM Dados Abertos** (DFP/ITR/IPE), **brapi/yfinance** (prices), company **RI** sites (best-effort).
+- Credit scores are **research-grade industry peer ranks**, not bureau/Serasa ratings and not Open Finance / Pluggy personal banking.
+- Filesystem store — not SQL. Prefer README + `docs/aar/` over re-deriving the layout.

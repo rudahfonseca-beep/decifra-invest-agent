@@ -1,0 +1,23 @@
+{
+  "mode": "equity",
+  "title": "Equity peer screen — VALE3",
+  "subjects": {
+    "companies": ["VALE3"],
+    "industries": ["Steel & Mining"]
+  },
+  "comparatives": {
+    "companies": [],
+    "industries": []
+  },
+  "kpis": [
+    "revenue",
+    "ebit",
+    "net_income",
+    "net_margin",
+    "ebit_margin",
+    "roe",
+    "equity_to_assets"
+  ],
+  "include_signals": false,
+  "language": "pt"
+}

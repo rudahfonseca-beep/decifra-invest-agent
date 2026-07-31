@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>decifra-invest-agent — Session dashboard</title>
+  <link rel="stylesheet" href="assets/dashboard.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>decifra-invest-agent session dashboard</h1>
+      <p class="sub">Human view of agent AARs, automation traces, improvements, and future prompts.</p>
+      <p class="meta">Generated 2026-07-31 20:18 UTC · 6 agent · 2 automation AARs</p>
+    </header>
+
+    <section>
+      <h2>Coverage snapshot</h2>
+      <div class="stats">
+      <div class="stat"><div class="label">tickers</div><div class="value">78</div></div>
+      <div class="stat"><div class="label">financials</div><div class="value">77/78</div></div>
+      <div class="stat"><div class="label">prices</div><div class="value">3/78</div></div>
+      <div class="stat"><div class="label">notices</div><div class="value">78/78</div></div>
+      <div class="stat"><div class="label">transcripts</div><div class="value">78/78</div></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Session timeline</h2>
+      <div class="grid">
+        
+      <article class="card">
+        <div class="meta-row">
+          <span class="badge badge-agent">agent</span>
+          <span class="badge badge-completed">completed</span>
+          2026-07-31
+        </div>
+        <h3><a href="../aar/2026-07-31-automation-aar.md">Automation + AAR memory</a></h3>
+        <div class="meta-row">2026-07-31-automation-aar</div>
+      </article>
+      <article class="card">
+        <div class="meta-row">
+          <span class="badge badge-agent">agent</span>
+          <span class="badge badge-completed">completed</span>
+          2026-07-31
+        </div>
+        <h3><a href="../aar/2026-07-31-rename-and-github.md">Rename workspace + push to GitHub</a></h3>
+        <div class="meta-row">2026-07-31-rename-and-github</div>
+      </article>
+      <article class="card">
+        <div class="meta-row">
+          <span class="badge badge-agent">agent</span>
+          <span class="badge badge-completed">completed</span>
+          2026-07-31
+        </div>
+        <h3><a href="../aar/2026-07-31-report-builder.md">Shared credit/equity report builder</a></h3>
+        <div class="meta-row">2026-07-31-report-builder</div>
+      </article>
+      <article class="card">
+        <div class="meta-row">
+          <span class="badge badge-agent">agent</span>
+          <span class="badge badge-superseded">superseded</span>
+          2026-07-31
+        </div>
+        <h3><a href="../aar/2026-07-31-report-platform-plan.md">Report platform planning</a></h3>
+        <div class="meta-row">2026-07-31-report-platform-plan</div>
+      </article>
+      <article class="card">
+        <div class="meta-row">
+          <span class="badge badge-automation">automation</span>
+          <span class="badge badge-completed">completed</span>
+          2026-07-31
+        </div>
+        <h3><a href="../aar/automation/2026-07-31-sync-pilot-dry-run.md">Sync pilot (dry-run)</a></h3>
+        <div class="meta-row">2026-07-31-sync-pilot-dry-run</div>
+      </article>
+      <article class="card">
+        <div class="meta-row">
+          <span class="badge badge-automation">automation</span>
+          <span class="badge badge-completed">completed</span>
+          2026-07-31
+        </div>
+        <h3><a href="../aar/automation/2026-07-31-sync-pilot.md">Sync pilot</a></h3>
+        <div class="meta-row">2026-07-31-sync-pilot</div>
+      </article>
+      <article class="card">
+        <div class="meta-row">
+          <span class="badge badge-agent">agent</span>
+          <span class="badge badge-completed">completed</span>
+          2026-07-20
+        </div>
+        <h3><a href="../aar/2026-07-20-credit-dashboard.md">Creditworthiness Streamlit dashboard</a></h3>
+        <div class="meta-row">2026-07-20-credit-dashboard</div>
+      </article>
+      <article class="card">
+        <div class="meta-row">
+          <span class="badge badge-agent">agent</span>
+          <span class="badge badge-completed">completed</span>
+          2026-07-20
+        </div>
+        <h3><a href="../aar/2026-07-20-greenfield-pipeline.md">Greenfield Ibovespa pipeline</a></h3>
+        <div class="meta-row">2026-07-20-greenfield-pipeline</div>
+      </article>
+      </div>
+    </section>
+
+    <section>
+      <h2>Open improvements</h2>
+      <table><thead><tr><th>ID</th><th>Improvement</th><th>Priority</th><th>Source</th></tr></thead><tbody><tr>
+          <td>IMP-001</td>
+          <td>Backfill `prices.csv` for all Ibovespa tickers (currently ~3/78)</td>
+          <td class="priority-high">high</td>
+          <td>greenfield-pipeline</td>
+        </tr><tr>
+          <td>IMP-002</td>
+          <td>Investigate ASAI3 missing DFP/ITR financials; document if CVM dump gap</td>
+          <td class="priority-high">high</td>
+          <td>greenfield-pipeline</td>
+        </tr><tr>
+          <td>IMP-003</td>
+          <td>Expand CVM cache years toward config defaults (2020–2021 DFP/ITR; fato relevante)</td>
+          <td class="priority-med">med</td>
+          <td>greenfield-pipeline</td>
+        </tr><tr>
+          <td>IMP-004</td>
+          <td>Fix empty interest coverage for PETR4 (account alias mapping) + regression test</td>
+          <td class="priority-high">high</td>
+          <td>credit-dashboard</td>
+        </tr><tr>
+          <td>IMP-007</td>
+          <td>Normalize free-text sectors into stable industry groups</td>
+          <td class="priority-med">med</td>
+          <td>report-platform-plan</td>
+        </tr><tr>
+          <td>IMP-008</td>
+          <td>Optionally wrap `sync_pilot.py` in a Cursor Automation once repo is on remote</td>
+          <td class="priority-low">low</td>
+          <td>automation-aar</td>
+        </tr><tr>
+          <td>IMP-012</td>
+          <td>Optional offline HTML render from `context.json` (no LLM)</td>
+          <td class="priority-low">low</td>
+          <td>report-builder</td>
+        </tr><tr>
+          <td>IMP-013</td>
+          <td>Rename local folder `DecifraCR` → `decifra-invest-agent` after closing Cursor; re-run editable install</td>
+          <td class="priority-med">med</td>
+          <td>rename-and-github</td>
+        </tr></tbody></table>
+    </section>
+
+    <section>
+      <h2>Lessons rollup</h2>
+      <div class="lessons">
+        <ul><li><strong>Automation + AAR memory:</strong> Encoding sync + AAR in one runner prevents “silent” collection runs with no handoff.</li><li><strong>Automation + AAR memory:</strong> Retrospective AARs from transcripts immediately reduce re-explore cost for the next agent.</li><li><strong>Automation + AAR memory:</strong> Human HTML should be generated from agent markdown sources, not maintained by hand.</li><li><strong>Rename workspace + push to GitHub:</strong> Renaming the workspace directory cannot succeed while Cursor has that folder open; do branding + git first, rename after close/reopen.</li><li><strong>Rename workspace + push to GitHub:</strong> Keep PyPI/CLI package name `decifra` stable even when the GitHub repo name changes.</li><li><strong>Shared credit/equity report builder:</strong> Prompt-first deliverable unblocks users without API keys; HTML is an optional second step.</li><li><strong>Shared credit/equity report builder:</strong> Validate tickers/industries against local universe before assemble.</li><li><strong>Shared credit/equity report builder:</strong> Keep report assembly fact-only; narrative stays in the LLM layer.</li><li><strong>Report platform planning:</strong> Do not start greenfield explores when README + prior session notes would suffice.</li><li><strong>Report platform planning:</strong> Ambiguous multi-mode product asks need one delivery decision before coding.</li><li><strong>Report platform planning:</strong> Report builder should reuse `credit/` + local store rather than a parallel data path.</li><li><strong>Sync pilot (dry-run):</strong> Idempotent CVM ZIP cache makes re-sync safe; status delta is the audit trail.</li><li><strong>Sync pilot (dry-run):</strong> Prefer `scripts/sync_pilot.py` over ad-hoc sync so every collection run leaves an AAR.</li><li><strong>Sync pilot (dry-run):</strong> Transcripts/RI crawl is the slowest stage — use `--skip-transcripts` for refresh loops.</li></ul>
+      </div>
+    </section>
+
+    <section>
+      <h2>Prompts for future agents</h2>
+      <ul class="prompt-list">
+        <li>
+          <strong>1. Sync + coverage delta</strong>
+          <div class="prompt-body">Run the Ibovespa sync via .venv (python scripts/sync_pilot.py or staged decifra sync). Report coverage deltas vs the latest automation AAR. Fix only regressions; log remaining gaps to docs/improvements/LOG.md.</div>
+        </li><li>
+          <strong>2. Prices backfill</strong>
+          <div class="prompt-body">Backfill prices.csv for all Ibovespa tickers missing OHLCV. Use BRAPI_API_KEY if present, else yfinance. Spot-check PETR4/VALE3/ITUB4. Write an AAR and update the HTML dashboard.</div>
+        </li><li>
+          <strong>3. ASAI3 financials</strong>
+          <div class="prompt-body">Diagnose why ASAI3 has no income/balance/cash CSVs. Check CNPJ mapping and CVM DFP/ITR presence. Fix or document as a known CVM dump gap. Add a note to improvements LOG.`
+
+## Credit / research</div>
+        </li><li>
+          <strong>4. Interest coverage fix</strong>
+          <div class="prompt-body">Diagnose empty interest_coverage for PETR4 in credit metrics. Fix account alias mapping; add a regression test; run credit smoke for Energy.</div>
+        </li><li>
+          <strong>5. Sector normalization</strong>
+          <div class="prompt-body">Normalize free-text sectors into stable industry_group values used by credit scoring. Document the mapping and update tests.</div>
+        </li><li>
+          <strong>6. Credit smoke</strong>
+          <div class="prompt-body">Follow docs/workflows/credit-smoke.md: run decifra credit --industry Energy, note empty ratios, write a short AAR if anything regresses.`
+
+## Product</div>
+        </li><li>
+          <strong>7. Report build smoke</strong>
+          <div class="prompt-body">Follow docs/workflows/report-build.md: run pytest on test_report_*, then decifra report build for PETR4/Energy, inspect data/reports artifacts. Optional --generate if OPENAI_API_KEY is set.</div>
+        </li><li>
+          <strong>8. Offline HTML from context (IMP-012)</strong>
+          <div class="prompt-body">Add an optional path that renders interactive HTML from context.json + chart_specs without calling an LLM (Jinja/Plotly). Keep prompt packing as the default path.`
+
+## Session hygiene</div>
+        </li><li>
+          <strong>9. Session closeout</strong>
+          <div class="prompt-body">Write an AAR for this session using docs/aar/_TEMPLATE.md (plan / happened / gaps / lessons / improvements). Update docs/aar/INDEX.md, docs/improvements/LOG.md, and run python scripts/update_session_dashboard.py.</div>
+        </li>
+      </ul>
+    </section>
+
+    <footer>
+      Agent sources: <code>docs/aar/</code> · Improvements: <code>docs/improvements/LOG.md</code> ·
+      Update: <code>python scripts/update_session_dashboard.py</code>
+    </footer>
+  </div>
+</body>
+</html>

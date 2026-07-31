@@ -1,0 +1,28 @@
+# AAR index
+
+Session and automation After Action Reports for decifra-invest-agent.
+
+| Date | ID | Title | Type | Status | File |
+|------|-----|-------|------|--------|------|
+| 2026-07-20 | 2026-07-20-greenfield-pipeline | Greenfield Ibovespa pipeline | agent | completed | [2026-07-20-greenfield-pipeline.md](2026-07-20-greenfield-pipeline.md) |
+| 2026-07-20 | 2026-07-20-credit-dashboard | Creditworthiness Streamlit dashboard | agent | completed | [2026-07-20-credit-dashboard.md](2026-07-20-credit-dashboard.md) |
+| 2026-07-31 | 2026-07-31-report-platform-plan | Report platform planning | agent | superseded | [2026-07-31-report-platform-plan.md](2026-07-31-report-platform-plan.md) |
+| 2026-07-31 | 2026-07-31-report-builder | Shared credit/equity report builder | agent | completed | [2026-07-31-report-builder.md](2026-07-31-report-builder.md) |
+| 2026-07-31 | 2026-07-31-automation-aar | Automation + AAR memory | agent | completed | [2026-07-31-automation-aar.md](2026-07-31-automation-aar.md) |
+| 2026-07-31 | 2026-07-31-rename-and-github | Rename workspace + push to GitHub | agent | completed | [2026-07-31-rename-and-github.md](2026-07-31-rename-and-github.md) |
+
+## Automation traces
+
+| Date | ID | Title | Status | File |
+|------|-----|-------|--------|------|
+| 2026-07-31 | 2026-07-31-sync-pilot-dry-run | Sync pilot | completed | [2026-07-31-sync-pilot-dry-run.md](automation/2026-07-31-sync-pilot-dry-run.md) |
+| 2026-07-31 | 2026-07-31-sync-pilot | Sync pilot | completed | [2026-07-31-sync-pilot.md](automation/2026-07-31-sync-pilot.md) |
+| _(populated by `scripts/sync_pilot.py`)_ | | | | |
+
+## How to add an AAR
+
+1. Copy [`_TEMPLATE.md`](_TEMPLATE.md) to `YYYY-MM-DD-<slug>.md` (or `automation/YYYY-MM-DD-<slug>.md`).
+2. Fill sections 1–5 (plan, happened, gaps, lessons, improvements).
+3. Append improvements to [`../improvements/LOG.md`](../improvements/LOG.md).
+4. Add a row to this INDEX.
+5. Run `python scripts/update_session_dashboard.py` to refresh the human HTML dashboard.

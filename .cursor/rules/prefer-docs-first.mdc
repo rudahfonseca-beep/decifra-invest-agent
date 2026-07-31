@@ -1,0 +1,14 @@
+---
+description: Prefer README and AAR index before launching a full codebase explore
+alwaysApply: true
+---
+
+# Docs first
+
+Before launching a broad explore subagent:
+
+1. Read `README.md`
+2. Read `docs/aar/INDEX.md` and the latest relevant AAR
+3. Skim `docs/improvements/LOG.md` for known gaps
+
+Only do a full greenfield explore when those sources are missing or clearly outdated for the task.

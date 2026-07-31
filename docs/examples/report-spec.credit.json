@@ -1,0 +1,21 @@
+{
+  "mode": "credit",
+  "title": "Energy credit screen — PETR4",
+  "subjects": {
+    "companies": ["PETR4"],
+    "industries": ["Energy"]
+  },
+  "comparatives": {
+    "companies": ["VALE3"],
+    "industries": []
+  },
+  "kpis": [
+    "credit_score",
+    "debt_to_equity",
+    "interest_coverage",
+    "current_ratio",
+    "net_margin"
+  ],
+  "include_signals": false,
+  "language": "pt"
+}

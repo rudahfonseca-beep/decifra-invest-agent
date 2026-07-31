@@ -1,0 +1,11 @@
+---
+description: Always use the project Windows venv for decifra-invest-agent CLI and scripts
+alwaysApply: true
+---
+
+# Windows venv / PATH
+
+- Prefer `.\.venv\Scripts\python.exe -m decifra …` or activate `.\.venv\Scripts\Activate.ps1`.
+- Prefer `.\.venv\Scripts\python.exe scripts\….py` for project scripts.
+- Do **not** assume a global `decifra` command is on PATH after `pip install`.
+- If `.venv` is missing: `python -m venv .venv` then `.\.venv\Scripts\python.exe -m pip install -e ".[dev]"`.
