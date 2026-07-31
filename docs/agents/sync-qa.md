@@ -21,11 +21,13 @@ Read `README.md`, `docs/aar/INDEX.md`, and the latest `docs/aar/automation/*.md`
 4. Flag:
    - Missing CNPJ in `meta.json`
    - Missing income/balance/cash (known: **ASAI3**)
-   - Missing `prices.csv` (most tickers)
-5. Write or update an automation/agent AAR; run `scripts/update_session_dashboard.py`.
+   - Missing `prices.csv` (treat as regression after IMP-001 backfill)
+5. Prefer `sync_pilot` so AAR + dashboard refresh happen together; otherwise write an AAR and run `scripts/update_session_dashboard.py`.
+6. Log lasting automation meta-gaps in `docs/improvements/AUTOMATION.md`.
 
 ## Do not
 
 - Assume global `decifra` on PATH
 - Treat this as bureau credit or Open Finance data
 - Launch a full codebase explore if AARs already explain the store layout
+- Skip dashboard refresh after a collection/automation run

@@ -10,7 +10,7 @@
 - Before launching a broad explore:
   1. Read `README.md`
   2. Read `docs/aar/INDEX.md` and the latest relevant AAR
-  3. Skim `docs/improvements/LOG.md` for known gaps
+  3. Skim `docs/improvements/LOG.md` and `docs/improvements/AUTOMATION.md` for known gaps
 - Only do a full greenfield explore when those sources are missing or clearly outdated for the task.
 
 ## Mandatory Session AAR Documentation
@@ -20,11 +20,11 @@ At the end of every `decifra-invest-agent` session (and after automation runs):
    - What actually happened
    - Gaps
    - Lessons
-   - Improvements (also append `docs/improvements/LOG.md`)
-2. Update `docs/aar/INDEX.md` and append follow-ups to `docs/improvements/LOG.md`.
+   - Improvements (also append `docs/improvements/LOG.md` and/or `docs/improvements/AUTOMATION.md`)
+2. Update `docs/aar/INDEX.md` and append follow-ups to the improvements logs.
 3. Add useful prompts to `docs/prompts/FUTURE_AGENTS.md` when lessons suggest them.
-4. Run `.\.venv\Scripts\python.exe scripts/update_session_dashboard.py`.
-5. Automation traces go under `docs/aar/automation/`. See `docs/workflows/session-closeout.md` and skill `decifra-aar`.
+4. Run `.\.venv\Scripts\python.exe scripts/update_session_dashboard.py` (required sync_pilot closeout too).
+5. Automation traces go under `docs/aar/automation/`. Automation meta: `docs/improvements/AUTOMATION.md`. See `docs/workflows/session-closeout.md` and skill `decifra-aar`.
 
 ## Windows Virtual Environment & Executables
 - Prefer `.\.venv\Scripts\python.exe -m decifra …` or activate `.\.venv\Scripts\Activate.ps1`.

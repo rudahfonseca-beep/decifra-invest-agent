@@ -14,6 +14,7 @@ DOCS = ROOT / "docs"
 AAR_DIR = DOCS / "aar"
 AUTO_DIR = AAR_DIR / "automation"
 IMPROVEMENTS = DOCS / "improvements" / "LOG.md"
+AUTOMATION_IMPROVEMENTS = DOCS / "improvements" / "AUTOMATION.md"
 PROMPTS = DOCS / "prompts" / "FUTURE_AGENTS.md"
 OUT_HTML = DOCS / "dashboard" / "index.html"
 CSS_HREF = "assets/dashboard.css"
@@ -67,7 +68,7 @@ def load_aars() -> list[dict]:
 
 
 def parse_improvements_open(text: str) -> list[dict[str, str]]:
-    """Parse the Open table from improvements LOG."""
+    """Parse the Open table from improvements LOG or AUTOMATION.md."""
     if "## Open" not in text:
         return []
     section = text.split("## Open", 1)[1]
@@ -80,6 +81,8 @@ def parse_improvements_open(text: str) -> list[dict[str, str]]:
         cols = [c.strip() for c in line.strip("|").split("|")]
         if len(cols) < 5 or cols[0] in ("ID", "----") or set(cols[0]) <= {"-"}:
             continue
+        # LOG.md: id, date, source, improvement, priority, notes
+        # AUTOMATION.md: id, date, source, opportunity, priority, notes
         rows.append(
             {
                 "id": cols[0],
@@ -93,6 +96,30 @@ def parse_improvements_open(text: str) -> list[dict[str, str]]:
     return rows
 
 
+def _priority_class(pri: str) -> str:
+    pri_l = pri.lower()
+    if "high" in pri_l:
+        return "priority-high"
+    if "med" in pri_l:
+        return "priority-med"
+    return "priority-low"
+
+
+def _table_rows(improvements: list[dict[str, str]]) -> list[str]:
+    rows: list[str] = []
+    for row in improvements:
+        pri_class = _priority_class(row.get("priority", ""))
+        rows.append(
+            f"""<tr>
+          <td>{escape(row['id'])}</td>
+          <td>{escape(row.get('improvement', ''))}</td>
+          <td class="{pri_class}">{escape(row.get('priority', ''))}</td>
+          <td>{escape(row.get('source', ''))}</td>
+        </tr>"""
+        )
+    return rows
+
+
 def parse_prompts(text: str) -> list[dict[str, str]]:
     """Extract numbered prompts: **Title** then body until blank or next number."""
     prompts: list[dict[str, str]] = []
@@ -102,20 +129,56 @@ def parse_prompts(text: str) -> list[dict[str, str]]:
         re.MULTILINE | re.DOTALL,
     )
     for m in pattern.finditer(text):
-        body = m.group(3).strip()
-        # Prefer fenced or backtick-wrapped single line; else strip backticks
-        body = body.strip("`").strip()
+        raw = m.group(3)
+        # Prefer backtick-wrapped body; drop ## section headers that sit between items
+        bt = re.search(r"`([^`]+)`", raw, re.DOTALL)
+        if bt:
+            body = " ".join(bt.group(1).split())
+        else:
+            body = re.sub(r"^##\s+.*$", "", raw, flags=re.MULTILINE).strip()
+            body = " ".join(body.strip("`").split())
         prompts.append({"n": m.group(1), "title": m.group(2).strip(), "body": body})
     return prompts
 
 
+def live_coverage() -> dict[str, str]:
+    """Coverage from the local lake via coverage_status (preferred)."""
+    try:
+        src = ROOT / "src"
+        if str(src) not in sys.path:
+            sys.path.insert(0, str(src))
+        from decifra.assistant.retrieve import coverage_status
+
+        rows = coverage_status()
+    except Exception:
+        return {}
+    n = len(rows)
+    if n == 0:
+        return {}
+
+    def has_fin(r: dict) -> bool:
+        return bool(
+            r.get("income_statement") and r.get("balance_sheet") and r.get("cash_flow")
+        )
+
+    return {
+        "tickers": str(n),
+        "financials": f"{sum(1 for r in rows if has_fin(r))}/{n}",
+        "prices": f"{sum(1 for r in rows if r.get('prices'))}/{n}",
+        "notices": f"{sum(1 for r in rows if r.get('notices'))}/{n}",
+        "transcripts": f"{sum(1 for r in rows if r.get('transcripts'))}/{n}",
+    }
+
+
 def summarize_coverage(aars: list[dict]) -> dict[str, str]:
-    """Pull coverage numbers from the newest automation AAR if present."""
+    """Prefer live lake coverage; fall back to newest automation AAR."""
+    live = live_coverage()
+    if live:
+        return live
     for a in aars:
         if a.get("session_type") == "automation":
             path: Path = a["path"]
             text = path.read_text(encoding="utf-8")
-            # Look for simple key: value lines under coverage
             cov: dict[str, str] = {}
             for key in ("tickers", "financials", "prices", "notices", "transcripts"):
                 m = re.search(rf"(?i){key}\s*[:=]\s*([^\n|]+)", text)
@@ -129,6 +192,7 @@ def summarize_coverage(aars: list[dict]) -> dict[str, str]:
 def render_html(
     aars: list[dict],
     improvements: list[dict[str, str]],
+    automation_opps: list[dict[str, str]],
     prompts: list[dict[str, str]],
     coverage: dict[str, str],
 ) -> str:
@@ -162,24 +226,8 @@ def render_html(
         if len(lesson_items) >= 12:
             break
 
-    imp_rows = []
-    for row in improvements:
-        pri = row.get("priority", "").lower()
-        pri_class = (
-            "priority-high"
-            if "high" in pri
-            else "priority-med"
-            if "med" in pri
-            else "priority-low"
-        )
-        imp_rows.append(
-            f"""<tr>
-          <td>{escape(row['id'])}</td>
-          <td>{escape(row.get('improvement', ''))}</td>
-          <td class="{pri_class}">{escape(row.get('priority', ''))}</td>
-          <td>{escape(row.get('source', ''))}</td>
-        </tr>"""
-        )
+    imp_rows = _table_rows(improvements)
+    auto_rows = _table_rows(automation_opps)
 
     prompt_lis = []
     for p in prompts:
@@ -196,7 +244,17 @@ def render_html(
             cov_stats += f"""
       <div class="stat"><div class="label">{escape(k)}</div><div class="value">{escape(v)}</div></div>"""
     else:
-        cov_stats = '<p class="empty">No automation coverage snapshot yet. Run <code>scripts/sync_pilot.py</code>.</p>'
+        cov_stats = '<p class="empty">No lake coverage yet. Run <code>decifra sync</code> or <code>scripts/sync_pilot.py</code>.</p>'
+
+    def section_table(rows: list[str], empty: str) -> str:
+        if not rows:
+            return f'<p class="empty">{empty}</p>'
+        return (
+            "<table><thead><tr><th>ID</th><th>Improvement</th><th>Priority</th>"
+            "<th>Source</th></tr></thead><tbody>"
+            + "".join(rows)
+            + "</tbody></table>"
+        )
 
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -216,6 +274,7 @@ def render_html(
 
     <section>
       <h2>Coverage snapshot</h2>
+      <p class="sub">Live lake via <code>coverage_status</code> (falls back to latest automation AAR).</p>
       <div class="stats">{cov_stats}
       </div>
     </section>
@@ -229,7 +288,13 @@ def render_html(
 
     <section>
       <h2>Open improvements</h2>
-      {"<table><thead><tr><th>ID</th><th>Improvement</th><th>Priority</th><th>Source</th></tr></thead><tbody>" + "".join(imp_rows) + "</tbody></table>" if imp_rows else '<p class="empty">No open improvements.</p>'}
+      {section_table(imp_rows, "No open improvements.")}
+    </section>
+
+    <section>
+      <h2>Automation opportunities</h2>
+      <p class="sub">Meta follow-ups from <code>docs/improvements/AUTOMATION.md</code> (runners, closeout, Cursor Automations).</p>
+      {section_table(auto_rows, "No open automation opportunities.")}
     </section>
 
     <section>
@@ -248,7 +313,8 @@ def render_html(
 
     <footer>
       Agent sources: <code>docs/aar/</code> · Improvements: <code>docs/improvements/LOG.md</code> ·
-      Update: <code>python scripts/update_session_dashboard.py</code>
+      Automation: <code>docs/improvements/AUTOMATION.md</code> ·
+      Update: <code>python scripts/update_session_dashboard.py</code> (also via <code>sync_pilot</code>)
     </footer>
   </div>
 </body>
@@ -261,12 +327,20 @@ def main() -> int:
     improvements = parse_improvements_open(
         IMPROVEMENTS.read_text(encoding="utf-8") if IMPROVEMENTS.exists() else ""
     )
+    automation_opps = parse_improvements_open(
+        AUTOMATION_IMPROVEMENTS.read_text(encoding="utf-8")
+        if AUTOMATION_IMPROVEMENTS.exists()
+        else ""
+    )
     prompts = parse_prompts(PROMPTS.read_text(encoding="utf-8") if PROMPTS.exists() else "")
     coverage = summarize_coverage(aars)
-    html = render_html(aars, improvements, prompts, coverage)
+    html = render_html(aars, improvements, automation_opps, prompts, coverage)
     OUT_HTML.parent.mkdir(parents=True, exist_ok=True)
     OUT_HTML.write_text(html, encoding="utf-8")
-    print(f"Wrote {OUT_HTML} ({len(aars)} AARs, {len(improvements)} open improvements, {len(prompts)} prompts)")
+    print(
+        f"Wrote {OUT_HTML} ({len(aars)} AARs, {len(improvements)} open improvements, "
+        f"{len(automation_opps)} automation opps, {len(prompts)} prompts)"
+    )
     return 0
 
 

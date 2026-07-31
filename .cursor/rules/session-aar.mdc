@@ -12,9 +12,9 @@ At the end of every decifra-invest-agent agent session (and after automation run
    - What actually happened
    - Gaps
    - Lessons
-   - Improvements
-2. Update `docs/aar/INDEX.md` and append follow-ups to `docs/improvements/LOG.md`.
+   - Improvements (also append `docs/improvements/LOG.md` and/or `docs/improvements/AUTOMATION.md`)
+2. Update `docs/aar/INDEX.md` and append follow-ups to the improvements logs.
 3. Add useful prompts to `docs/prompts/FUTURE_AGENTS.md` when lessons suggest them.
-4. Run `.\.venv\Scripts\python.exe scripts/update_session_dashboard.py`.
+4. Run `.\.venv\Scripts\python.exe scripts/update_session_dashboard.py` (also a **required** step of `scripts/sync_pilot.py` automation closeout).
 
-Automation traces go under `docs/aar/automation/`. See `docs/workflows/session-closeout.md` and skill `decifra-aar`.
+Automation traces go under `docs/aar/automation/`. Automation meta-opportunities: `docs/improvements/AUTOMATION.md`. See `docs/workflows/session-closeout.md` and skill `decifra-aar`.

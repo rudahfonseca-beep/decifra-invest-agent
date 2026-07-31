@@ -11,46 +11,43 @@ status: completed
 
 ## 1. Plan / purpose / objective
 
-Automate existing DecifraCR data collection (`decifra sync`) for stages: **universe, financials, notices, transcripts**.
-Capture before/after coverage, write this automation AAR, and refresh the human HTML dashboard.
+Automate existing decifra-invest-agent data collection (`decifra sync`) for stages: **universe**.
+Capture before/after coverage, write this automation AAR, and **refresh the human HTML dashboard** (required closeout).
 Universe: full Ibovespa set.
 Dry-run: **True**.
 
 ## 2. What actually happened
 
-Ran `scripts/sync_pilot.py` at 2026-07-31 16:44 UTC.
+Ran `scripts/sync_pilot.py` at 2026-07-31 22:29 UTC.
 
 ### Stages
 
 - `universe`: OK — `F:\Archive\Dev\python\DecifraCR\.venv\Scripts\python.exe -m decifra sync universe`
-- `financials`: OK — `F:\Archive\Dev\python\DecifraCR\.venv\Scripts\python.exe -m decifra sync financials`
-- `notices`: OK — `F:\Archive\Dev\python\DecifraCR\.venv\Scripts\python.exe -m decifra sync notices`
-- `transcripts`: OK — `F:\Archive\Dev\python\DecifraCR\.venv\Scripts\python.exe -m decifra sync transcripts`
 
 ### Coverage before
 
 - tickers: 78
-- financials: 77/78
-- prices: 3/78
+- financials: 78/78
+- prices: 78/78
 - notices: 78/78
 - transcripts: 78/78
-- notice_pdfs: 392
+- notice_pdfs: 755
 - transcript_files: 295
-- missing_financials: ASAI3
-- missing_prices_count: 75
+- missing_financials: (none)
+- missing_prices_count: 0
 
 
 ### Coverage after
 
 - tickers: 78
-- financials: 77/78
-- prices: 3/78
+- financials: 78/78
+- prices: 78/78
 - notices: 78/78
 - transcripts: 78/78
-- notice_pdfs: 392
+- notice_pdfs: 755
 - transcript_files: 295
-- missing_financials: ASAI3
-- missing_prices_count: 75
+- missing_financials: (none)
+- missing_prices_count: 0
 
 
 ### Machine-readable summary
@@ -59,35 +56,28 @@ Ran `scripts/sync_pilot.py` at 2026-07-31 16:44 UTC.
 {
   "before": {
     "tickers": 78,
-    "financials": "77/78",
-    "prices": "3/78",
+    "financials": "78/78",
+    "prices": "78/78",
     "notices": "78/78",
     "transcripts": "78/78",
-    "missing_financials": [
-      "ASAI3"
-    ],
-    "missing_prices_count": 75,
-    "notice_pdfs": 392,
+    "missing_financials": [],
+    "missing_prices_count": 0,
+    "notice_pdfs": 755,
     "transcript_files": 295
   },
   "after": {
     "tickers": 78,
-    "financials": "77/78",
-    "prices": "3/78",
+    "financials": "78/78",
+    "prices": "78/78",
     "notices": "78/78",
     "transcripts": "78/78",
-    "missing_financials": [
-      "ASAI3"
-    ],
-    "missing_prices_count": 75,
-    "notice_pdfs": 392,
+    "missing_financials": [],
+    "missing_prices_count": 0,
+    "notice_pdfs": 755,
     "transcript_files": 295
   },
   "stages": [
-    "universe",
-    "financials",
-    "notices",
-    "transcripts"
+    "universe"
   ],
   "dry_run": true
 }
@@ -96,22 +86,26 @@ Ran `scripts/sync_pilot.py` at 2026-07-31 16:44 UTC.
 ## 3. Gaps
 
 - Dry-run only — no network sync executed.
-- Missing full financial CSVs: ASAI3 (IMP-002).
-- 75 tickers still missing prices.csv (IMP-001).
 
 ## 4. Lessons
 
 - Idempotent CVM ZIP cache makes re-sync safe; status delta is the audit trail.
-- Prefer `scripts/sync_pilot.py` over ad-hoc sync so every collection run leaves an AAR.
+- Prefer `scripts/sync_pilot.py` over ad-hoc sync so every collection run leaves an AAR **and** refreshes the dashboard.
 - Transcripts/RI crawl is the slowest stage — use `--skip-transcripts` for refresh loops.
-- Known lake gaps (ASAI3 financials, sparse prices) persist across successful syncs until specifically fixed.
+- Product/data gaps: [`docs/improvements/LOG.md`](../../improvements/LOG.md). Automation meta: [`docs/improvements/AUTOMATION.md`](../../improvements/AUTOMATION.md).
 
 ## 5. Improvements
 
-| ID | Improvement | Priority | Status |
-|----|-------------|----------|--------|
-| IMP-001 | Backfill prices.csv for remaining tickers | high | open |
-| IMP-002 | Resolve ASAI3 / missing financials | high | open |
-| IMP-008 | Optional Cursor Automation wrapping this runner | low | open |
+### Product / data
 
-See [`docs/improvements/LOG.md`](../../improvements/LOG.md).
+See open `IMP-*` rows in [`docs/improvements/LOG.md`](../../improvements/LOG.md) (do not hardcode stale status here).
+
+### Automation opportunities
+
+| ID | Opportunity | Priority | Status |
+|----|-------------|----------|--------|
+| AUTO-001 | Cursor Automation wrapping this runner (IMP-008) | low | open |
+| AUTO-003 | Prefer sync_pilot over ad-hoc `decifra sync` | med | open |
+| (run) | Dry-run — no lake mutation; dashboard still refreshed for AAR visibility | low | note |
+
+Track lasting meta-follow-ups in [`docs/improvements/AUTOMATION.md`](../../improvements/AUTOMATION.md).

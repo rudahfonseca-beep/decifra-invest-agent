@@ -27,7 +27,9 @@ What should future agents and humans remember?
 
 ## 5. Improvements
 
-Concrete follow-ups. Also append matching entries to [`docs/improvements/LOG.md`](../improvements/LOG.md).
+Concrete follow-ups. Also append matching entries to:
+- Product/data: [`docs/improvements/LOG.md`](../improvements/LOG.md) (`IMP-*`)
+- Automation meta: [`docs/improvements/AUTOMATION.md`](../improvements/AUTOMATION.md) (`AUTO-*`)
 
 | ID | Improvement | Priority | Status |
 |----|-------------|----------|--------|

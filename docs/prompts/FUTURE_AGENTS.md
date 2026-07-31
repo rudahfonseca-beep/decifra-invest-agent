@@ -2,37 +2,33 @@
 
 Copy-paste prompts. Prefer reading `docs/aar/INDEX.md` and `README.md` before exploring.
 
+Completed work (do not re-run unless regressing): prices backfill (IMP-001), ASAI3 diagnosis (IMP-002), interest coverage (IMP-004), sector normalization (IMP-007), offline HTML reports (IMP-012).
+
 ## Data collection
 
 1. **Sync + coverage delta**  
-   `Run the Ibovespa sync via .venv (python scripts/sync_pilot.py or staged decifra sync). Report coverage deltas vs the latest automation AAR. Fix only regressions; log remaining gaps to docs/improvements/LOG.md.`
+   `Run Ibovespa sync via .venv using python scripts/sync_pilot.py (preferred — writes automation AAR and refreshes the session dashboard). Report coverage deltas. Fix only regressions; log product gaps to docs/improvements/LOG.md and automation meta to docs/improvements/AUTOMATION.md.`
 
-2. **Prices backfill**  
-   `Backfill prices.csv for all Ibovespa tickers missing OHLCV. Use BRAPI_API_KEY if present, else yfinance. Spot-check PETR4/VALE3/ITUB4. Write an AAR and update the HTML dashboard.`
-
-3. **ASAI3 financials**  
-   `Diagnose why ASAI3 has no income/balance/cash CSVs. Check CNPJ mapping and CVM DFP/ITR presence. Fix or document as a known CVM dump gap. Add a note to improvements LOG.`
+2. **CVM cache years (IMP-003)**  
+   `Expand CVM DFP/ITR/IPE cache years toward config defaults (include 2020-2021 where missing). Document what remains unavailable upstream.`
 
 ## Credit / research
 
-4. **Interest coverage fix**  
-   `Diagnose empty interest_coverage for PETR4 in credit metrics. Fix account alias mapping; add a regression test; run credit smoke for Energy.`
-
-5. **Sector normalization**  
-   `Normalize free-text sectors into stable industry_group values used by credit scoring. Document the mapping and update tests.`
-
-6. **Credit smoke**  
+3. **Credit smoke**  
    `Follow docs/workflows/credit-smoke.md: run decifra credit --industry Energy, note empty ratios, write a short AAR if anything regresses.`
 
 ## Product
 
-7. **Report build smoke**  
-   `Follow docs/workflows/report-build.md: run pytest on test_report_*, then decifra report build for PETR4/Energy, inspect data/reports artifacts. Optional --generate if OPENAI_API_KEY is set.`
+4. **Report build smoke**  
+   `Follow docs/workflows/report-build.md: run pytest on test_report_*, then decifra report build for PETR4/Energy (with --offline), inspect data/reports artifacts. Optional --generate if OPENAI_API_KEY is set.`
 
-8. **Offline HTML from context (IMP-012)**  
-   `Add an optional path that renders interactive HTML from context.json + chart_specs without calling an LLM (Jinja/Plotly). Keep prompt packing as the default path.`
+## Ops / hygiene
 
-## Session hygiene
+5. **Rename local folder (IMP-013)**  
+   `After closing Cursor, rename DecifraCR -> decifra-invest-agent, reopen, re-run editable install, confirm decifra CLI.`
 
-9. **Session closeout**  
-   `Write an AAR for this session using docs/aar/_TEMPLATE.md (plan / happened / gaps / lessons / improvements). Update docs/aar/INDEX.md, docs/improvements/LOG.md, and run python scripts/update_session_dashboard.py.`
+6. **Cursor Automation wrapper (AUTO-001 / IMP-008)**  
+   `Optionally wrap scripts/sync_pilot.py in a Cursor Automation now that the repo is on GitHub. Dashboard refresh is already part of the pilot closeout.`
+
+7. **Session closeout**  
+   `Write an AAR for this session using docs/aar/_TEMPLATE.md (plan / happened / gaps / lessons / improvements). Update docs/aar/INDEX.md, docs/improvements/LOG.md and/or AUTOMATION.md, and run python scripts/update_session_dashboard.py.`

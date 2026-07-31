@@ -21,7 +21,7 @@ description: >-
 
 ## Pilot automation runner
 
-Preferred for documented collection runs:
+Preferred for documented collection runs (AAR + **required** dashboard refresh):
 
 ```bash
 .\.venv\Scripts\python.exe scripts/sync_pilot.py
@@ -30,12 +30,12 @@ Preferred for documented collection runs:
 .\.venv\Scripts\python.exe scripts/sync_pilot.py --dry-run
 ```
 
-See `docs/workflows/sync-pilot.md` and `docs/agents/sync-qa.md`.
+See `docs/workflows/sync-pilot.md`, `docs/agents/sync-qa.md`, and `docs/improvements/AUTOMATION.md`.
 
 ## Known gaps (do not treat as surprises)
 
-- **ASAI3**: may lack financial CSVs (IMP-002)
-- **prices.csv**: often only a few tickers (IMP-001)
+- **ASAI3**: may lack financial CSVs (IMP-002 — known CVM gap)
+- **prices.csv**: backfilled (IMP-001 done); treat new misses as regressions
 - CVM ZIP cache may be a subset of configured year defaults (IMP-003)
 
 ## Spot-check

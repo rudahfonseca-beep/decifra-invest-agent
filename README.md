@@ -107,8 +107,9 @@ See [`.env.example`](.env.example):
 
 - Agent AARs (markdown): [`docs/aar/`](docs/aar/) — see [`docs/aar/INDEX.md`](docs/aar/INDEX.md)
 - Human dashboard (HTML): open [`docs/dashboard/index.html`](docs/dashboard/index.html)
-- Sync pilot (coverage + AAR): `.\.venv\Scripts\python.exe scripts/sync_pilot.py`
-- Refresh dashboard: `.\.venv\Scripts\python.exe scripts/update_session_dashboard.py`
+- Sync pilot (coverage + AAR + **dashboard refresh**): `.\.venv\Scripts\python.exe scripts/sync_pilot.py`
+- Refresh dashboard alone: `.\.venv\Scripts\python.exe scripts/update_session_dashboard.py`
+- Improvements: [`docs/improvements/LOG.md`](docs/improvements/LOG.md) · automation meta: [`docs/improvements/AUTOMATION.md`](docs/improvements/AUTOMATION.md)
 - Workflows: [`docs/workflows/`](docs/workflows/) · Cursor skills under [`.cursor/skills/`](.cursor/skills/)
 - Report smoke: [`docs/workflows/report-build.md`](docs/workflows/report-build.md) · examples in [`docs/examples/`](docs/examples/)
 

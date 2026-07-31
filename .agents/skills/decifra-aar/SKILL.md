@@ -18,10 +18,10 @@ End of session, handoff, or after automation that needs a documented trace.
    2. What actually happened
    3. Gaps
    4. Lessons
-   5. Improvements (also append `docs/improvements/LOG.md`)
+   5. Improvements (also append `docs/improvements/LOG.md` for product gaps and/or `docs/improvements/AUTOMATION.md` for automation meta)
 4. Update `docs/aar/INDEX.md`.
 5. Optionally add prompts to `docs/prompts/FUTURE_AGENTS.md`.
-6. Refresh dashboard:
+6. Refresh dashboard (**required**; `scripts/sync_pilot.py` does this automatically on automation runs):
 
 ```bash
 .\.venv\Scripts\python.exe scripts/update_session_dashboard.py

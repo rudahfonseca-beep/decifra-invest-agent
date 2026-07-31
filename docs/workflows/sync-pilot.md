@@ -25,10 +25,12 @@ The runner:
 2. Runs selected sync stages
 3. Captures coverage **after**
 4. Writes `docs/aar/automation/YYYY-MM-DD-sync-pilot.md`
-5. Updates `docs/aar/INDEX.md` automation section (via dashboard script metadata)
-6. Calls `scripts/update_session_dashboard.py`
+5. Updates `docs/aar/INDEX.md` automation section
+6. **Required:** refreshes `docs/dashboard/index.html` via `scripts/update_session_dashboard.py` (non-zero exit if refresh fails)
+7. Surfaces automation opportunities in the AAR (standing `AUTO-*` + run notes); lasting items go in `docs/improvements/AUTOMATION.md`
 
 ## Skill / playbook
 
 - Skill: `.cursor/skills/decifra-sync/SKILL.md`
 - Playbook: `docs/agents/sync-qa.md`
+- Automation opportunities: `docs/improvements/AUTOMATION.md`
