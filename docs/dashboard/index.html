@@ -11,7 +11,7 @@
     <header>
       <h1>decifra-invest-agent session dashboard</h1>
       <p class="sub">Human view of agent AARs, automation traces, improvements, and future prompts.</p>
-      <p class="meta">Generated 2026-07-31 20:18 UTC · 6 agent · 2 automation AARs</p>
+      <p class="meta">Generated 2026-07-31 22:05 UTC · 7 agent · 2 automation AARs</p>
     </header>
 
     <section>
@@ -37,6 +37,15 @@
         </div>
         <h3><a href="../aar/2026-07-31-automation-aar.md">Automation + AAR memory</a></h3>
         <div class="meta-row">2026-07-31-automation-aar</div>
+      </article>
+      <article class="card">
+        <div class="meta-row">
+          <span class="badge badge-agent">agent</span>
+          <span class="badge badge-completed">completed</span>
+          2026-07-31
+        </div>
+        <h3><a href="../aar/2026-07-31-implement-future-agent-prompts.md">Implement all FUTURE_AGENTS prompts</a></h3>
+        <div class="meta-row">2026-07-31-implement-future-agent-prompts</div>
       </article>
       <article class="card">
         <div class="meta-row">
@@ -112,38 +121,18 @@
           <td class="priority-high">high</td>
           <td>greenfield-pipeline</td>
         </tr><tr>
-          <td>IMP-002</td>
-          <td>Investigate ASAI3 missing DFP/ITR financials; document if CVM dump gap</td>
-          <td class="priority-high">high</td>
-          <td>greenfield-pipeline</td>
-        </tr><tr>
           <td>IMP-003</td>
-          <td>Expand CVM cache years toward config defaults (2020–2021 DFP/ITR; fato relevante)</td>
+          <td>Expand CVM cache years toward config defaults (2020-2021 DFP/ITR; fato relevante)</td>
           <td class="priority-med">med</td>
           <td>greenfield-pipeline</td>
-        </tr><tr>
-          <td>IMP-004</td>
-          <td>Fix empty interest coverage for PETR4 (account alias mapping) + regression test</td>
-          <td class="priority-high">high</td>
-          <td>credit-dashboard</td>
-        </tr><tr>
-          <td>IMP-007</td>
-          <td>Normalize free-text sectors into stable industry groups</td>
-          <td class="priority-med">med</td>
-          <td>report-platform-plan</td>
         </tr><tr>
           <td>IMP-008</td>
           <td>Optionally wrap `sync_pilot.py` in a Cursor Automation once repo is on remote</td>
           <td class="priority-low">low</td>
           <td>automation-aar</td>
         </tr><tr>
-          <td>IMP-012</td>
-          <td>Optional offline HTML render from `context.json` (no LLM)</td>
-          <td class="priority-low">low</td>
-          <td>report-builder</td>
-        </tr><tr>
           <td>IMP-013</td>
-          <td>Rename local folder `DecifraCR` → `decifra-invest-agent` after closing Cursor; re-run editable install</td>
+          <td>Rename local folder `DecifraCR` -&gt; `decifra-invest-agent` after closing Cursor; re-run editable install</td>
           <td class="priority-med">med</td>
           <td>rename-and-github</td>
         </tr></tbody></table>
@@ -152,7 +141,7 @@
     <section>
       <h2>Lessons rollup</h2>
       <div class="lessons">
-        <ul><li><strong>Automation + AAR memory:</strong> Encoding sync + AAR in one runner prevents “silent” collection runs with no handoff.</li><li><strong>Automation + AAR memory:</strong> Retrospective AARs from transcripts immediately reduce re-explore cost for the next agent.</li><li><strong>Automation + AAR memory:</strong> Human HTML should be generated from agent markdown sources, not maintained by hand.</li><li><strong>Rename workspace + push to GitHub:</strong> Renaming the workspace directory cannot succeed while Cursor has that folder open; do branding + git first, rename after close/reopen.</li><li><strong>Rename workspace + push to GitHub:</strong> Keep PyPI/CLI package name `decifra` stable even when the GitHub repo name changes.</li><li><strong>Shared credit/equity report builder:</strong> Prompt-first deliverable unblocks users without API keys; HTML is an optional second step.</li><li><strong>Shared credit/equity report builder:</strong> Validate tickers/industries against local universe before assemble.</li><li><strong>Shared credit/equity report builder:</strong> Keep report assembly fact-only; narrative stays in the LLM layer.</li><li><strong>Report platform planning:</strong> Do not start greenfield explores when README + prior session notes would suffice.</li><li><strong>Report platform planning:</strong> Ambiguous multi-mode product asks need one delivery decision before coding.</li><li><strong>Report platform planning:</strong> Report builder should reuse `credit/` + local store rather than a parallel data path.</li><li><strong>Sync pilot (dry-run):</strong> Idempotent CVM ZIP cache makes re-sync safe; status delta is the audit trail.</li><li><strong>Sync pilot (dry-run):</strong> Prefer `scripts/sync_pilot.py` over ad-hoc sync so every collection run leaves an AAR.</li><li><strong>Sync pilot (dry-run):</strong> Transcripts/RI crawl is the slowest stage — use `--skip-transcripts` for refresh loops.</li></ul>
+        <ul><li><strong>Automation + AAR memory:</strong> Encoding sync + AAR in one runner prevents “silent” collection runs with no handoff.</li><li><strong>Automation + AAR memory:</strong> Retrospective AARs from transcripts immediately reduce re-explore cost for the next agent.</li><li><strong>Automation + AAR memory:</strong> Human HTML should be generated from agent markdown sources, not maintained by hand.</li><li><strong>Implement all FUTURE_AGENTS prompts:</strong> `3.06.02` sub-account mapping is critical for interest coverage on companies whose financial revenue exceeds expenses (making parent `3.06` net positive).</li><li><strong>Implement all FUTURE_AGENTS prompts:</strong> `BRAPI_API_KEY` enables fast, complete OHLCV price backfills (2,482 bars/ticker) across the entire Ibovespa universe in under 2 minutes.</li><li><strong>Implement all FUTURE_AGENTS prompts:</strong> Jinja2 + Plotly offline rendering allows zero-latency interactive HTML reports without LLM API dependency.</li><li><strong>Rename workspace + push to GitHub:</strong> Renaming the workspace directory cannot succeed while Cursor has that folder open; do branding + git first, rename after close/reopen.</li><li><strong>Rename workspace + push to GitHub:</strong> Keep PyPI/CLI package name `decifra` stable even when the GitHub repo name changes.</li><li><strong>Shared credit/equity report builder:</strong> Prompt-first deliverable unblocks users without API keys; HTML is an optional second step.</li><li><strong>Shared credit/equity report builder:</strong> Validate tickers/industries against local universe before assemble.</li><li><strong>Shared credit/equity report builder:</strong> Keep report assembly fact-only; narrative stays in the LLM layer.</li><li><strong>Report platform planning:</strong> Do not start greenfield explores when README + prior session notes would suffice.</li><li><strong>Report platform planning:</strong> Ambiguous multi-mode product asks need one delivery decision before coding.</li><li><strong>Report platform planning:</strong> Report builder should reuse `credit/` + local store rather than a parallel data path.</li></ul>
       </div>
     </section>
 

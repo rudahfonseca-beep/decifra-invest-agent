@@ -297,6 +297,9 @@ def report_build_cmd(
     generate: bool = typer.Option(
         False, "--generate", help="Call LLM to produce report.html (needs OPENAI_API_KEY)"
     ),
+    offline: bool = typer.Option(
+        False, "--offline", help="Render HTML from context.json (Jinja2+Plotly, no LLM)"
+    ),
 ) -> None:
     """Assemble report context and write prompt (and optional HTML) under data/reports/."""
     from decifra.report.generate import build_report_artifacts
@@ -334,7 +337,7 @@ def report_build_cmd(
         raise typer.Exit(1)
 
     with console.status("Building report artifacts..."):
-        result = build_report_artifacts(report_spec, generate=generate)
+        result = build_report_artifacts(report_spec, generate=generate, offline=offline)
 
     console.print(f"[green]Report artifacts[/green]: {result['dir']}")
     console.print(f"  spec:    {result['spec_path']}")

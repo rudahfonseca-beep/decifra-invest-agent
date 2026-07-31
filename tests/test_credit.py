@@ -214,6 +214,22 @@ def test_industry_group_mapping():
     assert industry_group("Unknown Sector XYZ") == "Other"
 
 
+def test_sector_normalization_expanded():
+    """IMP-007: new mappings should not fall through to Other."""
+    assert industry_group("Gás") == "Energy"
+    assert industry_group("Construção Civil") == "Real Estate"
+    assert industry_group("Securitizadoras de Recebíveis") == "Financial Services"
+    assert industry_group("Previdência e Seguros") == "Insurance"
+    assert industry_group("Transporte Aéreo") == "Transport & Infra"
+    assert industry_group("Logística") == "Transport & Infra"
+    assert industry_group("Açúcar e Álcool") == "Agribusiness"
+    assert industry_group("Máquinas e Equipamentos") == "Industrials"
+    assert industry_group("Shoppings Centers") == "Real Estate"
+    assert industry_group("Comércio e Distribuição") == "Retail & Consumer"
+    assert industry_group("Embalagens") == "Pulp & Paper"
+    assert industry_group("Mineração") == "Steel & Mining"
+
+
 def test_filter_latest_dfp_prefers_ultimo():
     df = pd.DataFrame(
         [
@@ -254,6 +270,84 @@ def test_pick_account_and_ratios(credit_data: Path):
     assert kpis["current_ratio"] == pytest.approx(2.0)
     assert kpis["interest_coverage"] == pytest.approx(10.0)
     assert kpis["net_margin"] == pytest.approx(0.1)
+
+
+def test_interest_coverage_positive_fin_result(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    """IMP-004 regression: when 3.06 (financial_result) is positive but 3.06.02
+    (interest_expense / despesas financeiras) is negative, interest coverage
+    should still be computed from the sub-account."""
+    monkeypatch.setattr("decifra.store.folders.COMPANIES_DIR", tmp_path)
+    monkeypatch.setattr("decifra.credit.metrics.company_dir", lambda t: tmp_path / t.upper())
+    monkeypatch.setattr(
+        "decifra.credit.metrics.load_meta",
+        lambda t: json.loads((tmp_path / t.upper() / "meta.json").read_text(encoding="utf-8")),
+    )
+    d = _company_tree(tmp_path, "PETR4", "Exploração. Refino e Distribuição")
+    # Income: EBIT=200, financial_result=+50 (net positive), interest_expense=-80
+    _write_csv(
+        d / "financials" / "income_statement.csv",
+        _statement_rows(
+            accounts={
+                "3.01": ("Receita de Venda", 5000),
+                "3.05": ("Resultado Antes do Resultado Financeiro", 200),
+                "3.06": ("Resultado Financeiro", 50),       # positive net
+                "3.06.02": ("Despesas Financeiras", -80),   # negative sub-account
+                "3.11": ("Lucro/Prejuízo Consolidado do Período", 170),
+            }
+        ),
+    )
+    _write_csv(
+        d / "financials" / "balance_sheet.csv",
+        _statement_rows(
+            accounts={
+                "1": ("Ativo Total", 10000),
+                "1.01": ("Ativo Circulante", 3000),
+                "1.01.01": ("Caixa e Equivalentes de Caixa", 500),
+                "1.01.02": ("Aplicações Financeiras", 200),
+                "2": ("Passivo Total", 10000),
+                "2.01": ("Passivo Circulante", 2000),
+                "2.03": ("Patrimônio Líquido Consolidado", 4000),
+                "2.01.04": ("Empréstimos e Financiamentos", 1000),
+                "2.02.01": ("Empréstimos e Financiamentos", 2000),
+            }
+        ),
+    )
+    _write_csv(
+        d / "financials" / "cash_flow.csv",
+        _statement_rows(accounts={"6.01": ("Caixa Líquido Atividades Operacionais", 300)}),
+    )
+    kpis = extract_kpis("PETR4")
+    # Must NOT be None — computed from 3.06.02
+    assert kpis["interest_coverage"] is not None
+    assert kpis["interest_coverage"] == pytest.approx(200 / 80)
+
+
+def test_interest_coverage_negative_fin_result(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    """Legacy path: when no 3.06.02 exists but 3.06 is negative, use abs(3.06)."""
+    monkeypatch.setattr("decifra.store.folders.COMPANIES_DIR", tmp_path)
+    monkeypatch.setattr("decifra.credit.metrics.company_dir", lambda t: tmp_path / t.upper())
+    monkeypatch.setattr(
+        "decifra.credit.metrics.load_meta",
+        lambda t: json.loads((tmp_path / t.upper() / "meta.json").read_text(encoding="utf-8")),
+    )
+    d = _company_tree(tmp_path, "XXX3", "Energia Elétrica")
+    _write_csv(
+        d / "financials" / "income_statement.csv",
+        _statement_rows(
+            accounts={
+                "3.01": ("Receita de Venda", 1000),
+                "3.05": ("Resultado Antes do Resultado Financeiro", 200),
+                "3.06": ("Resultado Financeiro", -40),
+                "3.11": ("Lucro/Prejuízo Consolidado do Período", 100),
+            }
+        ),
+    )
+    _write_csv(d / "financials" / "balance_sheet.csv", _statement_rows(accounts={
+        "1": ("Ativo Total", 2000), "2.03": ("Patrimônio Líquido Consolidado", 1000),
+    }))
+    # No cash_flow.csv — _load_statement will return empty DataFrame
+    kpis = extract_kpis("XXX3")
+    assert kpis["interest_coverage"] == pytest.approx(200 / 40)
 
 
 def test_percentile_rank_direction():

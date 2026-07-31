@@ -43,6 +43,7 @@ def build_report_artifacts(
     spec: ReportSpec,
     *,
     generate: bool = False,
+    offline: bool = False,
     out_dir: Path | None = None,
     credit_df: Any = None,
 ) -> dict[str, Any]:
@@ -86,6 +87,15 @@ def build_report_artifacts(
         "context": context,
         "prompt_markdown": prompt_md,
     }
+
+    if offline:
+        from decifra.report.render_offline import render_offline_html
+
+        html = render_offline_html(context)
+        html_path.write_text(html, encoding="utf-8")
+        result["html_path"] = str(html_path)
+        result["generated"] = True
+        return result
 
     if generate:
         from decifra.assistant.llm import chat_completion

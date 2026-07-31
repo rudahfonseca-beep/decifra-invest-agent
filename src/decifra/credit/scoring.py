@@ -10,19 +10,35 @@ from decifra.credit.signals import format_signal_summary, scan_qualitative_signa
 from decifra.store.folders import list_tickers, load_meta, load_universe
 
 # Free-text CVM/B3 sector → stable industry group
+# Expanded mapping to minimise "Other" fallthrough (IMP-007)
 SECTOR_TO_GROUP: dict[str, str] = {
+    # Energy / Utilities
     "energia eletrica": "Energy",
     "agua e saneamento": "Energy",
+    "gas": "Energy",
+    # Oil & Gas / Petrochemicals
     "exploracao. refino e distribuicao": "Oil & Gas",
     "distribuicao de combustiveis": "Oil & Gas",
     "petroquimicos": "Oil & Gas",
+    "petroleo. gas e biocombustiveis": "Oil & Gas",
+    # Banks / Financial
     "bancos": "Banks",
     "seguradoras": "Insurance",
+    "previdencia e seguros": "Insurance",
     "servicos financeiros diversos": "Financial Services",
+    "securitizadoras de recebiveis": "Financial Services",
+    "intermediacao imobiliaria": "Financial Services",
+    "bolsas de valores / mercadorias e futuros": "Financial Services",
+    # Steel & Mining
     "siderurgia": "Steel & Mining",
     "minerais metalicos": "Steel & Mining",
+    "mineracao": "Steel & Mining",
+    # Real Estate
     "incorporacoes": "Real Estate",
     "exploracao de imoveis": "Real Estate",
+    "construcao civil": "Real Estate",
+    "shoppings centers": "Real Estate",
+    # Retail & Consumer
     "tecidos. vestuario e calcados": "Retail & Consumer",
     "alimentos": "Retail & Consumer",
     "cervejas e refrigerantes": "Retail & Consumer",
@@ -30,20 +46,42 @@ SECTOR_TO_GROUP: dict[str, str] = {
     "eletrodomesticos": "Retail & Consumer",
     "produtos de uso pessoal": "Retail & Consumer",
     "acessorios": "Retail & Consumer",
+    "produtos diversos": "Retail & Consumer",
+    "comercio e distribuicao": "Retail & Consumer",
+    "utilidades domesticas": "Retail & Consumer",
+    # Health
     "serv.med.hospit..analises e diagnosticos": "Health",
     "medicamentos e outros produtos": "Health",
+    # Telecom / Tech
     "telecomunicacoes": "Telecom",
+    "programas e servicos": "Education & Services",
+    "computadores e equipamentos": "Telecom",
+    # Pulp & Paper
     "papel e celulose": "Pulp & Paper",
+    "embalagens": "Pulp & Paper",
+    "madeira": "Pulp & Paper",
+    # Transport & Infrastructure
     "transporte ferroviario": "Transport & Infra",
     "exploracao de rodovias": "Transport & Infra",
     "aluguel de carros": "Transport & Infra",
     "material rodoviario": "Transport & Infra",
+    "transporte aereo": "Transport & Infra",
+    "transporte hidroviario": "Transport & Infra",
+    "logistica": "Transport & Infra",
+    "servicos de apoio e armazenagem": "Transport & Infra",
+    # Industrials
     "material aeronautico e de defesa": "Industrials",
     "motores . compressores e outros": "Industrials",
+    "maquinas e equipamentos": "Industrials",
+    "armas e municoes": "Industrials",
+    # Agribusiness
     "agricultura": "Agribusiness",
+    "acucar e alcool": "Agribusiness",
+    # Education & Services
     "servicos educacionais": "Education & Services",
-    "programas e servicos": "Education & Services",
     "atividades esportivas": "Education & Services",
+    "servicos diversos": "Education & Services",
+    # Holdings
     "holdings diversificadas": "Holdings",
 }
 
