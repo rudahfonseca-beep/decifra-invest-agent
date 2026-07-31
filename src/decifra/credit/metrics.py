@@ -14,6 +14,7 @@ ACCOUNT_CODES: dict[str, list[str]] = {
     "revenue": ["3.01"],
     "ebit": ["3.05"],
     "financial_result": ["3.06"],
+    "interest_expense": ["3.06.02"],
     "net_income": ["3.11"],
     "total_assets": ["1"],
     "current_assets": ["1.01"],
@@ -32,6 +33,7 @@ ACCOUNT_DESC_FALLBACK: dict[str, list[str]] = {
     "revenue": ["receita de venda", "receita líquida", "receitas de intermediação"],
     "ebit": ["antes do resultado financeiro"],
     "financial_result": ["resultado financeiro"],
+    "interest_expense": ["despesas financeiras", "juros sobre empréstimos", "juros e variações"],
     "net_income": ["lucro/prejuízo consolidado", "lucro líquido"],
     "total_assets": ["ativo total"],
     "current_assets": ["ativo circulante"],
@@ -160,6 +162,7 @@ def extract_kpis(ticker: str) -> dict[str, Any]:
             "revenue",
             "ebit",
             "financial_result",
+            "interest_expense",
             "net_income",
         } else balance
         kpis[kpi] = _pick_account(source, kpi)
@@ -195,7 +198,14 @@ def extract_kpis(ticker: str) -> dict[str, Any]:
     kpis["debt_to_equity"] = _div(kpis["gross_debt"], equity)
     kpis["net_debt_to_cash"] = _div(kpis["net_debt"], liquid_assets if liquid_assets else None)
     kpis["current_ratio"] = _div(current_assets, current_liab)
-    if ebit is not None and fin_res is not None and fin_res < 0:
+    # Interest coverage: prefer sub-account 3.06.02 (despesas financeiras),
+    # fall back to parent 3.06 (resultado financeiro) when negative.
+    # Fixes IMP-004: PETR4 has positive 3.06 (net revenues > expenses)
+    # but negative 3.06.02 (the expense portion).
+    int_exp = kpis.get("interest_expense")
+    if int_exp is not None and int_exp < 0 and ebit is not None:
+        kpis["interest_coverage"] = _div(ebit, abs(int_exp))
+    elif ebit is not None and fin_res is not None and fin_res < 0:
         kpis["interest_coverage"] = _div(ebit, abs(fin_res))
     else:
         kpis["interest_coverage"] = None

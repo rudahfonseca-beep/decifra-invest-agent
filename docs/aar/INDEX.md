@@ -10,6 +10,7 @@ Session and automation After Action Reports for decifra-invest-agent.
 | 2026-07-31 | 2026-07-31-report-builder | Shared credit/equity report builder | agent | completed | [2026-07-31-report-builder.md](2026-07-31-report-builder.md) |
 | 2026-07-31 | 2026-07-31-automation-aar | Automation + AAR memory | agent | completed | [2026-07-31-automation-aar.md](2026-07-31-automation-aar.md) |
 | 2026-07-31 | 2026-07-31-rename-and-github | Rename workspace + push to GitHub | agent | completed | [2026-07-31-rename-and-github.md](2026-07-31-rename-and-github.md) |
+| 2026-07-31 | 2026-07-31-implement-future-agent-prompts | Implement all FUTURE_AGENTS prompts | agent | completed | [2026-07-31-implement-future-agent-prompts.md](2026-07-31-implement-future-agent-prompts.md) |
 
 ## Automation traces
 
