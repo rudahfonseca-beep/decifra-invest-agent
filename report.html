@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BTG report</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    :root {
+      --bg: #f7f5f1;
+      --ink: #1a1f1c;
+      --muted: #5c6560;
+      --accent: #0f5c4c;
+      --accent-light: #10b981;
+      --line: #d9d4cb;
+      --card: #ffffff;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(165deg, #f7f5f1 0%, #e8efe9 55%, #f7f5f1 100%);
+      color: var(--ink);
+      line-height: 1.6;
+    }
+    header {
+      padding: 2.5rem 2rem 1.5rem;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(8px);
+      box-shadow: var(--shadow);
+    }
+    header h1 {
+      margin: 0 0 0.5rem;
+      font-size: 2rem;
+      color: var(--accent);
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    header p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 54rem;
+      font-size: 1.05rem;
+    }
+    main {
+      padding: 2rem 1.5rem 4rem;
+      max-width: 1140px;
+      margin: 0 auto;
+    }
+    section {
+      margin: 2.25rem 0;
+    }
+    section h2 {
+      font-size: 1.35rem;
+      margin: 0 0 1rem;
+      color: var(--accent);
+      border-bottom: 2px solid var(--accent);
+      display: inline-block;
+      padding-bottom: 0.35rem;
+    }
+    
+    /* KPI Cards */
+    .kpi-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+      margin: 1.5rem 0;
+    }
+    .kpi-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      padding: 1.25rem;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    }
+    .kpi-card label {
+      display: block;
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.75px;
+      font-weight: 600;
+    }
+    .kpi-card .val {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-top: 0.35rem;
+    }
+    .kpi-card .sub {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-top: 0.25rem;
+    }
+
+    #narrative p {
+      max-width: 52rem;
+      margin-bottom: 1.15rem;
+      font-size: 1rem;
+      color: #2b332e;
+    }
+    
+    /* Table Styling */
+    .table-container {
+      overflow-x: auto;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      margin-bottom: 1.5rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 0.75rem 0.9rem;
+      text-align: right;
+    }
+    th:first-child, td:first-child,
+    th:nth-child(2), td:nth-child(2) {
+      text-align: left;
+    }
+    th {
+      background: #eef3f0;
+      color: var(--accent);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    tr:hover {
+      background: #f9fbf9;
+    }
+    tr.bpac-highlight {
+      background: #e6f4f0;
+      font-weight: 600;
+    }
+    tr.median-row {
+      background: #f0f4f1;
+      font-weight: 700;
+      border-top: 2px solid var(--line);
+    }
+    .badge-subject {
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.72rem;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      margin-left: 0.4rem;
+    }
+
+    /* Charts */
+    .chart {
+      width: 100%;
+      min-height: 380px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      margin-bottom: 1.75rem;
+      padding: 0.5rem;
+    }
+
+    /* Signal Card */
+    .signal-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--accent);
+      padding: 1.25rem 1.5rem;
+      border-radius: 4px 8px 8px 4px;
+      box-shadow: var(--shadow);
+      font-size: 0.95rem;
+    }
+
+    footer {
+      padding: 1.75rem 1.5rem 3rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--line);
+      max-width: 1140px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1 id="report-title">BTG report</h1>
+    <p id="report-subtitle">Relatório de pesquisa fundamentalista e análise de rentabilidade, margens e estrutura patrimonial do Banco BTG Pactual S.A. (BPAC11) em comparação ao setor bancário brasileiro (CVM - 2025).</p>
+  </header>
+  <main>
+    <section id="narrative">
+      <h2>Resumo Executivo & Análise Fundamentalista</h2>
+      
+      <div class="kpi-cards">
+        <div class="kpi-card">
+          <label>Margem EBIT (BPAC11)</label>
+          <div class="val">68,54%</div>
+          <div class="sub">Mediana Setorial: 9,04%</div>
+        </div>
+        <div class="kpi-card">
+          <label>Margem Líquida (BPAC11)</label>
+          <div class="val">59,21%</div>
+          <div class="sub">Mediana Setorial: 8,85%</div>
+        </div>
+        <div class="kpi-card">
+          <label>Equity / Assets (BPAC11)</label>
+          <div class="val">70,13%</div>
+          <div class="sub">Mediana Setorial: 19,03%</div>
+        </div>
+        <div class="kpi-card">
+          <label>ROE (BPAC11)</label>
+          <div class="val">2,94%</div>
+          <div class="sub">Mediana Setorial: 5,40%</div>
+        </div>
+      </div>
+
+      <p>
+        O <strong>Banco BTG Pactual S.A. (BPAC11)</strong> apresenta um perfil operacional e financeiro altamente diferenciado em relação à média dos bancos de varejo tradicionais no Brasil (incluindo Itaú Unibanco, Bradesco, Santander Brasil e Banco do Brasil). No exercício de referência (período encerrado em 31/12/2025), o BTG Pactual registrou uma <strong>Receita Total de R$ 28.145.817,00</strong>, um <strong>EBIT de R$ 19.291.680,00</strong> e um <strong>Lucro Líquido de R$ 16.663.803,00</strong>.
+      </p>
+
+      <p>
+        <strong>Eficiência Extrema de Margens:</strong> O principal destaque fundamentalista do BTG Pactual é a sua excepcional eficiência operacional. O banco alcançou uma <strong>Margem EBIT de 68,54%</strong> (em comparação com a mediana do setor de 9,04%) e uma <strong>Margem Líquida de 59,21%</strong> (frente à mediana de 8,85%). Essa rentabilidade de margem (aprox. 6,7x a mediana setorial) reflete o seu modelo de negócios focado em Banco de Investimentos, Asset Management, Wealth Management e Sales & Trading, cujas receitas possuem menor custo direto relativo e elevada escala em relação aos conglomerados de varejo bancário tradicional.
+      </p>
+
+      <p>
+        <strong>Estrutura de Capital & Balanço Patrimonial:</strong> O BTG Pactual exibe uma relação <strong>Equity / Assets (Patrimônio Líquido / Ativos Totais) de 70,13%</strong>, substancialmente superior à mediana setorial de 19,03% e a de grandes pares de varejo como Santander (0,93%) e Banco do Brasil (1,58%). Essa elevada proporção patrimonial reflete uma estrutura de balanço altamente capitalizada e com conservadora alavancagem financeira sobre ativos reportados.
+      </p>
+
+      <p>
+        <strong>Análise de ROE (Return on Equity):</strong> O BTG Pactual registrou um <strong>ROE de 2,94%</strong> no período reportado, situando-se abaixo da mediana setorial de 5,40% (e de concorrentes como Santander Brasil com 109,83% e Banco do Brasil com 43,38%). É crucial pontuar que este ROE contábil reflete diretamente a sua base patrimonial extremamente densa (Equity / Assets de 70,13%), na qual o expressivo volume de capital próprio no denominador atenua o índice percentual de retorno sobre o patrimônio, em contraste com pares que alavancam pesadamente ativos de varejo sobre bases patrimoniais proporcionalmente menores.
+      </p>
+    </section>
+
+    <section id="tables">
+      <h2>Tabela Comparativa de KPIs — BPAC11 vs. Pares do Setor</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Ticker</th>
+              <th>Instituição Financeira</th>
+              <th>Receita (R$)</th>
+              <th>EBIT (R$)</th>
+              <th>Lucro Líquido (R$)</th>
+              <th>Margem EBIT</th>
+              <th>Margem Líquida</th>
+              <th>ROE</th>
+              <th>Equity / Assets</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="bpac-highlight">
+              <td><strong>BPAC11</strong> <span class="badge-subject">Alvo</span></td>
+              <td>BCO BTG PACTUAL S.A.</td>
+              <td>28.145.817</td>
+              <td>19.291.680</td>
+              <td>16.663.803</td>
+              <td>68,54%</td>
+              <td>59,21%</td>
+              <td>2,94%</td>
+              <td>70,13%</td>
+            </tr>
+            <tr>
+              <td><strong>SANB11</strong></td>
+              <td>BCO SANTANDER (BRASIL) S.A.</td>
+              <td>162.494.639</td>
+              <td>16.728.994</td>
+              <td>12.965.123</td>
+              <td>10,30%</td>
+              <td>7,98%</td>
+              <td>109,83%</td>
+              <td>0,93%</td>
+            </tr>
+            <tr>
+              <td><strong>BBAS3</strong></td>
+              <td>BCO BRASIL S.A.</td>
+              <td>319.462.104</td>
+              <td>5.613.636</td>
+              <td>16.781.938</td>
+              <td>1,76%</td>
+              <td>5,25%</td>
+              <td>43,38%</td>
+              <td>1,58%</td>
+            </tr>
+            <tr>
+              <td><strong>BBDC4</strong></td>
+              <td>BCO BRADESCO S.A.</td>
+              <td>270.183.106</td>
+              <td>21.024.584</td>
+              <td>23.924.636</td>
+              <td>7,78%</td>
+              <td>8,85%</td>
+              <td>5,40%</td>
+              <td>19,03%</td>
+            </tr>
+            <tr>
+              <td><strong>BBDC3</strong></td>
+              <td>BCO BRADESCO S.A.</td>
+              <td>270.183.106</td>
+              <td>21.024.584</td>
+              <td>23.924.636</td>
+              <td>7,78%</td>
+              <td>8,85%</td>
+              <td>5,40%</td>
+              <td>19,03%</td>
+            </tr>
+            <tr>
+              <td><strong>ITUB4</strong></td>
+              <td>ITAU UNIBANCO HOLDING S.A.</td>
+              <td>387.118.000</td>
+              <td>50.250.000</td>
+              <td>45.849.000</td>
+              <td>12,98%</td>
+              <td>11,84%</td>
+              <td>1,95%</td>
+              <td>76,67%</td>
+            </tr>
+            <tr class="median-row">
+              <td colspan="2">MEDIANA DO SETOR (BANCOS)</td>
+              <td>270.183.106</td>
+              <td>20.158.132</td>
+              <td>20.353.287</td>
+              <td>9,04%</td>
+              <td>8,85%</td>
+              <td>5,40%</td>
+              <td>19,03%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="charts">
+      <h2>Visualizações Gráficas Interativas</h2>
+      <div id="compare_bpac11" class="chart"></div>
+      <div id="bar_banks" class="chart"></div>
+      <div id="bar_margins" class="chart"></div>
+    </section>
+
+    <section id="signals">
+      <h2>Sinais Qualitativos & Monitoramento de Risco</h2>
+      <div class="signal-card">
+        <strong>Avaliação de Eventos & Alertas Qualitativos:</strong> Nenhum sinal qualitativo adverso ou penalidade (hit_count: 0) foi detectado na base de avisos, fatos relevantes ou transcrições analisadas para o Banco BTG Pactual S.A. (BPAC11). O perfil qualitativo permanece neutro e estável com base nas publicações CVM consolidadas.
+      </div>
+    </section>
+  </main>
+
+  <footer id="disclaimer">
+    Research-grade analysis from local CVM financials and optional notice/transcript keyword signals. Not a bureau credit rating or investment recommendation.
+  </footer>
+
+  <script>
+    window.DECIFRA_CHART_SPECS = [
+      {
+        "id": "bar_banks",
+        "type": "bar",
+        "title": "Banks — ROE",
+        "x": ["SANB11", "BBAS3", "BBDC4", "BBDC3", "BPAC11", "ITUB4"],
+        "y": [1.0983220610612139, 0.433755179163753, 0.053961992996553756, 0.053961992996553756, 0.029360583006302423, 0.019502735334239935]
+      },
+      {
+        "id": "compare_bpac11",
+        "type": "grouped_bar",
+        "title": "BPAC11 vs peer median",
+        "categories": ["Net Margin", "ROE", "Equity / Assets"],
+        "series": [
+          {
+            "name": "BPAC11",
+            "values": [0.5920525597107378, 0.029360583006302423, 0.7012923350264959]
+          },
+          {
+            "name": "Peer median",
+            "values": [0.08854971117254089, 0.053961992996553756, 0.19025691497566924]
+          }
+        ]
+      }
+    ];
+
+    document.addEventListener("DOMContentLoaded", function() {
+      // 1. Grouped Bar: BPAC11 vs Peer Median
+      const compareSpec = window.DECIFRA_CHART_SPECS.find(s => s.id === "compare_bpac11");
+      if (compareSpec) {
+        const bpacValues = compareSpec.series[0].values.map(v => +(v * 100).toFixed(2));
+        const medianValues = compareSpec.series[1].values.map(v => +(v * 100).toFixed(2));
+
+        Plotly.newPlot("compare_bpac11", [
+          {
+            x: compareSpec.categories,
+            y: bpacValues,
+            name: "BPAC11",
+            type: "bar",
+            marker: { color: "#0f5c4c" },
+            text: bpacValues.map(v => v + "%"),
+            textposition: "auto"
+          },
+          {
+            x: compareSpec.categories,
+            y: medianValues,
+            name: "Mediana do Setor",
+            type: "bar",
+            marker: { color: "#94a3b8" },
+            text: medianValues.map(v => v + "%"),
+            textposition: "auto"
+          }
+        ], {
+          title: { text: "<b>BPAC11 vs. Mediana do Setor</b>", font: { color: "#0f5c4c", size: 16 } },
+          barmode: "group",
+          yaxis: { title: "Percentual (%)", gridcolor: "#e2e8f0" },
+          xaxis: { title: "Métrica Fundamentalista" },
+          paper_bgcolor: "transparent",
+          plot_bgcolor: "transparent",
+          margin: { t: 45, b: 40, l: 50, r: 20 },
+          legend: { orientation: "h", y: 1.15, x: 0 }
+        }, { responsive: true });
+      }
+
+      // 2. Bar: Banks — ROE
+      const roeSpec = window.DECIFRA_CHART_SPECS.find(s => s.id === "bar_banks");
+      if (roeSpec) {
+        const roeFormatted = roeSpec.y.map(v => +(v * 100).toFixed(2));
+        const colors = roeSpec.x.map(t => t === "BPAC11" ? "#0f5c4c" : "#64748b");
+
+        Plotly.newPlot("bar_banks", [{
+          x: roeSpec.x,
+          y: roeFormatted,
+          type: "bar",
+          marker: { color: colors },
+          text: roeFormatted.map(v => v + "%"),
+          textposition: "auto"
+        }], {
+          title: { text: "<b>Setor Bancário — Retorno sobre Patrimônio (ROE)</b>", font: { color: "#0f5c4c", size: 16 } },
+          yaxis: { title: "ROE (%)", gridcolor: "#e2e8f0" },
+          xaxis: { title: "Ticker" },
+          paper_bgcolor: "transparent",
+          plot_bgcolor: "transparent",
+          margin: { t: 45, b: 40, l: 50, r: 20 }
+        }, { responsive: true });
+      }
+
+      // 3. Extended Chart: EBIT Margin & Net Margin comparison
+      const tickers = ["SANB11", "BBAS3", "BBDC4", "BBDC3", "BPAC11", "ITUB4"];
+      const ebitMargins = [10.30, 1.76, 7.78, 7.78, 68.54, 12.98];
+      const netMargins = [7.98, 5.25, 8.85, 8.85, 59.21, 11.84];
+
+      Plotly.newPlot("bar_margins", [
+        {
+          x: tickers,
+          y: ebitMargins,
+          name: "Margem EBIT",
+          type: "bar",
+          marker: { color: "#10b981" },
+          text: ebitMargins.map(v => v + "%"),
+          textposition: "auto"
+        },
+        {
+          x: tickers,
+          y: netMargins,
+          name: "Margem Líquida",
+          type: "bar",
+          marker: { color: "#0f5c4c" },
+          text: netMargins.map(v => v + "%"),
+          textposition: "auto"
+        }
+      ], {
+        title: { text: "<b>Setor Bancário — Margem EBIT vs. Margem Líquida (%)</b>", font: { color: "#0f5c4c", size: 16 } },
+        barmode: "group",
+        yaxis: { title: "Margem (%)", gridcolor: "#e2e8f0" },
+        xaxis: { title: "Ticker" },
+        paper_bgcolor: "transparent",
+        plot_bgcolor: "transparent",
+        margin: { t: 45, b: 40, l: 50, r: 20 },
+        legend: { orientation: "h", y: 1.15, x: 0 }
+      }, { responsive: true });
+    });
+  </script>
+</body>
+</html>
