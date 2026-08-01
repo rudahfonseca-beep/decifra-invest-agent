@@ -9,13 +9,15 @@ from rich.console import Console
 from rich.table import Table
 
 from decifra import __version__
-from decifra.config import DEFAULT_FINANCIAL_YEARS, DEFAULT_NOTICE_YEARS, ensure_dirs
+from decifra.config import DEFAULT_FINANCIAL_YEARS, DEFAULT_FORECAST_YEARS, DEFAULT_NOTICE_YEARS, ensure_dirs
 
 app = typer.Typer(help="decifra-invest-agent — Ibovespa research data pipeline and CLI", no_args_is_help=True)
 sync_app = typer.Typer(help="Sync data from B3/CVM/RI sources")
 report_app = typer.Typer(help="Build credit/equity research report prompts and HTML")
+valuation_app = typer.Typer(help="Equity valuation: DCF (FCFF/WACC) and trading multiples")
 app.add_typer(sync_app, name="sync")
 app.add_typer(report_app, name="report")
+app.add_typer(valuation_app, name="valuation")
 console = Console()
 
 
@@ -347,6 +349,216 @@ def report_build_cmd(
         console.print(f"  html:    {result['html_path']}")
     elif generate and result.get("generate_error"):
         console.print(f"[yellow]{result['generate_error']}[/yellow]")
+
+
+def _assumption_overrides_from_flags(
+    *,
+    growth: Optional[float],
+    terminal_growth: Optional[float],
+    ebit_margin: Optional[float],
+    tax_rate: Optional[float],
+    wacc: Optional[float],
+    risk_free: Optional[float],
+    erp: Optional[float],
+    country_risk: Optional[float],
+    beta: Optional[float],
+    cost_of_debt: Optional[float],
+) -> dict:
+    pairs = (
+        ("revenue_growth_y1", growth),
+        ("terminal_growth", terminal_growth),
+        ("ebit_margin", ebit_margin),
+        ("tax_rate", tax_rate),
+        ("wacc_override", wacc),
+        ("risk_free_rate", risk_free),
+        ("equity_risk_premium", erp),
+        ("country_risk_premium", country_risk),
+        ("beta", beta),
+        ("cost_of_debt", cost_of_debt),
+    )
+    return {k: v for k, v in pairs if v is not None}
+
+
+@valuation_app.command("dcf")
+def valuation_dcf_cmd(
+    ticker: str = typer.Option(..., "--ticker", help="Subject ticker, e.g. PETR4"),
+    peers: Optional[str] = typer.Option(
+        None, "--peers", help="Comparable tickers for beta fallback (comma-separated)"
+    ),
+    years: int = typer.Option(DEFAULT_FORECAST_YEARS, "--years", help="Explicit forecast horizon"),
+    growth: Optional[float] = typer.Option(None, "--growth", help="Override year-1 revenue growth"),
+    terminal_growth: Optional[float] = typer.Option(None, "--terminal-growth"),
+    ebit_margin: Optional[float] = typer.Option(None, "--ebit-margin"),
+    tax_rate: Optional[float] = typer.Option(None, "--tax-rate"),
+    wacc: Optional[float] = typer.Option(None, "--wacc", help="Override WACC directly (bypasses CAPM)"),
+    risk_free: Optional[float] = typer.Option(None, "--risk-free"),
+    erp: Optional[float] = typer.Option(None, "--erp"),
+    country_risk: Optional[float] = typer.Option(None, "--country-risk"),
+    beta: Optional[float] = typer.Option(None, "--beta"),
+    cost_of_debt: Optional[float] = typer.Option(None, "--cost-of-debt"),
+    assumptions_path: Optional[str] = typer.Option(
+        None, "--assumptions", help="JSON file with full assumption overrides"
+    ),
+    json_out: bool = typer.Option(False, "--json", help="Print raw JSON"),
+) -> None:
+    """Run the FCFF/WACC DCF for one ticker; prints computed defaults unless overridden."""
+    from pathlib import Path
+
+    from decifra.valuation.assumptions import DcfAssumptions, build_default_assumptions
+    from decifra.valuation.dcf import discount_cash_flow
+
+    peer_list = _split_csv(peers)
+    overrides = _assumption_overrides_from_flags(
+        growth=growth,
+        terminal_growth=terminal_growth,
+        ebit_margin=ebit_margin,
+        tax_rate=tax_rate,
+        wacc=wacc,
+        risk_free=risk_free,
+        erp=erp,
+        country_risk=country_risk,
+        beta=beta,
+        cost_of_debt=cost_of_debt,
+    )
+    if assumptions_path:
+        overrides = {**json.loads(Path(assumptions_path).read_text(encoding="utf-8")), **overrides}
+
+    with console.status(f"Running DCF for {ticker.upper()}..."):
+        defaults, _ = build_default_assumptions(ticker, peers=peer_list, forecast_years=years)
+        merged = {**defaults.to_dict(), **overrides}
+        assumptions = DcfAssumptions.from_dict(merged)
+        result = discount_cash_flow(ticker, assumptions, peers=peer_list)
+
+    if json_out:
+        console.print_json(json.dumps(result.to_dict(), ensure_ascii=False))
+        return
+
+    console.print(f"[bold]{result.ticker}[/bold] DCF — WACC {result.wacc:.1%} ({result.wacc_source})")
+    table = Table(title="FCFF projection")
+    for col in ("Year", "Growth", "Revenue", "EBIT", "FCFF", "PV(FCFF)"):
+        table.add_column(col)
+    for y in result.years:
+        table.add_row(
+            str(y.year),
+            f"{y.growth:.1%}",
+            f"{y.revenue:,.0f}",
+            f"{y.ebit:,.0f}",
+            f"{y.fcff:,.0f}",
+            f"{y.pv_fcff:,.0f}",
+        )
+    console.print(table)
+    console.print(f"Enterprise value: {result.enterprise_value:,.0f}")
+    console.print(f"Net debt: {result.net_debt:,.0f}" if result.net_debt is not None else "Net debt: -")
+    console.print(
+        f"Equity value: {result.equity_value:,.0f}" if result.equity_value is not None else "Equity value: -"
+    )
+    if result.value_per_share is not None:
+        upside = f"{result.upside_pct:.1%}" if result.upside_pct is not None else "-"
+        price = f"{result.current_price:.2f}" if result.current_price is not None else "-"
+        console.print(f"Value per share: {result.value_per_share:.2f} (current: {price}, upside {upside})")
+    for w in result.warnings:
+        console.print(f"[yellow]Warning:[/yellow] {w}")
+
+
+@valuation_app.command("multiples")
+def valuation_multiples_cmd(
+    ticker: str = typer.Option(..., "--ticker", help="Subject ticker, e.g. PETR4"),
+    peers: str = typer.Option(..., "--peers", help="Comparable tickers (comma-separated)"),
+    stat: str = typer.Option("median", "--stat", help="Peer aggregation: median or mean"),
+    json_out: bool = typer.Option(False, "--json", help="Print raw JSON"),
+) -> None:
+    """Trading multiples (P/E, EV/EBITDA, EV/Revenue, EV/EBIT, P/B) vs. user-chosen comparables."""
+    from decifra.valuation.multiples import MULTIPLE_LABELS, relative_valuation
+
+    peer_list = _split_csv(peers)
+    with console.status(f"Computing multiples for {ticker.upper()}..."):
+        result = relative_valuation(ticker, peer_list, stat=stat)
+
+    if json_out:
+        console.print_json(json.dumps(result.to_dict(), ensure_ascii=False))
+        return
+
+    console.print(
+        f"[bold]{result.ticker}[/bold] relative valuation vs {result.peer_count} peer(s) ({stat})"
+    )
+    table = Table(title="Multiples")
+    for col in ("Multiple", "Subject", "Peer", "Implied price"):
+        table.add_column(col)
+
+    def _s(v: Optional[float]) -> str:
+        return f"{v:.2f}" if v is not None else "-"
+
+    for key, label in MULTIPLE_LABELS.items():
+        table.add_row(
+            label,
+            _s(getattr(result.subject, key)),
+            _s(result.peer_multiples.get(key)),
+            _s(result.implied_price.get(key)),
+        )
+    console.print(table)
+    if result.implied_price_avg is not None:
+        console.print(
+            f"Implied range: {_s(result.implied_price_low)} - {_s(result.implied_price_high)} "
+            f"(avg {_s(result.implied_price_avg)}) vs current price {_s(result.subject.price)}"
+        )
+    for w in result.warnings:
+        console.print(f"[yellow]Warning:[/yellow] {w}")
+
+
+@valuation_app.command("build")
+def valuation_build_cmd(
+    ticker: Optional[str] = typer.Option(None, "--ticker", help="Subject ticker (ignored if --spec given)"),
+    peers: Optional[str] = typer.Option(None, "--peers", help="Comparable tickers (comma-separated)"),
+    stat: str = typer.Option("median", "--stat", help="Peer aggregation: median or mean"),
+    years: int = typer.Option(DEFAULT_FORECAST_YEARS, "--years", help="Explicit forecast horizon"),
+    assumptions_path: Optional[str] = typer.Option(
+        None, "--assumptions", help="JSON file with DCF assumption overrides"
+    ),
+    title: Optional[str] = typer.Option(None, "--title", help="Valuation title"),
+    spec: Optional[str] = typer.Option(None, "--spec", help="Path to valuation spec JSON"),
+) -> None:
+    """Assemble the full DCF + multiples context and write artifacts under data/valuations/."""
+    from pathlib import Path
+
+    from decifra.valuation.generate import build_valuation_artifacts
+    from decifra.valuation.spec import (
+        SpecValidationError,
+        ValuationSpec,
+        load_spec,
+        validate_spec,
+    )
+
+    try:
+        if spec:
+            val_spec = load_spec(spec)
+        else:
+            if not ticker:
+                console.print("[red]--ticker is required unless --spec is given[/red]")
+                raise typer.Exit(1)
+            overrides: dict = {}
+            if assumptions_path:
+                overrides.update(json.loads(Path(assumptions_path).read_text(encoding="utf-8")))
+            val_spec = validate_spec(
+                ValuationSpec(
+                    ticker=ticker,
+                    comparatives=_split_csv(peers),
+                    dcf_assumptions=overrides,
+                    multiples_stat=stat,
+                    forecast_years=years,
+                    title=title or "",
+                )
+            )
+    except (SpecValidationError, ValueError, OSError, json.JSONDecodeError) as exc:
+        console.print(f"[red]Invalid valuation spec:[/red] {exc}")
+        raise typer.Exit(1)
+
+    with console.status("Building valuation artifacts..."):
+        result = build_valuation_artifacts(val_spec)
+
+    console.print(f"[green]Valuation artifacts[/green]: {result['dir']}")
+    console.print(f"  spec:     {result['spec_path']}")
+    console.print(f"  context:  {result['context_path']}")
+    console.print(f"  markdown: {result['markdown_path']}")
 
 
 @app.command("dashboard")
