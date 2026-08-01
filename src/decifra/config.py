@@ -21,10 +21,14 @@ VALUATIONS_DIR = DATA_DIR / "valuations"
 FUNDS_DIR = DATA_DIR / "funds"
 ENTITIES_JSON = UNIVERSE_DIR / "entities.json"
 
+# Canonical listed-equity universe (all B3 ON/PN/units). Ibovespa is a membership subset.
+EQUITIES_JSON = UNIVERSE_DIR / "equities.json"
 IBOVESPA_JSON = UNIVERSE_DIR / "ibovespa.json"
+WATCHLIST_JSON = UNIVERSE_DIR / "watchlist.json"
 CADASTRO_CSV = CVM_CACHE_DIR / "cad_cia_aberta.csv"
 B3_SHARES_JSON = UNIVERSE_DIR / "b3_shares.json"
 B3_BALCAO_JSON = UNIVERSE_DIR / "b3_balcao_bonds.json"
+UI_CACHE_DIR = CACHE_DIR / "ui"
 
 BRAPI_API_KEY = os.getenv("BRAPI_API_KEY", "").strip()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "").strip()
@@ -59,6 +63,13 @@ DEFAULT_FRE_YEARS = list(range(2022, 2027))
 B3_IBOV_PORTFOLIO_URL = (
     "https://sistemaswebb3-listados.b3.com.br/indexProxy/indexCall/GetPortfolioDay/"
 )
+B3_LISTED_COMPANIES_URL = (
+    "https://sistemaswebb3-listados.b3.com.br/listedCompaniesProxy/"
+    "CompanyCall/GetInitialCompanies/"
+)
+B3_COMPANY_DETAIL_URL = (
+    "https://sistemaswebb3-listados.b3.com.br/listedCompaniesProxy/CompanyCall/GetDetail/"
+)
 
 # --- Valuation defaults ---------------------------------------------------
 # These are static, research-grade proxies (not a live macro feed). Override
@@ -85,6 +96,7 @@ def ensure_dirs() -> None:
         CVM_CACHE_DIR,
         ANBIMA_CACHE_DIR,
         MARKET_CACHE_DIR,
+        UI_CACHE_DIR,
         COMPANIES_DIR,
         REPORTS_DIR,
         VALUATIONS_DIR,

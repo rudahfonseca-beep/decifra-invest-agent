@@ -198,15 +198,18 @@ def _fill_cnpj_from_known_patterns(
 
 
 def attach_cnpj_map(cnpj_by_ticker: dict[str, str]) -> None:
-    """Update universe + meta with CNPJ map discovered from financial files."""
-    if not IBOVESPA_JSON.exists():
-        return
-    data = json.loads(IBOVESPA_JSON.read_text(encoding="utf-8"))
-    for c in data.get("constituents", []):
-        t = c["ticker"]
-        if t in cnpj_by_ticker and not c.get("cnpj"):
-            c["cnpj"] = cnpj_by_ticker[t]
-    IBOVESPA_JSON.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    """Update universe artifacts + meta with CNPJ map discovered from financial files."""
+    from decifra.config import EQUITIES_JSON
+
+    for path in (EQUITIES_JSON, IBOVESPA_JSON):
+        if not path.exists():
+            continue
+        data = json.loads(path.read_text(encoding="utf-8"))
+        for c in data.get("constituents", []):
+            t = c["ticker"]
+            if t in cnpj_by_ticker and not c.get("cnpj"):
+                c["cnpj"] = cnpj_by_ticker[t]
+        path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
     for t, cnpj in cnpj_by_ticker.items():
         meta_path = ensure_company_tree(t) / "meta.json"
         if meta_path.exists():

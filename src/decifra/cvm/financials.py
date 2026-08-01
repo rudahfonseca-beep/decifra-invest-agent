@@ -156,9 +156,10 @@ def sync_financials(
     years: list[int] | None = None,
     *,
     include_prices: bool = True,
+    scope: str = "all",
 ) -> dict[str, Any]:
     years = years or DEFAULT_FINANCIAL_YEARS
-    tickers = list_tickers(ticker)
+    tickers = list_tickers(ticker, scope=scope)  # type: ignore[arg-type]
     if not tickers:
         raise RuntimeError("No universe loaded. Run: decifra sync universe")
 

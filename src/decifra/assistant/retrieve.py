@@ -56,9 +56,13 @@ def extract_year(question: str) -> str | None:
     return m.group(1) if m else None
 
 
-def coverage_status(ticker: str | None = None) -> list[dict[str, Any]]:
+def coverage_status(
+    ticker: str | None = None,
+    *,
+    scope: str = "all",
+) -> list[dict[str, Any]]:
     rows = []
-    for t in list_tickers(ticker):
+    for t in list_tickers(ticker, scope=scope):  # type: ignore[arg-type]
         root = company_dir(t)
         meta = load_meta(t)
         fin = root / "financials"
@@ -67,6 +71,7 @@ def coverage_status(ticker: str | None = None) -> list[dict[str, Any]]:
         rows.append(
             {
                 "ticker": t,
+                "sync_tier": meta.get("sync_tier") or "",
                 "cnpj": meta.get("cnpj", ""),
                 "company": meta.get("company_name") or meta.get("stock_name") or "",
                 "income_statement": (fin / "income_statement.csv").exists(),

@@ -1,3 +1,3 @@
-from decifra.universe.ibovespa import sync_universe
+from decifra.universe.listed import sync_universe
 
 __all__ = ["sync_universe"]

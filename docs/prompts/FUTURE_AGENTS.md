@@ -7,7 +7,10 @@ Completed work (do not re-run unless regressing): prices backfill (IMP-001), ASA
 ## Data collection
 
 1. **Sync + coverage delta**  
-   `Run Ibovespa sync via .venv using python scripts/sync_pilot.py (preferred — writes automation AAR and refreshes the session dashboard). Report coverage deltas. Fix only regressions; log product gaps to docs/improvements/LOG.md and automation meta to docs/improvements/AUTOMATION.md.`
+   `Run tiered B3 sync via .venv using python scripts/sync_pilot.py (preferred — writes automation AAR, refreshes the session dashboard, exports UI cache). Report coverage deltas for all vs core. Fix only regressions; log product gaps to docs/improvements/LOG.md and automation meta to docs/improvements/AUTOMATION.md.`
+
+1b. **Full listed universe smoke (IMP-043)**  
+   `Run decifra sync universe (expect equities.json ≫ 78), then financials --scope core for a quick check. Confirm list_tickers(scope='core') ⊆ list_tickers(scope='all') and status --scope core.`
 
 2. **CVM cache years (IMP-003)**  
    `Expand CVM DFP/ITR/IPE cache years toward config defaults (include 2020-2021 where missing). Document what remains unavailable upstream.`

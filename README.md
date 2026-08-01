@@ -1,19 +1,21 @@
 # decifra-invest-agent
 
-Ibovespa financial market research **data pipeline + CLI** (package/CLI: `decifra`).
+B3 listed-equity financial market research **data pipeline + CLI** (package/CLI: `decifra`).
 
 Syncs official public data into one folder per ticker, then answers research questions from that local store.
 
+**Universe (tiered):** `decifra sync universe` builds `data/universe/equities.json` (all B3 listed ON/PN/units) and refreshes `ibovespa.json`. Heavy stages (notices, transcripts, FRE, engine screener) default to **core** = Ibovespa ∪ `data/universe/watchlist.json`. Financials default to **all** equities with CNPJ.
+
 ## What it collects
 
-For each Ibovespa constituent:
+For each equity in the local universe:
 
 | Path | Content |
 |------|---------|
-| `data/companies/{TICKER}/meta.json` | Ticker, CNPJ, CVM code, RI URL |
+| `data/companies/{TICKER}/meta.json` | Ticker, CNPJ, CVM code, RI URL, `sync_tier`, indexes |
 | `financials/*.csv` | DRE, balance sheet, cash flow (CVM DFP/ITR) + prices |
-| `notices/` | Fatos relevantes / comunicados (index + PDFs) |
-| `transcripts/` | Call/presentation materials (index + PDFs + extracted text) |
+| `notices/` | Fatos relevantes / comunicados (index + PDFs) — core by default |
+| `transcripts/` | Call/presentation materials — core by default |
 
 ## Install
 
@@ -28,24 +30,27 @@ copy .env.example .env          # optional keys
 ## Usage
 
 ```bash
-# 1) Universe + folders
+# 1) Universe + folders (all B3 listed equities + IBOV membership)
 decifra sync universe
+# Optional core extras: data/universe/watchlist.json → ["WEGE3","RAIL3"]
 
-# 2) Financial statements (downloads CVM ZIPs — first run is slow)
+# 2) Financial statements (default --scope all; first run downloads large CVM ZIPs)
 decifra sync financials
+decifra sync financials --scope core
 decifra sync financials --ticker PETR4 --years 2022-2025
 
-# 3) Market notices
+# 3) Market notices (default --scope core)
 decifra sync notices --ticker PETR4 --years 2024-2026
 
-# 4) Call / presentation materials
+# 4) Call / presentation materials (default --scope core)
 decifra sync transcripts --ticker PETR4
 
-# Full pipeline
+# Tiered full pipeline: financials=all, notices/transcripts=core
 decifra sync all --ticker PETR4
 
 # Coverage
 decifra status
+decifra status --scope core
 decifra status --ticker VALE3
 
 # Research questions (local data; optional LLM if OPENAI_API_KEY set)
@@ -132,13 +137,13 @@ See [`.env.example`](.env.example):
 - `OPENAI_BASE_URL` / `OPENAI_MODEL` — OpenAI-compatible endpoint (defaults to OpenAI + `gpt-4o-mini`)
 ## Sources
 
-- **B3 Listados** — Ibovespa theoretical portfolio + company CNPJ enrichment
+- **B3 Listados** — all listed equity issuers (`GetInitialCompanies` + `GetDetail`) + Ibovespa portfolio + CNPJ enrichment
 - **CVM Dados Abertos** — cadastro, DFP, ITR, IPE, fatos relevantes
 - **Company RI sites** — best-effort harvest of call/presentation links
 
 ## Architecture target (Unified Financial Data Pipeline)
 
-End-state vision (equity + credit + fixed income + funds) is documented under [`docs/architecture/`](docs/architecture/). **Not all layers are implemented yet** — current product remains Ibovespa + CVM DFP/ITR + research credit/valuation.
+End-state vision (equity + credit + fixed income + funds) is documented under [`docs/architecture/`](docs/architecture/). **Not all layers are implemented yet** — current product is tiered B3 listed equities + CVM DFP/ITR + research credit/valuation.
 
 - Gap analysis (pillar Pass/Fail): [`docs/architecture/unified-pipeline-gap-analysis.md`](docs/architecture/unified-pipeline-gap-analysis.md)
 - Phased roadmap: [`docs/architecture/unified-pipeline-roadmap.md`](docs/architecture/unified-pipeline-roadmap.md)
@@ -158,5 +163,6 @@ End-state vision (equity + credit + fixed income + funds) is documented under [`
 
 - First `sync financials` downloads multi‑MB yearly ZIPs into `data/cache/cvm/` and is idempotent.
 - Transcripts in Brazil are often slides/audio, not clean text — extraction is best-effort.
-- v1 universe is **Ibovespa only**.
+- Universe is **all B3 listed equities** with tiered heavy sync (core = IBOV ∪ watchlist).
+- React Terminal Dark: `frontend/` + `decifra schemas serve` (scoped API + `data/cache/ui/`).
 - Prefer `.\.venv\Scripts\python.exe -m decifra` on Windows (global `decifra` may not be on PATH).

@@ -17,7 +17,10 @@ from decifra.config import (
     ensure_dirs,
 )
 
-app = typer.Typer(help="decifra-invest-agent — Ibovespa research data pipeline and CLI", no_args_is_help=True)
+app = typer.Typer(
+    help="decifra-invest-agent — B3 listed-equity research data pipeline and CLI",
+    no_args_is_help=True,
+)
 sync_app = typer.Typer(help="Sync data from B3/CVM/RI sources")
 entities_app = typer.Typer(help="Entity graph: CNPJ/CVM/ticker/ISIN + private-issuer fallback")
 schemas_app = typer.Typer(help="Standardized Profile / Credit&Debt / Valuation Waterfall schemas")
@@ -41,6 +44,13 @@ def _parse_years(years: Optional[str], default: list[int]) -> list[int]:
     return [int(x.strip()) for x in years.split(",") if x.strip()]
 
 
+def _parse_scope(scope: str) -> str:
+    s = (scope or "all").strip().lower()
+    if s not in ("all", "core"):
+        raise typer.BadParameter("scope must be 'all' or 'core'")
+    return s
+
+
 @app.callback()
 def main() -> None:
     ensure_dirs()
@@ -55,43 +65,64 @@ def version() -> None:
 @sync_app.command("universe")
 def sync_universe_cmd(
     force_cadastro: bool = typer.Option(False, help="Re-download CVM cadastro"),
-    b3_cnpj: bool = typer.Option(True, help="Enrich CNPJ via B3 listed companies API"),
+    b3_cnpj: bool = typer.Option(True, help="Enrich missing CNPJ via B3 search (core gaps)"),
     force_cnpj: bool = typer.Option(False, help="Re-resolve CNPJ even if already set"),
+    no_details: bool = typer.Option(
+        False, help="Skip per-issuer GetDetail (fast; IBOV+watchlist only)"
+    ),
 ) -> None:
-    """Fetch Ibovespa constituents and create company folders."""
-    from decifra.universe.ibovespa import sync_universe
+    """Fetch all B3 listed equities + Ibovespa membership; create company folders."""
+    from decifra.config import EQUITIES_JSON, IBOVESPA_JSON
+    from decifra.store.folders import ensure_company_tree, save_meta
     from decifra.universe.b3_cnpj import enrich_constituents_with_b3
-    from decifra.config import IBOVESPA_JSON
-    from decifra.store.folders import save_meta, ensure_company_tree
+    from decifra.universe.listed import sync_listed_universe
 
-    with console.status("Syncing Ibovespa universe..."):
-        payload = sync_universe(force_cadastro=force_cadastro)
+    with console.status("Syncing B3 listed equities universe..."):
+        payload = sync_listed_universe(
+            force_cadastro=force_cadastro, fetch_details=not no_details
+        )
         if b3_cnpj:
-            console.print("Enriching CNPJ via B3...")
-            enriched = enrich_constituents_with_b3(payload["constituents"], force=force_cnpj)
-            payload["constituents"] = enriched
-            IBOVESPA_JSON.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
-            for c in enriched:
-                ensure_company_tree(c["ticker"])
-                save_meta(
-                    c["ticker"],
-                    {
-                        "ticker": c["ticker"],
-                        "stock_name": c.get("stock_name"),
-                        "type": c.get("type"),
-                        "cnpj": c.get("cnpj", ""),
-                        "cvm_code": c.get("cvm_code", ""),
-                        "company_name": c.get("company_name", ""),
-                        "ri_url": c.get("ri_url", ""),
-                        "sector": c.get("sector", ""),
-                        "part_pct": c.get("part_pct"),
-                        "issuing_company": c.get("issuing_company", ""),
-                        "source": "ibovespa",
-                    },
+            # Only enrich names still missing CNPJ (full-universe search is expensive).
+            need = [c for c in payload["constituents"] if not c.get("cnpj") or force_cnpj]
+            if need:
+                console.print(f"Enriching CNPJ via B3 for {len(need)} tickers...")
+                enriched_need = enrich_constituents_with_b3(need, force=force_cnpj)
+                by_t = {c["ticker"]: c for c in enriched_need}
+                for c in payload["constituents"]:
+                    if c["ticker"] in by_t:
+                        c.update({k: v for k, v in by_t[c["ticker"]].items() if v})
+                EQUITIES_JSON.write_text(
+                    json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
                 )
+                for c in payload["constituents"]:
+                    ensure_company_tree(c["ticker"])
+                    save_meta(
+                        c["ticker"],
+                        {
+                            "ticker": c["ticker"],
+                            "stock_name": c.get("stock_name"),
+                            "type": c.get("type"),
+                            "isin": c.get("isin", ""),
+                            "cnpj": c.get("cnpj", ""),
+                            "cvm_code": c.get("cvm_code", ""),
+                            "company_name": c.get("company_name", ""),
+                            "ri_url": c.get("ri_url", ""),
+                            "sector": c.get("sector", ""),
+                            "part_pct": c.get("part_pct"),
+                            "issuing_company": c.get("issuing_company", ""),
+                            "indexes": c.get("indexes") or [],
+                            "sync_tier": c.get("sync_tier") or "index",
+                            "source": c.get("source") or "b3_listed",
+                        },
+                    )
     mapped = sum(1 for c in payload["constituents"] if c.get("cnpj"))
-    console.print(f"[green]Universe OK[/green]: {payload['count']} tickers, {mapped} with CNPJ")
-    console.print(f"Saved: {IBOVESPA_JSON}")
+    console.print(
+        f"[green]Universe OK[/green]: {payload['count']} listed equities "
+        f"({payload.get('core_count', '?')} core / {payload.get('ibov_count', '?')} IBOV), "
+        f"{mapped} with CNPJ"
+    )
+    console.print(f"Saved: {EQUITIES_JSON}")
+    console.print(f"Ibovespa snapshot: {IBOVESPA_JSON}")
 
 
 @sync_app.command("financials")
@@ -99,13 +130,19 @@ def sync_financials_cmd(
     ticker: Optional[str] = typer.Option(None, help="Single ticker, e.g. PETR4"),
     years: Optional[str] = typer.Option(None, help="Year range, e.g. 2020-2026"),
     no_prices: bool = typer.Option(False, help="Skip OHLCV prices"),
+    scope: str = typer.Option("all", help="Ticker scope: all | core (IBOV∪watchlist)"),
 ) -> None:
     """Download CVM DFP/ITR and write per-company financial CSVs."""
     from decifra.cvm.financials import sync_financials
 
     y = _parse_years(years, DEFAULT_FINANCIAL_YEARS)
     with console.status("Syncing financials (this downloads large CVM ZIPs)..."):
-        result = sync_financials(ticker=ticker, years=y, include_prices=not no_prices)
+        result = sync_financials(
+            ticker=ticker,
+            years=y,
+            include_prices=not no_prices,
+            scope=_parse_scope(scope),
+        )
     console.print(
         f"[green]Financials OK[/green]: {result['cnpj_mapped']}/{result['tickers']} tickers mapped"
     )
@@ -117,6 +154,7 @@ def sync_notices_cmd(
     years: Optional[str] = typer.Option(None, help="Year range, e.g. 2023-2026"),
     no_pdfs: bool = typer.Option(False, help="Metadata only"),
     max_pdfs: int = typer.Option(80, help="Max PDFs per ticker"),
+    scope: str = typer.Option("core", help="Ticker scope: all | core (default core)"),
 ) -> None:
     """Sync fatos relevantes / comunicados from CVM IPE."""
     from decifra.cvm.notices import sync_notices
@@ -124,7 +162,11 @@ def sync_notices_cmd(
     y = _parse_years(years, DEFAULT_NOTICE_YEARS)
     with console.status("Syncing notices..."):
         result = sync_notices(
-            ticker=ticker, years=y, download_pdfs=not no_pdfs, max_pdfs_per_ticker=max_pdfs
+            ticker=ticker,
+            years=y,
+            download_pdfs=not no_pdfs,
+            max_pdfs_per_ticker=max_pdfs,
+            scope=_parse_scope(scope),
         )
     console.print(f"[green]Notices OK[/green]: wrote indexes for {len(result['written'])} tickers")
 
@@ -136,6 +178,7 @@ def sync_transcripts_cmd(
     no_download: bool = typer.Option(False, help="Index only"),
     no_ri: bool = typer.Option(False, help="Skip RI site crawl"),
     max_docs: int = typer.Option(40, help="Max docs per ticker"),
+    scope: str = typer.Option("core", help="Ticker scope: all | core (default core)"),
 ) -> None:
     """Collect earnings call / presentation materials."""
     from decifra.ri.calls import sync_transcripts
@@ -148,6 +191,7 @@ def sync_transcripts_cmd(
             download_files=not no_download,
             max_docs_per_ticker=max_docs,
             crawl_ri=not no_ri,
+            scope=_parse_scope(scope),
         )
     console.print(f"[green]Transcripts OK[/green]: wrote indexes for {len(result['written'])} tickers")
 
@@ -158,13 +202,20 @@ def sync_fre_cmd(
     years: Optional[str] = typer.Option(None, help="Year range, e.g. 2022-2026"),
     force: bool = typer.Option(False, help="Re-download FRE zips"),
     cache_only: bool = typer.Option(False, help="Only use data/cache/cvm FRE zips"),
+    scope: str = typer.Option("core", help="Ticker scope: all | core (default core)"),
 ) -> None:
     """Download CVM Formulário de Referência (FRE) and write company extracts."""
     from decifra.cvm.fre import sync_fre
 
     y = _parse_years(years, DEFAULT_FRE_YEARS)
     with console.status("Syncing FRE..."):
-        result = sync_fre(ticker=ticker, years=y, force=force, from_cache_only=cache_only)
+        result = sync_fre(
+            ticker=ticker,
+            years=y,
+            force=force,
+            from_cache_only=cache_only,
+            scope=_parse_scope(scope),
+        )
     console.print(
         f"[green]FRE OK[/green]: {len(result['written'])} extracts · "
         f"{len(result.get('errors') or [])} warnings"
@@ -174,12 +225,13 @@ def sync_fre_cmd(
 @sync_app.command("anbima")
 def sync_anbima_cmd(
     ticker: Optional[str] = typer.Option(None, help="Single ticker"),
+    scope: str = typer.Option("core", help="Ticker scope: all | core (default core)"),
 ) -> None:
     """Sync ANBIMA debentures/CRI/CRA into company debt folders (cache/fixture)."""
     from decifra.anbima import sync_anbima
 
     with console.status("Syncing ANBIMA debt instruments..."):
-        result = sync_anbima(ticker=ticker)
+        result = sync_anbima(ticker=ticker, scope=_parse_scope(scope))
     console.print(
         f"[green]ANBIMA OK[/green]: {result['instruments']} instruments · "
         f"wrote {len(result['written'])} tickers"
@@ -191,12 +243,20 @@ def sync_b3_shares_cmd(
     ticker: Optional[str] = typer.Option(None, help="Single ticker"),
     force: bool = typer.Option(False, help="Refresh all rows"),
     network: bool = typer.Option(False, "--network", help="Call B3 GetDetail for share counts"),
+    scope: str = typer.Option(
+        "core",
+        help="Ticker scope when --network (default core); local artifact uses all without network",
+    ),
 ) -> None:
     """Build B3 shares/mcap universe artifact from local meta (+ optional network)."""
     from decifra.b3 import sync_b3_shares
 
+    # Network hits are expensive — default core. Local-only can cover all meta cheaply.
+    eff_scope = _parse_scope(scope) if network else "all"
     with console.status("Syncing B3 shares artifact..."):
-        result = sync_b3_shares(ticker=ticker, force=force, use_network=network)
+        result = sync_b3_shares(
+            ticker=ticker, force=force, use_network=network, scope=eff_scope
+        )
     console.print(
         f"[green]B3 shares OK[/green]: {len(result['updated'])} tickers -> {result['path']}"
         + (f" · network hits={result.get('network_hits', 0)}" if network else "")
@@ -206,12 +266,13 @@ def sync_b3_shares_cmd(
 @sync_app.command("b3-bonds")
 def sync_b3_bonds_cmd(
     ticker: Optional[str] = typer.Option(None, help="Single ticker"),
+    scope: str = typer.Option("core", help="Ticker scope: all | core (default core)"),
 ) -> None:
     """Sync B3 Balcão bond registrations into company debt folders."""
     from decifra.b3 import sync_b3_bonds
 
     with console.status("Syncing B3 Balcão bonds..."):
-        result = sync_b3_bonds(ticker=ticker)
+        result = sync_b3_bonds(ticker=ticker, scope=_parse_scope(scope))
     console.print(
         f"[green]B3 Balcão OK[/green]: {result['bonds']} bonds · wrote {len(result['written'])} tickers"
     )
@@ -253,16 +314,18 @@ def sync_all_cmd(
     years: Optional[str] = typer.Option(None, help="Years for notices/transcripts"),
     financial_years: Optional[str] = typer.Option(None, help="Years for DFP/ITR"),
 ) -> None:
-    """Run full pipeline: universe → financials → notices → transcripts."""
+    """Run tiered pipeline: universe → financials (all) → notices/transcripts (core)."""
     sync_universe_cmd()
-    sync_financials_cmd(ticker=ticker, years=financial_years, no_prices=False)
-    sync_notices_cmd(ticker=ticker, years=years, no_pdfs=False, max_pdfs=40)
-    sync_transcripts_cmd(ticker=ticker, years=years, no_download=False, no_ri=False, max_docs=20)
+    sync_financials_cmd(ticker=ticker, years=financial_years, no_prices=False, scope="all")
+    sync_notices_cmd(ticker=ticker, years=years, no_pdfs=False, max_pdfs=40, scope="core")
+    sync_transcripts_cmd(
+        ticker=ticker, years=years, no_download=False, no_ri=False, max_docs=20, scope="core"
+    )
 
 
 @entities_app.command("sync")
 def entities_sync_cmd() -> None:
-    """Build data/universe/entities.json from Ibovespa meta + debt ISINs."""
+    """Build data/universe/entities.json from listed-equity meta + debt ISINs."""
     from decifra.entities.resolve import sync_entities
 
     with console.status("Building entity graph..."):
@@ -362,6 +425,20 @@ def schemas_export_ui_cmd(
         console.print(f"[green]{name}[/green] -> {path}")
 
 
+@schemas_app.command("warm-ui-cache")
+def schemas_warm_ui_cache_cmd(
+    scope: str = typer.Option("core", help="Ticker scope for warm artifacts: all | core"),
+) -> None:
+    """Persist lake API warm JSON under data/cache/ui/ (IMP-041)."""
+    from decifra.schemas.ui_cache import warm_ui_disk_cache
+
+    sc = _parse_scope(scope)
+    with console.status(f"Warming UI disk cache (scope={sc})..."):
+        written = warm_ui_disk_cache(scope=sc)
+    for name, path in written.items():
+        console.print(f"[green]{name}[/green] -> {path}")
+
+
 @schemas_app.command("serve")
 def schemas_serve_cmd(
     host: str = typer.Option("127.0.0.1", help="Bind host"),
@@ -409,14 +486,22 @@ def schemas_align_cmd(
 
 
 @app.command("status")
-def status_cmd(ticker: Optional[str] = typer.Option(None, help="Single ticker")) -> None:
-    """Show local data coverage for Ibovespa companies."""
+def status_cmd(
+    ticker: Optional[str] = typer.Option(None, help="Single ticker"),
+    scope: str = typer.Option("all", help="Ticker scope: all | core"),
+) -> None:
+    """Show local data coverage for listed equities (tiered)."""
     from decifra.assistant.retrieve import coverage_status
+    from decifra.store.folders import list_tickers
 
-    rows = coverage_status(ticker)
-    table = Table(title="decifra coverage")
+    sc = _parse_scope(scope)
+    rows = coverage_status(ticker, scope=sc)
+    n_all = len(list_tickers(scope="all")) if not ticker else 1
+    n_core = len(list_tickers(scope="core")) if not ticker else 1
+    table = Table(title=f"decifra coverage (scope={sc}; universe all={n_all} core={n_core})")
     for col in (
         "ticker",
+        "tier",
         "cnpj",
         "company",
         "income_statement",
@@ -432,6 +517,7 @@ def status_cmd(ticker: Optional[str] = typer.Option(None, help="Single ticker"))
     for r in rows:
         table.add_row(
             r["ticker"],
+            r.get("sync_tier") or "-",
             r["cnpj"] or "-",
             (r["company"] or "-")[:28],
             "Y" if r["income_statement"] else ".",

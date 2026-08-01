@@ -17,11 +17,15 @@ def setup_function() -> None:
 def test_dual_credit_cache_keeps_both_modes(monkeypatch):
     calls: list[bool] = []
 
-    def fake_build(*, include_signals: bool = False, tickers=None):
+    def fake_build(tickers=None, *, include_signals: bool = False):
         calls.append(include_signals)
         return pd.DataFrame({"ticker": ["PETR4"], "has_financials": [True], "sig": [include_signals]})
 
     monkeypatch.setattr("decifra.schemas.research_api.build_credit_table", fake_build)
+    monkeypatch.setattr(
+        "decifra.schemas.research_api.list_tickers",
+        lambda *a, scope="core", **k: ["PETR4"],
+    )
 
     fund = get_credit_df(include_signals=False)
     sig = get_credit_df(include_signals=True)
@@ -32,7 +36,7 @@ def test_dual_credit_cache_keeps_both_modes(monkeypatch):
 
 
 def test_api_defaults_signals_off(monkeypatch):
-    def fake_build(*, include_signals: bool = False, tickers=None):
+    def fake_build(tickers=None, *, include_signals: bool = False):
         return pd.DataFrame(
             {
                 "ticker": ["PETR4"],
@@ -59,11 +63,16 @@ def test_api_defaults_signals_off(monkeypatch):
         )
 
     monkeypatch.setattr("decifra.schemas.research_api.build_credit_table", fake_build)
+    monkeypatch.setattr(
+        "decifra.schemas.research_api.list_tickers",
+        lambda *a, scope="core", **k: ["PETR4"],
+    )
     ui_cache.clear_credit_cache()
 
     code, payload = handle_api("/api/credit", {})
     assert code == 200
     assert payload["filters"]["include_signals"] is False
+    assert payload["filters"]["scope"] == "core"
 
     code, ind = handle_api("/api/industries", {})
     assert code == 200
@@ -90,15 +99,16 @@ def test_screener_ttl_cache_reuse(monkeypatch):
         }
 
     monkeypatch.setattr(
-        "decifra.schemas.screener.list_tickers", lambda: ["PETR4", "VALE3", "ITUB4"]
+        "decifra.schemas.screener.list_tickers",
+        lambda *a, scope="all", **k: ["PETR4", "VALE3", "ITUB4"],
     )
     monkeypatch.setattr("decifra.schemas.screener.assemble_screener_row", fake_row)
 
-    first = assemble_opportunity_screener(limit=2)
-    second = assemble_opportunity_screener(limit=2)
+    first = assemble_opportunity_screener(limit=2, persist_disk=False)
+    second = assemble_opportunity_screener(limit=2, persist_disk=False)
     assert first is second
     assert n["calls"] == 2
-    third = assemble_opportunity_screener(limit=2, refresh=True)
+    third = assemble_opportunity_screener(limit=2, refresh=True, persist_disk=False)
     assert third is not first
     assert n["calls"] == 4
     assert len(third["rows"]) == 2

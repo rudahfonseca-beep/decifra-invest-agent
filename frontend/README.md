@@ -20,11 +20,14 @@ In another terminal:
 
 Vite proxies `/api/*` → `http://127.0.0.1:8765`. Without the API, the UI falls back to `public/sample/`.
 
-Refresh committed sample fixtures from the lake:
+Refresh committed sample fixtures + disk UI cache from the lake (also run by `sync_pilot` closeout):
 
 ```bash
 .\.venv\Scripts\python.exe -m decifra schemas export-ui --out frontend/public/sample --limit 8
+.\.venv\Scripts\python.exe -m decifra schemas warm-ui-cache --scope core
 ```
+
+List/screener/credit APIs default to `scope=core` (IBOV ∪ watchlist) so full listed-equity universes stay responsive. Client state uses TanStack Query (shell vs ticker-scoped keys).
 
 Samples under `public/sample/`:
 

@@ -11,7 +11,7 @@
     <header>
       <h1>decifra-invest-agent session dashboard</h1>
       <p class="sub">Human view of agent AARs, automation traces, improvements, pipeline roadmap, and future prompts.</p>
-      <p class="meta">Generated 2026-08-01 12:33 UTC · 22 agent · 2 automation AARs</p>
+      <p class="meta">Generated 2026-08-01 14:39 UTC · 23 agent · 2 automation AARs</p>
     </header>
 
     <nav class="tabs" role="tablist">
@@ -36,6 +36,15 @@
       <h2>Session timeline</h2>
       <div class="grid">
         
+      <article class="card">
+        <div class="meta-row">
+          <span class="badge badge-agent">agent</span>
+          <span class="badge badge-completed">completed</span>
+          2026-08-01
+        </div>
+        <h3><a href="../aar/2026-08-01-b3-universe-scale.md">Full B3 universe + scalable state (tiered)</a></h3>
+        <div class="meta-row">2026-08-01-b3-universe-scale</div>
+      </article>
       <article class="card">
         <div class="meta-row">
           <span class="badge badge-agent">agent</span>
@@ -258,15 +267,15 @@
     <section>
       <h2>Open improvements</h2>
       <table><thead><tr><th>ID</th><th>Improvement</th><th>Priority</th><th>Source</th></tr></thead><tbody><tr>
-          <td>IMP-041</td>
-          <td>Persist UI JSON bundle on sync_pilot closeout (`schemas export-ui`)</td>
+          <td>IMP-043</td>
+          <td>Live smoke: full `sync universe` + sample `financials --scope all`</td>
           <td class="priority-med">med</td>
-          <td>ui-load-performance</td>
+          <td>b3-universe-scale</td>
         </tr><tr>
-          <td>IMP-042</td>
-          <td>Parallelize cold screener row assembly (thread pool)</td>
+          <td>IMP-044</td>
+          <td>Streamlit credit/status use `list_tickers(scope=)` consistently</td>
           <td class="priority-low">low</td>
-          <td>ui-load-performance</td>
+          <td>b3-universe-scale</td>
         </tr><tr>
           <td>IMP-013</td>
           <td>Rename local folder `DecifraCR` -&gt; `decifra-invest-agent` after closing Cursor; re-run editable install</td>
@@ -309,7 +318,7 @@
     <section>
       <h2>Lessons rollup</h2>
       <div class="lessons">
-        <ul><li><strong>Close open IMP backlog (034–039, 003, 008, 015–018):</strong> B3 `GetDetail` is identity-only; share counts require `GetListedSupplementCompany` + `issuingCompany`.</li><li><strong>Close open IMP backlog (034–039, 003, 008, 015–018):</strong> Screener/API should assemble from engines against the lake before polishing UI fixtures.</li><li><strong>Close open IMP backlog (034–039, 003, 008, 015–018):</strong> Patch tests at the consumer import (`load_identity`) when swapping identity helpers.</li><li><strong>Unified pipeline E2E closeout (Phases 1–5 on epic):</strong> Opt-in pipeline stages on `sync_pilot` prevent accidental multi-GB downloads.</li><li><strong>Unified pipeline E2E closeout (Phases 1–5 on epic):</strong> Avoid Unicode arrows in Windows console scripts (cp1252).</li><li><strong>Unified pipeline E2E closeout (Phases 1–5 on epic):</strong> Progress JSON + dashboard tab makes phase status visible without re-reading all AARs.</li><li><strong>Pipeline Phase 1 — Primary ingestion (FRE, ANBIMA, B3):</strong> Keep pipeline sync stages opt-in on `sync_pilot` so daily pilots do not download FRE/funds by default.</li><li><strong>Pipeline Phase 1 — Primary ingestion (FRE, ANBIMA, B3):</strong> Fixture-backed FI parsers unblock CI and lake shape before opaque vendor APIs stabilize.</li><li><strong>Pipeline Phase 1 — Primary ingestion (FRE, ANBIMA, B3):</strong> Avoid Unicode arrows in Rich CLI strings on Windows cp1252 consoles.</li><li><strong>Pipeline Phase 2 — Entity resolution &amp; fallbacks:</strong> Seed entities from existing Ibovespa meta first; debt ISINs are additive.</li><li><strong>Pipeline Phase 2 — Entity resolution &amp; fallbacks:</strong> Keep Hierarchy of Truth as a shared constant consumed by conflict helpers and docs.</li><li><strong>Pipeline Phase 3 — APV, Merton, capacity, waterfall:</strong> Keep new engines complementary — acceptance is coexistence with DCF/peer scores.</li><li><strong>Pipeline Phase 3 — APV, Merton, capacity, waterfall:</strong> Capacity thresholds (3.5x / 1.25x) belong in named constants for report/schema reuse.</li></ul>
+        <ul><li><strong>Full B3 universe + scalable state (tiered):</strong> GetInitialCompanies returns issuers, not tickers; equity codes come from GetDetail `otherCodes` (filter `^[A-Z]{4}\d{1,2}$`).</li><li><strong>Full B3 universe + scalable state (tiered):</strong> Scale wins are server-side (scope + disk cache + parallel assemble), not Redux.</li><li><strong>Full B3 universe + scalable state (tiered):</strong> Never bind universe list fetches to `selectedTicker` (still true with Query keys).</li><li><strong>Close open IMP backlog (034–039, 003, 008, 015–018):</strong> B3 `GetDetail` is identity-only; share counts require `GetListedSupplementCompany` + `issuingCompany`.</li><li><strong>Close open IMP backlog (034–039, 003, 008, 015–018):</strong> Screener/API should assemble from engines against the lake before polishing UI fixtures.</li><li><strong>Close open IMP backlog (034–039, 003, 008, 015–018):</strong> Patch tests at the consumer import (`load_identity`) when swapping identity helpers.</li><li><strong>Unified pipeline E2E closeout (Phases 1–5 on epic):</strong> Opt-in pipeline stages on `sync_pilot` prevent accidental multi-GB downloads.</li><li><strong>Unified pipeline E2E closeout (Phases 1–5 on epic):</strong> Avoid Unicode arrows in Windows console scripts (cp1252).</li><li><strong>Unified pipeline E2E closeout (Phases 1–5 on epic):</strong> Progress JSON + dashboard tab makes phase status visible without re-reading all AARs.</li><li><strong>Pipeline Phase 1 — Primary ingestion (FRE, ANBIMA, B3):</strong> Keep pipeline sync stages opt-in on `sync_pilot` so daily pilots do not download FRE/funds by default.</li><li><strong>Pipeline Phase 1 — Primary ingestion (FRE, ANBIMA, B3):</strong> Fixture-backed FI parsers unblock CI and lake shape before opaque vendor APIs stabilize.</li><li><strong>Pipeline Phase 1 — Primary ingestion (FRE, ANBIMA, B3):</strong> Avoid Unicode arrows in Rich CLI strings on Windows cp1252 consoles.</li></ul>
       </div>
     </section>
 
@@ -318,7 +327,7 @@
       <ul class="prompt-list">
         <li>
           <strong>1. Sync + coverage delta</strong>
-          <div class="prompt-body">Run Ibovespa sync via .venv using python scripts/sync_pilot.py (preferred — writes automation AAR and refreshes the session dashboard). Report coverage deltas. Fix only regressions; log product gaps to docs/improvements/LOG.md and automation meta to docs/improvements/AUTOMATION.md.</div>
+          <div class="prompt-body">Run tiered B3 sync via .venv using python scripts/sync_pilot.py (preferred — writes automation AAR, refreshes the session dashboard, exports UI cache). Report coverage deltas for all vs core. Fix only regressions; log product gaps to docs/improvements/LOG.md and automation meta to docs/improvements/AUTOMATION.md.</div>
         </li><li>
           <strong>2. CVM cache years (IMP-003)</strong>
           <div class="prompt-body">Expand CVM DFP/ITR/IPE cache years toward config defaults (include 2020-2021 where missing). Document what remains unavailable upstream.</div>
