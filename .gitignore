@@ -12,3 +12,5 @@ venv/
 data/
 *.zip
 .DS_Store
+node_modules/
+frontend/dist/

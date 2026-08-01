@@ -1,172 +1,90 @@
-import { useEffect, useState } from "react";
-
-type Tab = "profile" | "debt" | "waterfall";
-
-type Metric = { value: number | string | null; lineage?: { source_doc?: string } };
+import { useEffect, useMemo, useState } from "react";
+import { CatalystFeed } from "./components/CatalystFeed";
+import { Header } from "./components/Header";
+import { Sidebar } from "./components/Sidebar";
+import { DebtView } from "./components/views/DebtView";
+import { ProfileView } from "./components/views/ProfileView";
+import { ScreenerView } from "./components/views/ScreenerView";
+import { WaterfallView } from "./components/views/WaterfallView";
+import type {
+  CatalystPayload,
+  CompanyProfile,
+  CreditDebtMatrix,
+  ScreenerPayload,
+  ValuationWaterfall,
+  ViewId,
+} from "./types";
 
 export default function App() {
-  const [tab, setTab] = useState<Tab>("profile");
-  const [profile, setProfile] = useState<any>(null);
-  const [debt, setDebt] = useState<any>(null);
-  const [waterfall, setWaterfall] = useState<any>(null);
+  const [view, setView] = useState<ViewId>("screener");
+  const [query, setQuery] = useState("");
+  const [screener, setScreener] = useState<ScreenerPayload | null>(null);
+  const [catalysts, setCatalysts] = useState<CatalystPayload | null>(null);
+  const [profile, setProfile] = useState<CompanyProfile | null>(null);
+  const [debt, setDebt] = useState<CreditDebtMatrix | null>(null);
+  const [waterfall, setWaterfall] = useState<ValuationWaterfall | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([
+      fetch("/sample/opportunity_screener.json").then((r) => r.json()),
+      fetch("/sample/catalyst_feed.json").then((r) => r.json()),
       fetch("/sample/company_profile.json").then((r) => r.json()),
       fetch("/sample/credit_debt_matrix.json").then((r) => r.json()),
       fetch("/sample/valuation_waterfall.json").then((r) => r.json()),
     ])
-      .then(([p, d, w]) => {
+      .then(([s, c, p, d, w]) => {
+        setScreener(s);
+        setCatalysts(c);
         setProfile(p);
         setDebt(d);
         setWaterfall(w);
       })
-      .catch((e) => setError(String(e)));
+      .catch((e) => setError(String(e)))
+      .finally(() => setLoading(false));
   }, []);
 
+  const filteredRows = useMemo(() => {
+    const rows = screener?.rows ?? [];
+    const q = query.trim().toLowerCase();
+    if (!q) return rows;
+    return rows.filter(
+      (row) =>
+        row.ticker.toLowerCase().includes(q) ||
+        row.cnpj.includes(q.replace(/\D/g, "")) ||
+        row.cnpj.toLowerCase().includes(q) ||
+        row.isin.toLowerCase().includes(q) ||
+        row.company_name.toLowerCase().includes(q)
+    );
+  }, [screener, query]);
+
   return (
-    <>
-      <header>
-        <h1>decifra</h1>
-        <p>Dark-mode research UI (MVP) — Company Profile · Credit & Debt · Valuation Waterfall</p>
-      </header>
+    <div className="flex h-screen overflow-hidden bg-slate-950">
+      <Sidebar active={view} onNavigate={setView} />
 
-      <nav className="tabs">
-        {(
-          [
-            ["profile", "Company Profile"],
-            ["debt", "Credit & Debt"],
-            ["waterfall", "Valuation Waterfall"],
-          ] as const
-        ).map(([id, label]) => (
-          <button
-            key={id}
-            className={tab === id ? "active" : ""}
-            onClick={() => setTab(id)}
-            type="button"
-          >
-            {label}
-          </button>
-        ))}
-      </nav>
+      <div className="flex min-w-0 flex-1 flex-col bg-[#0B1120]">
+        <Header query={query} onQueryChange={setQuery} />
 
-      {error && <p className="empty">Failed to load samples: {error}</p>}
+        <div className="flex min-h-0 flex-1">
+          <main className="flex min-w-0 flex-1 flex-col px-4 py-4">
+            {error && (
+              <p className="mb-3 text-xs text-rose-400">Failed to load samples: {error}</p>
+            )}
 
-      {tab === "profile" && (
-        <section className="panel">
-          <h2>Company Profile</h2>
-          {!profile ? (
-            <p className="empty">Loading…</p>
-          ) : (
-            <>
-              <div className="meta">
-                {profile.ticker} · CNPJ {profile.cnpj || "—"} · {profile.currency}
-              </div>
-              <p>{profile.company_name || "—"}</p>
-              <p className="lineage">ISINs: {(profile.isins || []).join(", ") || "—"}</p>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Metric</th>
-                    <th>Value</th>
-                    <th>Lineage</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {Object.entries(profile.metrics || {}).map(([k, m]) => {
-                    const metric = m as Metric;
-                    return (
-                      <tr key={k}>
-                        <td>{k}</td>
-                        <td>{String(metric.value)}</td>
-                        <td className="lineage">{metric.lineage?.source_doc}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </>
-          )}
-        </section>
-      )}
+            {view === "screener" && (
+              <ScreenerView rows={filteredRows} loading={loading} />
+            )}
+            {view === "profile" && <ProfileView profile={profile} loading={loading} />}
+            {view === "debt" && <DebtView debt={debt} loading={loading} />}
+            {view === "waterfall" && (
+              <WaterfallView waterfall={waterfall} loading={loading} />
+            )}
+          </main>
 
-      {tab === "debt" && (
-        <section className="panel">
-          <h2>Integrated Credit & Debt Matrix</h2>
-          {!debt ? (
-            <p className="empty">Loading…</p>
-          ) : (
-            <>
-              <div className="meta">{debt.ticker}</div>
-              <p>
-                Capacity breach:{" "}
-                <span
-                  className={
-                    debt.capacity?.any_breach ? "badge badge-breach" : "badge badge-ok"
-                  }
-                >
-                  {String(debt.capacity?.any_breach)}
-                </span>
-              </p>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Code/ISIN</th>
-                    <th>Type</th>
-                    <th>Indexer</th>
-                    <th>Maturity</th>
-                    <th>Lineage</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(debt.facilities || []).map((f: any, i: number) => (
-                    <tr key={i}>
-                      <td>{f.isin_or_code}</td>
-                      <td>{f.instrument_type}</td>
-                      <td>{f.indexer}</td>
-                      <td>{f.maturity}</td>
-                      <td className="lineage">{f.lineage?.source_doc}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </>
-          )}
-        </section>
-      )}
-
-      {tab === "waterfall" && (
-        <section className="panel">
-          <h2>Valuation Waterfall</h2>
-          {!waterfall ? (
-            <p className="empty">Loading…</p>
-          ) : (
-            <>
-              <div className="meta">
-                {waterfall.ticker} · {waterfall.method}
-              </div>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Output</th>
-                    <th>Value</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {Object.entries(waterfall.outputs || {}).map(([k, v]) => (
-                    <tr key={k}>
-                      <td>{k}</td>
-                      <td>{v == null ? "—" : String(v)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <p className="lineage">source: {waterfall.lineage?.source_doc}</p>
-            </>
-          )}
-        </section>
-      )}
-    </>
+          <CatalystFeed items={catalysts?.items ?? []} loading={loading} />
+        </div>
+      </div>
+    </div>
   );
 }

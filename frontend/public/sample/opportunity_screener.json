@@ -1,0 +1,133 @@
+{
+  "as_of": "2026-08-01T02:00:00Z",
+  "rows": [
+    {
+      "ticker": "PETR4",
+      "cnpj": "33000167000101",
+      "isin": "BRPETRACNPR6",
+      "company_name": "Petrobras",
+      "apv_discount_pct": 18.4,
+      "ev_equity": 412.5,
+      "net_debt_ebitda": 1.2,
+      "dscr": 2.8,
+      "merton_pd_pct": 0.9,
+      "signal": "safe",
+      "lineage": {
+        "equity": "ITR updated 2h ago",
+        "credit": "ANBIMA updated 4h ago"
+      }
+    },
+    {
+      "ticker": "VALE3",
+      "cnpj": "33592510000154",
+      "isin": "BRVALEACNOR0",
+      "company_name": "Vale",
+      "apv_discount_pct": 12.1,
+      "ev_equity": 298.0,
+      "net_debt_ebitda": 0.8,
+      "dscr": 3.1,
+      "merton_pd_pct": 0.6,
+      "signal": "safe",
+      "lineage": {
+        "equity": "ITR updated 5h ago",
+        "credit": "CVM FRE updated 1d ago"
+      }
+    },
+    {
+      "ticker": "CSNA3",
+      "cnpj": "33042349000120",
+      "isin": "BRCSNAACNOR5",
+      "company_name": "CSN",
+      "apv_discount_pct": 6.2,
+      "ev_equity": 28.4,
+      "net_debt_ebitda": 3.4,
+      "dscr": 1.4,
+      "merton_pd_pct": 4.2,
+      "signal": "warning",
+      "lineage": {
+        "equity": "ITR updated 1d ago",
+        "credit": "ANBIMA updated 6h ago"
+      }
+    },
+    {
+      "ticker": "GGBR4",
+      "cnpj": "33611500000119",
+      "isin": "BRGGBRACNPR8",
+      "company_name": "Gerdau",
+      "apv_discount_pct": 9.8,
+      "ev_equity": 45.2,
+      "net_debt_ebitda": 1.6,
+      "dscr": 2.2,
+      "merton_pd_pct": 1.4,
+      "signal": "safe",
+      "lineage": {
+        "equity": "DFP updated 3d ago",
+        "credit": "ANBIMA updated 8h ago"
+      }
+    },
+    {
+      "ticker": "USIM5",
+      "cnpj": "60894464000187",
+      "isin": "BRUSIMACNPA6",
+      "company_name": "Usiminas",
+      "apv_discount_pct": -2.5,
+      "ev_equity": 12.1,
+      "net_debt_ebitda": 4.1,
+      "dscr": 1.1,
+      "merton_pd_pct": 7.8,
+      "signal": "warning",
+      "lineage": {
+        "equity": "ITR updated 12h ago",
+        "credit": "Capacity model updated 2h ago"
+      }
+    },
+    {
+      "ticker": "GOAU4",
+      "cnpj": "09208849000105",
+      "isin": "BRGOAUACNPR8",
+      "company_name": "Metalúrgica Gerdau",
+      "apv_discount_pct": 4.0,
+      "ev_equity": 18.7,
+      "net_debt_ebitda": 2.9,
+      "dscr": 1.6,
+      "merton_pd_pct": 3.1,
+      "signal": "warning",
+      "lineage": {
+        "equity": "ITR updated 9h ago",
+        "credit": "ANBIMA updated 1d ago"
+      }
+    },
+    {
+      "ticker": "AZUL4",
+      "cnpj": "09297811000118",
+      "isin": "BRAZULACNPR4",
+      "company_name": "Azul",
+      "apv_discount_pct": -14.2,
+      "ev_equity": 6.8,
+      "net_debt_ebitda": 6.5,
+      "dscr": 0.7,
+      "merton_pd_pct": 22.4,
+      "signal": "distress",
+      "lineage": {
+        "equity": "ITR updated 3h ago",
+        "credit": "Covenant scan updated 1h ago"
+      }
+    },
+    {
+      "ticker": "EMBR3",
+      "cnpj": "07689002000189",
+      "isin": "BREMBRACNOR4",
+      "company_name": "Embraer",
+      "apv_discount_pct": 15.6,
+      "ev_equity": 38.9,
+      "net_debt_ebitda": 1.9,
+      "dscr": 2.0,
+      "merton_pd_pct": 1.8,
+      "signal": "safe",
+      "lineage": {
+        "equity": "ITR updated 6h ago",
+        "credit": "B3 Balcão updated 2d ago"
+      }
+    }
+  ]
+}

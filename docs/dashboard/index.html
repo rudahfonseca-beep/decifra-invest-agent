@@ -11,7 +11,7 @@
     <header>
       <h1>decifra-invest-agent session dashboard</h1>
       <p class="sub">Human view of agent AARs, automation traces, improvements, pipeline roadmap, and future prompts.</p>
-      <p class="meta">Generated 2026-08-01 04:58 UTC · 18 agent · 2 automation AARs</p>
+      <p class="meta">Generated 2026-08-01 05:19 UTC · 19 agent · 2 automation AARs</p>
     </header>
 
     <nav class="tabs" role="tablist">
@@ -89,6 +89,15 @@
         </div>
         <h3><a href="../aar/2026-08-01-pipeline-phase-5-schemas-ui.md">Pipeline Phase 5 — Schemas, alignment, React MVP</a></h3>
         <div class="meta-row">2026-08-01-pipeline-phase-5-schemas-ui</div>
+      </article>
+      <article class="card">
+        <div class="meta-row">
+          <span class="badge badge-agent">agent</span>
+          <span class="badge badge-completed">completed</span>
+          2026-08-01
+        </div>
+        <h3><a href="../aar/2026-08-01-terminal-dark-ui.md">Terminal Dark UI revamp (React MVP)</a></h3>
+        <div class="meta-row">2026-08-01-terminal-dark-ui</div>
       </article>
       <article class="card">
         <div class="meta-row">
@@ -222,6 +231,16 @@
     <section>
       <h2>Open improvements</h2>
       <table><thead><tr><th>ID</th><th>Improvement</th><th>Priority</th><th>Source</th></tr></thead><tbody><tr>
+          <td>IMP-038</td>
+          <td>Assemble screener rows from APV + Merton + capacity outputs</td>
+          <td class="priority-med">med</td>
+          <td>terminal-dark-ui</td>
+        </tr><tr>
+          <td>IMP-039</td>
+          <td>Define Streamlit → React cutover gates (parity checklist)</td>
+          <td class="priority-low">low</td>
+          <td>terminal-dark-ui</td>
+        </tr><tr>
           <td>IMP-034</td>
           <td>Wire live B3 shares-outstanding detail API into `b3/shares.py`</td>
           <td class="priority-med">med</td>
@@ -352,6 +371,9 @@
         </li><li>
           <strong>12. Phase 4–5 funds/schemas/UI (IMP-029..033)</strong>
           <div class="prompt-body">Pick from roadmap: CVM INF_DIARIO/CDA, EDGAR, three output schemas + lineage, ITR–debt alignment, or React frontend under frontend/. Streamlit stays until cutover.</div>
+        </li><li>
+          <strong>13. Terminal Dark live feed (IMP-037..039)</strong>
+          <div class="prompt-body">React shell already uses Terminal Dark (frontend/: Tailwind, screener, catalyst feed). Wire live lake/API (IMP-037), assemble screener rows from APV/Merton/capacity (IMP-038), and/or draft Streamlit→React cutover gates (IMP-039). Preserve slate/indigo tokens and lineage freshness UX. Prefer .venv Scripts python for any backend.</div>
         </li><li>
           <strong>5. Rename local folder (IMP-013)</strong>
           <div class="prompt-body">After closing Cursor, rename DecifraCR -&gt; decifra-invest-agent, reopen, re-run editable install, confirm decifra CLI.</div>

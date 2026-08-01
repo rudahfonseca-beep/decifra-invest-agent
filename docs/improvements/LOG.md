@@ -8,6 +8,8 @@ Lessons from AARs turned into trackable follow-ups. Newest first within each sta
 
 | ID | Date | Source AAR | Improvement | Priority | Notes |
 |----|------|------------|-------------|----------|-------|
+| IMP-038 | 2026-08-01 | terminal-dark-ui | Assemble screener rows from APV + Merton + capacity outputs | med | UI fixtures in `opportunity_screener.json` today |
+| IMP-039 | 2026-08-01 | terminal-dark-ui | Define Streamlit → React cutover gates (parity checklist) | low | Streamlit remains interim |
 | IMP-034 | 2026-08-01 | pipeline-phase-1-ingestion | Wire live B3 shares-outstanding detail API into `b3/shares.py` | med | Artifact path exists; network reserved |
 | IMP-035 | 2026-08-01 | pipeline-phase-2-entities | Migrate credit/valuation/report joins to `load_identity` / resolver | med | Helper shipped |
 | IMP-036 | 2026-08-01 | pipeline-phase-3-modeling | Auto-assemble APV/Merton inputs from CVM + market for a ticker | med | Engines are CLI/formula-first |

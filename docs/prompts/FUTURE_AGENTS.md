@@ -45,6 +45,9 @@ Completed work (do not re-run unless regressing): prices backfill (IMP-001), ASA
 12. **Phase 4–5 funds/schemas/UI (IMP-029..033)**  
    `Pick from roadmap: CVM INF_DIARIO/CDA, EDGAR, three output schemas + lineage, ITR–debt alignment, or React frontend under frontend/. Streamlit stays until cutover.`
 
+13. **Terminal Dark live feed (IMP-037..039)**  
+   `React shell already uses Terminal Dark (frontend/: Tailwind, screener, catalyst feed). Wire live lake/API (IMP-037), assemble screener rows from APV/Merton/capacity (IMP-038), and/or draft Streamlit→React cutover gates (IMP-039). Preserve slate/indigo tokens and lineage freshness UX. Prefer .venv Scripts python for any backend.`
+
 ## Ops / hygiene
 
 5. **Rename local folder (IMP-013)**  
