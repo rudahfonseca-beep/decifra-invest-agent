@@ -11,7 +11,7 @@
     <header>
       <h1>decifra-invest-agent session dashboard</h1>
       <p class="sub">Human view of agent AARs, automation traces, improvements, and future prompts.</p>
-      <p class="meta">Generated 2026-07-31 22:29 UTC · 9 agent · 2 automation AARs</p>
+      <p class="meta">Generated 2026-08-01 00:34 UTC · 11 agent · 2 automation AARs</p>
     </header>
 
     <section>
@@ -47,6 +47,15 @@
         </div>
         <h3><a href="../aar/2026-07-31-automation-dashboard-track.md">Automation closeout + automation opportunity tracking</a></h3>
         <div class="meta-row">2026-07-31-automation-dashboard-track</div>
+      </article>
+      <article class="card">
+        <div class="meta-row">
+          <span class="badge badge-agent">agent</span>
+          <span class="badge badge-completed">completed</span>
+          2026-07-31
+        </div>
+        <h3><a href="../aar/2026-07-31-credit-report-generation.md">Credit report HTML generation from prompt</a></h3>
+        <div class="meta-row">2026-07-31-credit-report-generation</div>
       </article>
       <article class="card">
         <div class="meta-row">
@@ -92,6 +101,15 @@
         </div>
         <h3><a href="../aar/2026-07-31-report-platform-plan.md">Report platform planning</a></h3>
         <div class="meta-row">2026-07-31-report-platform-plan</div>
+      </article>
+      <article class="card">
+        <div class="meta-row">
+          <span class="badge badge-agent">agent</span>
+          <span class="badge badge-completed">completed</span>
+          2026-07-31
+        </div>
+        <h3><a href="../aar/2026-07-31-valuation-capability.md">Valuation capability (DCF + trading multiples)</a></h3>
+        <div class="meta-row">2026-07-31-valuation-capability</div>
       </article>
       <article class="card">
         <div class="meta-row">
@@ -149,6 +167,26 @@
           <td>Rename local folder `DecifraCR` -&gt; `decifra-invest-agent` after closing Cursor; re-run editable install</td>
           <td class="priority-med">med</td>
           <td>rename-and-github</td>
+        </tr><tr>
+          <td>IMP-015</td>
+          <td>Add EPS-implied shares-outstanding fallback when yfinance has no data for a ticker</td>
+          <td class="priority-low">low</td>
+          <td>valuation-capability</td>
+        </tr><tr>
+          <td>IMP-016</td>
+          <td>&quot;Defaults are a starting point, not a price target&quot; callout when \</td>
+          <td class="priority-low">upside_pct\</td>
+          <td>valuation-capability</td>
+        </tr><tr>
+          <td>IMP-017</td>
+          <td>Open PR for `feat/valuation-dashboard-docs` (Streamlit tab + docs) once 5-PR split confirmed</td>
+          <td class="priority-high">high</td>
+          <td>valuation-capability</td>
+        </tr><tr>
+          <td>IMP-018</td>
+          <td>Profile/cache Valuation tab cold-start cost (`sensitivity_grid` re-reads local CSVs 25x)</td>
+          <td class="priority-low">low</td>
+          <td>valuation-capability</td>
         </tr></tbody></table>
     </section>
 
