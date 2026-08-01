@@ -2,17 +2,34 @@
   "ticker": "PETR4",
   "method": "OCF_FCFE",
   "inputs": {
-    "ocf": { "value": 250, "lineage": { "source_doc": "CVM_DFP_ITR" } },
-    "interest": { "value": 80, "lineage": { "source_doc": "CVM_DFP_ITR" } },
-    "mandatory_amortization": { "value": 20, "lineage": { "source_doc": "debt_schedule" } }
+    "ocf": {
+      "value": 200333000000.0,
+      "lineage": {
+        "source_doc": "CVM_DFP_ITR"
+      }
+    },
+    "interest": {
+      "value": 3315000000.0,
+      "lineage": {
+        "source_doc": "CVM_DFP_ITR"
+      }
+    },
+    "mandatory_amortization": {
+      "value": 0.0,
+      "lineage": {
+        "source_doc": "debt_schedule"
+      }
+    }
   },
   "outputs": {
-    "ocf": 250,
-    "debt_service": 100,
-    "fcfe": 150,
+    "ocf": 200333000000.0,
+    "debt_service": 3315000000.0,
+    "fcfe": 197018000000.0,
     "v_u": null,
     "pv_tax_shield": null,
     "v_l": null
   },
-  "lineage": { "source_doc": "valuation_waterfall" }
+  "lineage": {
+    "source_doc": "valuation_waterfall"
+  }
 }

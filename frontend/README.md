@@ -10,6 +10,22 @@ npm install
 npm run dev
 ```
 
+### Live lake feed (IMP-037)
+
+In another terminal:
+
+```bash
+.\.venv\Scripts\python.exe -m decifra schemas serve --port 8765
+```
+
+Vite proxies `/api/*` → `http://127.0.0.1:8765`. Without the API, the UI falls back to `public/sample/`.
+
+Refresh committed sample fixtures from the lake:
+
+```bash
+.\.venv\Scripts\python.exe -m decifra schemas export-ui --out frontend/public/sample --limit 8
+```
+
 Samples under `public/sample/`:
 
 | File | Role |

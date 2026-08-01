@@ -60,7 +60,7 @@ def patch_sources(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr("decifra.valuation.multiples.build_annual_history", lambda t: HIST_MAP[t.upper()])
     monkeypatch.setattr("decifra.valuation.multiples.fetch_market_data", lambda t: MARKET_MAP[t.upper()])
     monkeypatch.setattr(
-        "decifra.valuation.multiples.load_meta", lambda t: {"company_name": f"{t.upper()} SA"}
+        "decifra.valuation.multiples.load_identity", lambda t: {"company_name": f"{t.upper()} SA"}
     )
 
 

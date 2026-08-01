@@ -190,13 +190,17 @@ def sync_anbima_cmd(
 def sync_b3_shares_cmd(
     ticker: Optional[str] = typer.Option(None, help="Single ticker"),
     force: bool = typer.Option(False, help="Refresh all rows"),
+    network: bool = typer.Option(False, "--network", help="Call B3 GetDetail for share counts"),
 ) -> None:
     """Build B3 shares/mcap universe artifact from local meta (+ optional network)."""
     from decifra.b3 import sync_b3_shares
 
     with console.status("Syncing B3 shares artifact..."):
-        result = sync_b3_shares(ticker=ticker, force=force)
-    console.print(f"[green]B3 shares OK[/green]: {len(result['updated'])} tickers -> {result['path']}")
+        result = sync_b3_shares(ticker=ticker, force=force, use_network=network)
+    console.print(
+        f"[green]B3 shares OK[/green]: {len(result['updated'])} tickers -> {result['path']}"
+        + (f" · network hits={result.get('network_hits', 0)}" if network else "")
+    )
 
 
 @sync_app.command("b3-bonds")
@@ -337,6 +341,60 @@ def schemas_assemble_cmd(
     )
 
 
+@schemas_app.command("export-ui")
+def schemas_export_ui_cmd(
+    out: str = typer.Option(
+        "frontend/public/sample",
+        help="Output directory for React JSON fixtures",
+    ),
+    tickers: Optional[str] = typer.Option(None, help="Comma-separated tickers (default: universe head)"),
+    limit: int = typer.Option(8, help="Max screener rows"),
+    detail_ticker: str = typer.Option("PETR4", help="Ticker for profile/debt/waterfall detail JSON"),
+) -> None:
+    """Export lake-backed screener + schema JSON for the React UI (IMP-037/038)."""
+    from pathlib import Path
+
+    from decifra.schemas.api_server import export_ui_bundle
+
+    names = _split_csv(tickers) if tickers else None
+    written = export_ui_bundle(Path(out), tickers=names, limit=limit, detail_ticker=detail_ticker)
+    for name, path in written.items():
+        console.print(f"[green]{name}[/green] -> {path}")
+
+
+@schemas_app.command("serve")
+def schemas_serve_cmd(
+    host: str = typer.Option("127.0.0.1", help="Bind host"),
+    port: int = typer.Option(8765, help="Bind port"),
+) -> None:
+    """Serve read-only lake API for React (`/api/screener`, `/api/profile/TICKER`, …)."""
+    from decifra.schemas.api_server import serve_lake_api
+
+    serve_lake_api(host=host, port=port)
+
+
+@schemas_app.command("screener")
+def schemas_screener_cmd(
+    tickers: Optional[str] = typer.Option(None, help="Comma-separated tickers"),
+    limit: int = typer.Option(8, help="Max rows"),
+    json_out: bool = typer.Option(True, "--json/--no-json", help="Print JSON"),
+) -> None:
+    """Assemble opportunity screener rows from APV + Merton + capacity."""
+    from decifra.schemas.screener import assemble_opportunity_screener
+
+    names = _split_csv(tickers) if tickers else None
+    payload = assemble_opportunity_screener(names, limit=limit)
+    if json_out:
+        console.print_json(json.dumps(payload, ensure_ascii=False, default=str))
+        return
+    for row in payload.get("rows") or []:
+        console.print(
+            f"{row['ticker']}: APV={row.get('apv_discount_pct')}  "
+            f"ND/EBITDA={row.get('net_debt_ebitda')}  PD={row.get('merton_pd_pct')}  "
+            f"signal={row.get('signal')}"
+        )
+
+
 @schemas_app.command("align")
 def schemas_align_cmd(
     statements: str = typer.Option(..., help="Comma-separated statement DT_REFER dates"),
@@ -409,14 +467,38 @@ def ask_cmd(
 
 @app.command("merton")
 def merton_cmd(
-    asset_value: float = typer.Option(..., help="Asset value V"),
-    debt_face: float = typer.Option(..., help="Debt face value D"),
+    ticker: Optional[str] = typer.Option(None, "--ticker", help="Assemble inputs from lake + market"),
+    asset_value: Optional[float] = typer.Option(None, help="Asset value V (required without --ticker)"),
+    debt_face: Optional[float] = typer.Option(None, help="Debt face value D"),
     risk_free: float = typer.Option(0.07, help="Risk-free rate"),
     horizon: float = typer.Option(1.0, help="Horizon years T"),
-    asset_vol: float = typer.Option(..., help="Asset volatility sigma_V"),
+    asset_vol: Optional[float] = typer.Option(None, help="Asset volatility sigma_V"),
     json_out: bool = typer.Option(False, "--json", help="Print JSON"),
 ) -> None:
     """Merton structural model / Distance to Default."""
+    if ticker:
+        from decifra.credit.assemble_models import assemble_merton
+
+        pack = assemble_merton(ticker, risk_free=risk_free, horizon_years=horizon, asset_vol=asset_vol)
+        if json_out:
+            console.print_json(json.dumps(pack, ensure_ascii=False))
+            return
+        m = pack.get("merton")
+        if not m:
+            console.print(f"[yellow]Merton unavailable for {ticker}: {pack.get('warnings')}[/yellow]")
+            raise typer.Exit(1)
+        console.print(
+            f"[bold]{ticker.upper()}[/bold]  Equity={m['equity_value']:,.2f}  "
+            f"DtD={m['distance_to_default']:.3f}  PD={m['default_probability']:.2%}"
+        )
+        for w in pack.get("warnings") or []:
+            console.print(f"[yellow]{w}[/yellow]")
+        return
+
+    if asset_value is None or debt_face is None or asset_vol is None:
+        console.print("[red]Provide --ticker or --asset-value/--debt-face/--asset-vol[/red]")
+        raise typer.Exit(1)
+
     from decifra.credit.merton import merton_dtd
 
     result = merton_dtd(
@@ -437,13 +519,36 @@ def merton_cmd(
 
 @app.command("capacity")
 def capacity_cmd(
-    net_debt: float = typer.Option(..., help="Net debt"),
-    ebitda: float = typer.Option(..., help="EBITDA"),
-    ocf: float = typer.Option(..., help="OCF or EBITDA proxy for DSCR numerator"),
-    debt_service: float = typer.Option(..., help="Debt service (interest + mandatory amort)"),
+    ticker: Optional[str] = typer.Option(None, "--ticker", help="Assemble inputs from lake KPIs"),
+    net_debt: Optional[float] = typer.Option(None, help="Net debt"),
+    ebitda: Optional[float] = typer.Option(None, help="EBITDA"),
+    ocf: Optional[float] = typer.Option(None, help="OCF or EBITDA proxy for DSCR numerator"),
+    debt_service: Optional[float] = typer.Option(None, help="Debt service (interest + mandatory amort)"),
     json_out: bool = typer.Option(False, "--json", help="Print JSON"),
 ) -> None:
     """Debt capacity flags: ND/EBITDA <= 3.5x and DSCR >= 1.25x."""
+    if ticker:
+        from decifra.credit.assemble_models import assemble_capacity
+
+        pack = assemble_capacity(ticker)
+        if json_out:
+            console.print_json(json.dumps(pack, ensure_ascii=False))
+            return
+        cap = pack["capacity"]
+        nd = cap["net_debt_ebitda"]
+        ds = cap["dscr"]
+        console.print(
+            f"[bold]{ticker.upper()}[/bold]  "
+            f"ND/EBITDA={nd.get('value')} (breach={nd.get('breach')})  "
+            f"DSCR={ds.get('value')} (breach={ds.get('breach')})  "
+            f"any_breach={cap.get('any_breach')}"
+        )
+        return
+
+    if None in (net_debt, ebitda, ocf, debt_service):
+        console.print("[red]Provide --ticker or all of --net-debt/--ebitda/--ocf/--debt-service[/red]")
+        raise typer.Exit(1)
+
     from decifra.credit.capacity import evaluate_capacity
 
     result = evaluate_capacity(
@@ -713,15 +818,40 @@ def valuation_dcf_cmd(
 
 @valuation_app.command("apv")
 def valuation_apv_cmd(
-    fcff: str = typer.Option(..., help="Comma-separated unlevered FCFF path"),
-    ku: float = typer.Option(..., "--ku", help="Unlevered cost of capital"),
+    ticker: Optional[str] = typer.Option(None, "--ticker", help="Assemble FCFF/interest from lake"),
+    fcff: Optional[str] = typer.Option(None, help="Comma-separated unlevered FCFF path"),
+    ku: Optional[float] = typer.Option(None, "--ku", help="Unlevered cost of capital"),
     interest: Optional[str] = typer.Option(None, help="Comma-separated interest path"),
     tax_rate: float = typer.Option(0.34, help="Corporate tax rate"),
     distress_pv: float = typer.Option(0.0, help="PV of financial distress costs"),
     terminal_growth: float = typer.Option(0.0, help="Gordon growth on terminal FCFF"),
+    peers: Optional[str] = typer.Option(None, "--peers", help="Comparables for defaults"),
     json_out: bool = typer.Option(False, "--json", help="Print JSON"),
 ) -> None:
     """Adjusted Present Value: V_L = V_U + PV(tax shield) - PV(distress)."""
+    if ticker:
+        from decifra.valuation.assemble_apv import assemble_apv
+
+        pack = assemble_apv(ticker, peers=_split_csv(peers) if peers else None)
+        if json_out:
+            console.print_json(json.dumps(pack, ensure_ascii=False))
+            return
+        apv = pack["apv"]
+        disc = pack.get("apv_discount_pct")
+        disc_s = f"{disc:.1%}" if disc is not None else "-"
+        console.print(
+            f"[bold]{ticker.upper()}[/bold]  V_U={apv['v_u']:,.2f}  "
+            f"PV(TS)={apv['pv_tax_shield']:,.2f}  V_L={apv['v_l']:,.2f}  "
+            f"vs market disc={disc_s}"
+        )
+        for w in pack.get("warnings") or []:
+            console.print(f"[yellow]{w}[/yellow]")
+        return
+
+    if fcff is None or ku is None:
+        console.print("[red]Provide --ticker or --fcff and --ku[/red]")
+        raise typer.Exit(1)
+
     from decifra.valuation.apv import compute_apv
 
     fcff_path = [float(x) for x in _split_csv(fcff)]

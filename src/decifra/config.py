@@ -37,7 +37,8 @@ USER_AGENT = "decifra-invest-agent/0.1 (+https://github.com/rudahfonseca-beep/de
 
 # Default years for CVM document sync
 DEFAULT_FINANCIAL_YEARS = list(range(2020, 2027))
-DEFAULT_NOTICE_YEARS = list(range(2023, 2027))
+# Include 2020+ so fato relevante / IPE cache can match financial year coverage (IMP-003).
+DEFAULT_NOTICE_YEARS = list(range(2020, 2027))
 
 CVM_BASE = "https://dados.cvm.gov.br/dados/CIA_ABERTA"
 CVM_CADASTRO_URL = f"{CVM_BASE}/CAD/DADOS/cad_cia_aberta.csv"

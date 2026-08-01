@@ -15,6 +15,20 @@ import type {
   ViewId,
 } from "./types";
 
+async function fetchJson<T>(urls: string[]): Promise<T> {
+  let lastError: unknown;
+  for (const url of urls) {
+    try {
+      const r = await fetch(url);
+      if (!r.ok) throw new Error(`${url} -> ${r.status}`);
+      return (await r.json()) as T;
+    } catch (e) {
+      lastError = e;
+    }
+  }
+  throw lastError ?? new Error("fetch failed");
+}
+
 export default function App() {
   const [view, setView] = useState<ViewId>("screener");
   const [query, setQuery] = useState("");
@@ -25,14 +39,31 @@ export default function App() {
   const [waterfall, setWaterfall] = useState<ValuationWaterfall | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [feedSource, setFeedSource] = useState<"api" | "sample">("sample");
 
   useEffect(() => {
+    const detail = "PETR4";
     Promise.all([
-      fetch("/sample/opportunity_screener.json").then((r) => r.json()),
-      fetch("/sample/catalyst_feed.json").then((r) => r.json()),
-      fetch("/sample/company_profile.json").then((r) => r.json()),
-      fetch("/sample/credit_debt_matrix.json").then((r) => r.json()),
-      fetch("/sample/valuation_waterfall.json").then((r) => r.json()),
+      fetchJson<ScreenerPayload>([
+        "/api/screener?limit=8",
+        "/sample/opportunity_screener.json",
+      ]),
+      fetchJson<CatalystPayload>([
+        "/api/catalysts?limit=8",
+        "/sample/catalyst_feed.json",
+      ]),
+      fetchJson<CompanyProfile>([
+        `/api/profile/${detail}`,
+        "/sample/company_profile.json",
+      ]),
+      fetchJson<CreditDebtMatrix>([
+        `/api/debt/${detail}`,
+        "/sample/credit_debt_matrix.json",
+      ]),
+      fetchJson<ValuationWaterfall>([
+        `/api/waterfall/${detail}`,
+        "/sample/valuation_waterfall.json",
+      ]),
     ])
       .then(([s, c, p, d, w]) => {
         setScreener(s);
@@ -40,6 +71,8 @@ export default function App() {
         setProfile(p);
         setDebt(d);
         setWaterfall(w);
+        // Heuristic: live API rows usually have ISO as_of from assemblers
+        setFeedSource(s.as_of?.includes("T") && !s.as_of.startsWith("2026-08-01T02") ? "api" : "sample");
       })
       .catch((e) => setError(String(e)))
       .finally(() => setLoading(false));
@@ -69,8 +102,13 @@ export default function App() {
         <div className="flex min-h-0 flex-1">
           <main className="flex min-w-0 flex-1 flex-col px-4 py-4">
             {error && (
-              <p className="mb-3 text-xs text-rose-400">Failed to load samples: {error}</p>
+              <p className="mb-3 text-xs text-rose-400">Failed to load data: {error}</p>
             )}
+            <p className="mb-2 text-[10px] text-slate-600">
+              Data feed: {feedSource === "api" ? "lake API /api/*" : "static sample JSON"}
+              {" · "}
+              run `decifra schemas serve` or `decifra schemas export-ui` for live lake
+            </p>
 
             {view === "screener" && (
               <ScreenerView rows={filteredRows} loading={loading} />

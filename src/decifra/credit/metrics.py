@@ -6,7 +6,7 @@ from typing import Any
 
 import pandas as pd
 
-from decifra.store.folders import company_dir, load_meta
+from decifra.store.folders import company_dir, load_identity
 
 
 # Account codes → logical KPI names (exact CD_CONTA match preferred)
@@ -138,7 +138,7 @@ def _pick_account(df: pd.DataFrame, kpi: str) -> float | None:
 def extract_kpis(ticker: str) -> dict[str, Any]:
     """Extract latest DFP KPIs and credit ratios for one ticker."""
     root = company_dir(ticker) / "financials"
-    meta = load_meta(ticker)
+    meta = load_identity(ticker)
     income = _filter_latest_dfp(_load_statement(root / "income_statement.csv"))
     balance = _filter_latest_dfp(_load_statement(root / "balance_sheet.csv"))
     cashflow = _filter_latest_dfp(_load_statement(root / "cash_flow.csv"))
@@ -153,6 +153,9 @@ def extract_kpis(ticker: str) -> dict[str, Any]:
         "ticker": ticker.upper(),
         "company": meta.get("company_name") or meta.get("stock_name") or ticker,
         "sector": meta.get("sector") or "",
+        "cnpj": meta.get("cnpj") or "",
+        "cvm_code": str(meta.get("cvm_code") or ""),
+        "isins": meta.get("isins") or [],
         "period": period,
         "has_financials": not (income.empty and balance.empty),
     }

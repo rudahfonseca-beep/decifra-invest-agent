@@ -40,6 +40,41 @@ def _is_fresh(fetched_at: str, max_age_hours: float) -> bool:
     return datetime.now(timezone.utc) - ts < timedelta(hours=max_age_hours)
 
 
+def _shares_from_b3_artifact(ticker: str) -> float | None:
+    path = company_dir(ticker) / "financials" / "b3_shares.json"
+    if not path.exists():
+        return None
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    shares = data.get("shares_outstanding")
+    return float(shares) if shares else None
+
+
+def _eps_implied_shares(
+    *,
+    price: float | None,
+    market_cap: float | None,
+    trailing_eps: float | None,
+    net_income: float | None,
+) -> tuple[float | None, str | None]:
+    """IMP-015: derive shares when yfinance omits sharesOutstanding.
+
+    Prefer market_cap / price. Else net_income / EPS, or net_income / (price * EPS)
+    is invalid — use net_income / (price) when EPS unavailable is wrong.
+    Correct: shares ≈ market_cap / price, or shares ≈ net_income / EPS.
+    """
+    if price and price > 0 and market_cap and market_cap > 0:
+        return float(market_cap) / float(price), "market_cap/price"
+    if trailing_eps and trailing_eps != 0 and net_income is not None:
+        return abs(float(net_income) / float(trailing_eps)), "net_income/EPS"
+    if price and price > 0 and trailing_eps and trailing_eps != 0 and market_cap is None:
+        # Cannot get shares from price+EPS alone without net income or mcap
+        return None, None
+    return None, None
+
+
 def _fetch_yfinance_quote(ticker: str) -> dict[str, Any]:
     import yfinance as yf
 
@@ -56,6 +91,7 @@ def _fetch_yfinance_quote(ticker: str) -> dict[str, Any]:
     shares: float | None = None
     market_cap: float | None = None
     beta: float | None = None
+    trailing_eps: float | None = None
     try:
         info = yt.info or {}
     except Exception:
@@ -66,6 +102,35 @@ def _fetch_yfinance_quote(ticker: str) -> dict[str, Any]:
         shares = info.get("sharesOutstanding")
         market_cap = info.get("marketCap")
         beta = info.get("beta")
+        trailing_eps = info.get("trailingEps") or info.get("epsTrailingTwelveMonths")
+
+    source = "yfinance"
+    if not shares:
+        b3_shares = _shares_from_b3_artifact(t)
+        if b3_shares:
+            shares = b3_shares
+            source = "b3_shares.json"
+
+    if not shares:
+        net_income = None
+        try:
+            from decifra.credit.metrics import extract_kpis
+            from decifra.valuation.dcf import _CVM_THOUSANDS_SCALE
+
+            kpis = extract_kpis(t)
+            if kpis.get("net_income") is not None:
+                net_income = float(kpis["net_income"]) * _CVM_THOUSANDS_SCALE
+        except Exception:
+            net_income = None
+        implied, how = _eps_implied_shares(
+            price=float(price) if price else None,
+            market_cap=float(market_cap) if market_cap else None,
+            trailing_eps=float(trailing_eps) if trailing_eps else None,
+            net_income=net_income,
+        )
+        if implied:
+            shares = implied
+            source = f"implied:{how}"
 
     if price and market_cap is None and shares:
         market_cap = float(price) * float(shares)
@@ -75,7 +140,7 @@ def _fetch_yfinance_quote(ticker: str) -> dict[str, Any]:
         "shares_outstanding": float(shares) if shares else None,
         "market_cap": float(market_cap) if market_cap else None,
         "beta": float(beta) if beta not in (None, 0) else None,
-        "source": "yfinance",
+        "source": source,
     }
 
 

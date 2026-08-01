@@ -76,12 +76,17 @@ def _company_block(
         if k in meds
     }
 
+    from decifra.store.folders import load_identity
+
+    ident = load_identity(ticker)
     block: dict[str, Any] = {
         "role": role,
         "ticker": str(row["ticker"]),
         "found": True,
         "company": row.get("company") or ticker,
         "sector": row.get("sector") or "",
+        "cnpj": ident.get("cnpj") or row.get("cnpj") or "",
+        "isins": ident.get("isins") or row.get("isins") or [],
         "industry_group": industry,
         "cohort": row.get("cohort") or "",
         "period": row.get("period") or "",

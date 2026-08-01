@@ -12,11 +12,11 @@ export type ScreenerRow = {
   cnpj: string;
   isin: string;
   company_name: string;
-  apv_discount_pct: number;
-  ev_equity: number;
-  net_debt_ebitda: number;
-  dscr: number;
-  merton_pd_pct: number;
+  apv_discount_pct: number | null;
+  ev_equity: number | null;
+  net_debt_ebitda: number | null;
+  dscr: number | null;
+  merton_pd_pct: number | null;
   signal: Signal;
   lineage: {
     equity: string;

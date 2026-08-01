@@ -7,7 +7,7 @@ import pandas as pd
 
 from decifra.credit.metrics import extract_kpis
 from decifra.credit.signals import format_signal_summary, scan_qualitative_signals
-from decifra.store.folders import list_tickers, load_meta, load_universe
+from decifra.store.folders import list_tickers, load_identity, load_universe
 
 # Free-text CVM/B3 sector → stable industry group
 # Expanded mapping to minimise "Other" fallthrough (IMP-007)
@@ -183,7 +183,7 @@ def build_credit_table(
 
     for t in tickers:
         kpis = extract_kpis(t)
-        meta = load_meta(t)
+        meta = load_identity(t)
         sector = kpis.get("sector") or meta.get("sector") or universe.get(t, {}).get("sector") or ""
         if not kpis.get("sector"):
             kpis["sector"] = sector
@@ -195,6 +195,8 @@ def build_credit_table(
             "ticker": t,
             "company": company,
             "sector": sector,
+            "cnpj": kpis.get("cnpj") or meta.get("cnpj") or "",
+            "isins": kpis.get("isins") or meta.get("isins") or [],
             "industry_group": group,
             "cohort": cohort,
             "period": kpis.get("period") or "",

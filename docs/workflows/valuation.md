@@ -56,7 +56,8 @@ Open the printed folder under `data/valuations/`:
 ## Checks
 
 - Unknown ticker / comparative / `multiples_stat` / out-of-range `forecast_years` → validation error (CLI exit 1 / Streamlit error)
-- Missing shares outstanding (e.g. thin/no yfinance coverage) → DCF still returns enterprise value with a warning instead of crashing
+- When `|upside_pct| > 100%`, Streamlit and `valuation.md` show: **Defaults are a starting point, not a price target** (IMP-016)
+- Missing shares outstanding (e.g. thin/no yfinance coverage) → try B3 artifact then EPS/market-cap implied shares (IMP-015); else DCF still returns enterprise value with a warning instead of crashing
 - Terminal growth ≥ WACC is auto-clipped with a warning, never silently produces a negative/undefined terminal value
 - CVM statements report accounts in **thousands of reais** — `valuation/historical.py` normalizes to absolute reais before combining with market data (price × shares); this is the single most important place to re-check after touching account extraction, since a scale mismatch silently produces plausible-looking but wrong (1000x) per-share values
 - Peer count < 2 for multiples flags `peer_benchmark: false` (directional, not a robust benchmark) — matches the existing `credit/scoring.py` convention

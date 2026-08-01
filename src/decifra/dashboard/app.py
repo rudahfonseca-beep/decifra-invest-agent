@@ -44,7 +44,20 @@ from decifra.valuation.spec import SpecValidationError as ValuationSpecValidatio
 from decifra.valuation.spec import validate_spec as validate_valuation_spec  # noqa: E402
 
 
+EXTREME_UPSIDE_ABS = 1.0  # |upside_pct| > 100%
 RATIO_LABELS = KPI_LABELS
+
+
+@st.cache_data(show_spinner=False)
+def _cached_sensitivity_grid(
+    ticker: str,
+    assumption_key: tuple,
+) -> dict:
+    """IMP-018: memoize WACC×g grid across Streamlit reruns."""
+    fields = DcfAssumptions.__dataclass_fields__
+    kwargs = {name: assumption_key[i] for i, name in enumerate(fields)}
+    assumptions = DcfAssumptions(**kwargs)
+    return sensitivity_grid(ticker, assumptions)
 
 
 def _fmt(v: object, pct: bool = False) -> str:
@@ -321,6 +334,12 @@ def _render_valuation_tab(df: pd.DataFrame) -> None:
         f"{result.value_per_share:.2f}" if result.value_per_share is not None else "—",
         delta=f"{result.upside_pct:.1%} vs current price" if result.upside_pct is not None else None,
     )
+    if result.upside_pct is not None and abs(result.upside_pct) > EXTREME_UPSIDE_ABS:
+        st.warning(
+            "Defaults are a starting point, not a price target. "
+            f"Implied upside/downside of {result.upside_pct:.0%} is extreme — "
+            "revisit growth, margins, WACC, and scale before acting."
+        )
     for w in result.warnings:
         st.warning(w)
 
@@ -329,7 +348,8 @@ def _render_valuation_tab(df: pd.DataFrame) -> None:
         st.dataframe(years_df, use_container_width=True, hide_index=True)
 
     st.markdown("##### Sensitivity: WACC × terminal growth")
-    grid_data = sensitivity_grid(ticker, assumptions)
+    assumption_key = tuple(getattr(assumptions, f) for f in DcfAssumptions.__dataclass_fields__)
+    grid_data = _cached_sensitivity_grid(ticker, assumption_key)
     grid_df = pd.DataFrame(
         grid_data["grid"],
         index=[f"{w:.1%}" for w in grid_data["wacc_values"]],

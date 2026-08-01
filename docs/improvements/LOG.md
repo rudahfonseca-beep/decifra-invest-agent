@@ -8,24 +8,24 @@ Lessons from AARs turned into trackable follow-ups. Newest first within each sta
 
 | ID | Date | Source AAR | Improvement | Priority | Notes |
 |----|------|------------|-------------|----------|-------|
-| IMP-038 | 2026-08-01 | terminal-dark-ui | Assemble screener rows from APV + Merton + capacity outputs | med | UI fixtures in `opportunity_screener.json` today |
-| IMP-039 | 2026-08-01 | terminal-dark-ui | Define Streamlit → React cutover gates (parity checklist) | low | Streamlit remains interim |
-| IMP-034 | 2026-08-01 | pipeline-phase-1-ingestion | Wire live B3 shares-outstanding detail API into `b3/shares.py` | med | Artifact path exists; network reserved |
-| IMP-035 | 2026-08-01 | pipeline-phase-2-entities | Migrate credit/valuation/report joins to `load_identity` / resolver | med | Helper shipped |
-| IMP-036 | 2026-08-01 | pipeline-phase-3-modeling | Auto-assemble APV/Merton inputs from CVM + market for a ticker | med | Engines are CLI/formula-first |
-| IMP-037 | 2026-08-01 | pipeline-phase-5-schemas-ui | Live lake/API feed for React UI (replace static samples) | med | MVP uses public/sample |
-| IMP-003 | 2026-07-20 | greenfield-pipeline | Expand CVM cache years toward config defaults (2020-2021 DFP/ITR; fato relevante) | med | Partial cache 2022-2025 |
-| IMP-008 | 2026-07-31 | automation-aar | Optionally wrap `sync_pilot.py` in a Cursor Automation once repo is on remote | low | See AUTO-001 |
-| IMP-013 | 2026-07-31 | rename-and-github | Rename local folder `DecifraCR` -> `decifra-invest-agent` after closing Cursor; re-run editable install | med | Dir locked while workspace open |
-| IMP-015 | 2026-07-31 | valuation-capability | Add EPS-implied shares-outstanding fallback when yfinance has no data for a ticker | low | EV-based figures still work without it |
-| IMP-016 | 2026-07-31 | valuation-capability | "Defaults are a starting point, not a price target" callout when \|upside_pct\| is extreme | med | Streamlit tab + `valuation.md` |
-| IMP-017 | 2026-07-31 | valuation-capability | Open PR for `feat/valuation-dashboard-docs` (Streamlit tab + docs) once 5-PR split confirmed | high | Branch pushed-ready |
-| IMP-018 | 2026-07-31 | valuation-capability | Profile/cache Valuation tab cold-start cost (`sensitivity_grid` re-reads local CSVs 25x) | low | `st.cache_data` candidate |
+| IMP-013 | 2026-07-31 | rename-and-github | Rename local folder `DecifraCR` -> `decifra-invest-agent` after closing Cursor; re-run editable install | med | Dir locked while workspace open — human step |
 
 ## Done
 
 | ID | Date | Source AAR | Improvement | Resolved |
 |----|------|------------|-------------|----------|
+| IMP-038 | 2026-08-01 | terminal-dark-ui / backlog-close | Assemble screener rows from APV + Merton + capacity | 2026-08-01 -- `schemas/screener.py` + `schemas screener\|export-ui` |
+| IMP-039 | 2026-08-01 | terminal-dark-ui / backlog-close | Streamlit → React cutover gates | 2026-08-01 -- `docs/workflows/streamlit-react-cutover.md` |
+| IMP-037 | 2026-08-01 | pipeline-phase-5 / backlog-close | Live lake/API feed for React UI | 2026-08-01 -- `schemas/api_server.py` + `schemas serve` + Vite `/api` proxy |
+| IMP-036 | 2026-08-01 | pipeline-phase-3 / backlog-close | Auto-assemble APV/Merton/capacity from ticker | 2026-08-01 -- `valuation/assemble_apv.py` + `credit/assemble_models.py` + CLI `--ticker` |
+| IMP-035 | 2026-08-01 | pipeline-phase-2 / backlog-close | Migrate credit/valuation/report joins to `load_identity` | 2026-08-01 -- metrics/scoring/multiples/report + store export |
+| IMP-034 | 2026-08-01 | pipeline-phase-1 / backlog-close | Wire live B3 shares API | 2026-08-01 -- `GetListedSupplementCompany` + `sync b3-shares --network` |
+| IMP-018 | 2026-08-01 | valuation / backlog-close | Cache Valuation tab `sensitivity_grid` | 2026-08-01 -- `@st.cache_data` in dashboard |
+| IMP-017 | 2026-07-31 | valuation-capability | Open PR for `feat/valuation-dashboard-docs` | 2026-08-01 -- PR #6 opened (later closed; Valuation tab on `main`) |
+| IMP-016 | 2026-08-01 | valuation / backlog-close | Extreme upside callout | 2026-08-01 -- Streamlit + `valuation.md` + workflow doc |
+| IMP-015 | 2026-08-01 | valuation / backlog-close | EPS/mcap implied shares fallback | 2026-08-01 -- `market_data.py` (B3 artifact → mcap/price → NI/EPS) |
+| IMP-008 | 2026-08-01 | automation-aar / backlog-close | Wrap `sync_pilot.py` in Cursor Automation | 2026-08-01 -- draft in Automations editor + `docs/workflows/sync-pilot-automation.md` |
+| IMP-003 | 2026-08-01 | greenfield / backlog-close | Expand CVM cache years (2020-2021 DFP/ITR; notices) | 2026-08-01 -- DFP/ITR already cached; IPE 2020-2022 warmed; `DEFAULT_NOTICE_YEARS` → 2020-2026 |
 | IMP-031 | 2026-08-01 | pipeline-phase-5-schemas-ui | Phase 5: Three schemas + lineage | 2026-08-01 -- `schemas/` + `docs/schemas/` |
 | IMP-032 | 2026-08-01 | pipeline-phase-5-schemas-ui | Phase 5: ITR–debt DT_REFER alignment | 2026-08-01 -- `schemas/alignment.py` |
 | IMP-033 | 2026-08-01 | pipeline-phase-5-schemas-ui | Phase 5: React dark-mode MVP | 2026-08-01 -- `frontend/` |

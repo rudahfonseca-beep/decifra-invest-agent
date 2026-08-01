@@ -1,68 +1,28 @@
 {
   "items": [
     {
-      "id": "cat-001",
+      "id": "cat-petr4",
       "source": "CVM ITR",
-      "ts_relative": "2 hours ago",
-      "title": "PETR4 — Net debt/EBITDA improved to 1.2x",
-      "impact": "APV discount widened; DSCR remains comfortably above 2.5x",
+      "ts_relative": "assembled just now",
+      "title": "PETR4 — Stable credit / APV upside",
+      "impact": "APV disc=163.00082819823876%; DSCR=19.952889853888827",
       "signal": "safe"
     },
     {
-      "id": "cat-002",
-      "source": "ANBIMA",
-      "ts_relative": "4 hours ago",
-      "title": "CSNA3 — Debenture CDI+115 reprice vs peers",
-      "impact": "Yield arbitrage vs GGBR4 curve; leverage near covenant headroom",
-      "signal": "warning"
+      "id": "cat-vale3",
+      "source": "CVM ITR",
+      "ts_relative": "assembled just now",
+      "title": "VALE3 — Stable credit / APV upside",
+      "impact": "APV disc=40.06493754627448%; DSCR=5.769572059014919",
+      "signal": "safe"
     },
     {
-      "id": "cat-003",
-      "source": "Covenant scan",
-      "ts_relative": "1 hour ago",
-      "title": "AZUL4 — DSCR breach signal (0.7x)",
-      "impact": "Merton PD elevated to 22.4%; capacity model flags distress",
+      "id": "cat-csna3",
+      "source": "Capacity+Merton",
+      "ts_relative": "assembled just now",
+      "title": "CSNA3 — Capacity / default stress signal",
+      "impact": "ND/EBITDA=7.8603638112108065; DSCR=-0.10746406725222596; Merton PD=93.99242584831511%",
       "signal": "distress"
-    },
-    {
-      "id": "cat-004",
-      "source": "CVM FRE",
-      "ts_relative": "1 day ago",
-      "title": "VALE3 — Debt schedule alignment with ITR DT_REFER",
-      "impact": "No material covenant pressure; low default probability",
-      "signal": "safe"
-    },
-    {
-      "id": "cat-005",
-      "source": "B3",
-      "ts_relative": "6 hours ago",
-      "title": "USIM5 — Share count refresh alters EV/Equity",
-      "impact": "APV turns negative; watch leverage trajectory vs peers",
-      "signal": "warning"
-    },
-    {
-      "id": "cat-006",
-      "source": "Rating agency",
-      "ts_relative": "3 days ago",
-      "title": "EMBR3 — Adjusted net debt commentary (press release)",
-      "impact": "Supports APV upside case; credit metrics remain investment-grade research",
-      "signal": "safe"
-    },
-    {
-      "id": "cat-007",
-      "source": "ANBIMA",
-      "ts_relative": "8 hours ago",
-      "title": "GOAU4 — CRI/CRA linked facility update",
-      "impact": "Indexer CDI+; moderate Merton PD — monitor amortizations",
-      "signal": "warning"
-    },
-    {
-      "id": "cat-008",
-      "source": "CVM ITR",
-      "ts_relative": "12 hours ago",
-      "title": "GGBR4 — Working capital release lifts FCFE waterfall",
-      "impact": "Equity APV discount ~10%; credit capacity stable",
-      "signal": "safe"
     }
   ]
 }

@@ -2,13 +2,18 @@
   "ticker": "PETR4",
   "cnpj": "33000167000101",
   "cvm_code": "9512",
-  "company_name": "PETROLEO BRASILEIRO S.A.",
-  "isins": ["BRPETRDBS0A1"],
+  "company_name": "PETROLEO BRASILEIRO S.A. PETROBRAS",
+  "isins": [
+    "BRPETRDBS0A1",
+    "BRPETRDBA001"
+  ],
   "currency": "BRL",
   "metrics": {
     "identity_source": {
       "value": "B3,ANBIMA",
-      "lineage": { "source_doc": "entities.json|meta.json" }
+      "lineage": {
+        "source_doc": "entities.json|meta.json"
+      }
     }
   }
 }

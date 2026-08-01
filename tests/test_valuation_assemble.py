@@ -87,11 +87,11 @@ def two_companies(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     monkeypatch.setattr("decifra.valuation.historical.company_dir", lambda t: tmp_path / t.upper())
     monkeypatch.setattr("decifra.credit.metrics.company_dir", lambda t: tmp_path / t.upper())
     monkeypatch.setattr(
-        "decifra.credit.metrics.load_meta",
+        "decifra.credit.metrics.load_identity",
         lambda t: json.loads((tmp_path / t.upper() / "meta.json").read_text(encoding="utf-8")),
     )
     monkeypatch.setattr(
-        "decifra.valuation.multiples.load_meta",
+        "decifra.valuation.multiples.load_identity",
         lambda t: json.loads((tmp_path / t.upper() / "meta.json").read_text(encoding="utf-8")),
     )
 

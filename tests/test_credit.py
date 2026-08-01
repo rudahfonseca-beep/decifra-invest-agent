@@ -82,11 +82,11 @@ def credit_data(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
         lambda: {"constituents": []},
     )
     monkeypatch.setattr(
-        "decifra.credit.metrics.load_meta",
+        "decifra.credit.metrics.load_identity",
         lambda t: json.loads((tmp_path / t.upper() / "meta.json").read_text(encoding="utf-8")),
     )
     monkeypatch.setattr(
-        "decifra.credit.scoring.load_meta",
+        "decifra.credit.scoring.load_identity",
         lambda t: json.loads((tmp_path / t.upper() / "meta.json").read_text(encoding="utf-8")),
     )
 
@@ -279,7 +279,7 @@ def test_interest_coverage_positive_fin_result(tmp_path: Path, monkeypatch: pyte
     monkeypatch.setattr("decifra.store.folders.COMPANIES_DIR", tmp_path)
     monkeypatch.setattr("decifra.credit.metrics.company_dir", lambda t: tmp_path / t.upper())
     monkeypatch.setattr(
-        "decifra.credit.metrics.load_meta",
+        "decifra.credit.metrics.load_identity",
         lambda t: json.loads((tmp_path / t.upper() / "meta.json").read_text(encoding="utf-8")),
     )
     d = _company_tree(tmp_path, "PETR4", "Exploração. Refino e Distribuição")
@@ -327,7 +327,7 @@ def test_interest_coverage_negative_fin_result(tmp_path: Path, monkeypatch: pyte
     monkeypatch.setattr("decifra.store.folders.COMPANIES_DIR", tmp_path)
     monkeypatch.setattr("decifra.credit.metrics.company_dir", lambda t: tmp_path / t.upper())
     monkeypatch.setattr(
-        "decifra.credit.metrics.load_meta",
+        "decifra.credit.metrics.load_identity",
         lambda t: json.loads((tmp_path / t.upper() / "meta.json").read_text(encoding="utf-8")),
     )
     d = _company_tree(tmp_path, "XXX3", "Energia Elétrica")

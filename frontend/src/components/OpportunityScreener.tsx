@@ -8,25 +8,29 @@ type Props = {
   loading?: boolean;
 };
 
-function apvTone(pct: number): Signal | "default" {
+function apvTone(pct: number | null | undefined): Signal | "default" {
+  if (pct == null) return "default";
   if (pct >= 10) return "safe";
   if (pct < 0) return "distress";
   return "default";
 }
 
-function dscrTone(dscr: number): Signal | "default" {
+function dscrTone(dscr: number | null | undefined): Signal | "default" {
+  if (dscr == null) return "default";
   if (dscr >= 1.5) return "safe";
   if (dscr < 1) return "distress";
   return "warning";
 }
 
-function mertonTone(pd: number): Signal | "default" {
+function mertonTone(pd: number | null | undefined): Signal | "default" {
+  if (pd == null) return "default";
   if (pd >= 10) return "distress";
   if (pd >= 3) return "warning";
   return "safe";
 }
 
-function leverageTone(nd: number): Signal | "default" {
+function leverageTone(nd: number | null | undefined): Signal | "default" {
+  if (nd == null) return "default";
   if (nd >= 5) return "distress";
   if (nd >= 3) return "warning";
   return "default";
@@ -93,7 +97,7 @@ export function OpportunityScreener({ rows, loading }: Props) {
                   />
                 </td>
                 <td className="px-2 py-2.5 align-top">
-                  <MetricCell value={fmtNum(row.ev_equity, 1)} />
+                  <MetricCell value={fmtNum(row.ev_equity, 2)} />
                 </td>
                 <td className="px-2 py-2.5 align-top">
                   <MetricCell

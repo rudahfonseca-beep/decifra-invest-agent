@@ -69,11 +69,11 @@ def offline_context(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> dict:
     )
     monkeypatch.setattr("decifra.credit.scoring.load_universe", lambda: {"constituents": []})
     monkeypatch.setattr(
-        "decifra.credit.metrics.load_meta",
+        "decifra.credit.metrics.load_identity",
         lambda t: json.loads((tmp_path / t.upper() / "meta.json").read_text(encoding="utf-8")),
     )
     monkeypatch.setattr(
-        "decifra.credit.scoring.load_meta",
+        "decifra.credit.scoring.load_identity",
         lambda t: json.loads((tmp_path / t.upper() / "meta.json").read_text(encoding="utf-8")),
     )
 

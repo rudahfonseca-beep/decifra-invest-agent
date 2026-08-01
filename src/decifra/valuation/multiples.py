@@ -15,7 +15,7 @@ from typing import Any
 
 import pandas as pd
 
-from decifra.store.folders import load_meta
+from decifra.store.folders import load_identity
 from decifra.valuation.historical import build_annual_history
 from decifra.valuation.market_data import fetch_market_data
 
@@ -63,7 +63,7 @@ class CompanyMultiples:
 def compute_multiples(ticker: str) -> CompanyMultiples:
     """P/E, EV/EBITDA, EV/Revenue, EV/EBIT, P/B for one ticker from local data + live quote."""
     hist = build_annual_history(ticker)
-    meta = load_meta(ticker)
+    meta = load_identity(ticker)
     market = fetch_market_data(ticker)
     warnings: list[str] = []
 

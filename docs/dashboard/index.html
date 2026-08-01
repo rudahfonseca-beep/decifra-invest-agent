@@ -11,7 +11,7 @@
     <header>
       <h1>decifra-invest-agent session dashboard</h1>
       <p class="sub">Human view of agent AARs, automation traces, improvements, pipeline roadmap, and future prompts.</p>
-      <p class="meta">Generated 2026-08-01 05:19 UTC · 19 agent · 2 automation AARs</p>
+      <p class="meta">Generated 2026-08-01 05:39 UTC · 20 agent · 2 automation AARs</p>
     </header>
 
     <nav class="tabs" role="tablist">
@@ -36,6 +36,15 @@
       <h2>Session timeline</h2>
       <div class="grid">
         
+      <article class="card">
+        <div class="meta-row">
+          <span class="badge badge-agent">agent</span>
+          <span class="badge badge-completed">completed</span>
+          2026-08-01
+        </div>
+        <h3><a href="../aar/2026-08-01-backlog-imp-closeout.md">Close open IMP backlog (034–039, 003, 008, 015–018)</a></h3>
+        <div class="meta-row">2026-08-01-backlog-imp-closeout</div>
+      </article>
       <article class="card">
         <div class="meta-row">
           <span class="badge badge-agent">agent</span>
@@ -231,70 +240,10 @@
     <section>
       <h2>Open improvements</h2>
       <table><thead><tr><th>ID</th><th>Improvement</th><th>Priority</th><th>Source</th></tr></thead><tbody><tr>
-          <td>IMP-038</td>
-          <td>Assemble screener rows from APV + Merton + capacity outputs</td>
-          <td class="priority-med">med</td>
-          <td>terminal-dark-ui</td>
-        </tr><tr>
-          <td>IMP-039</td>
-          <td>Define Streamlit → React cutover gates (parity checklist)</td>
-          <td class="priority-low">low</td>
-          <td>terminal-dark-ui</td>
-        </tr><tr>
-          <td>IMP-034</td>
-          <td>Wire live B3 shares-outstanding detail API into `b3/shares.py`</td>
-          <td class="priority-med">med</td>
-          <td>pipeline-phase-1-ingestion</td>
-        </tr><tr>
-          <td>IMP-035</td>
-          <td>Migrate credit/valuation/report joins to `load_identity` / resolver</td>
-          <td class="priority-med">med</td>
-          <td>pipeline-phase-2-entities</td>
-        </tr><tr>
-          <td>IMP-036</td>
-          <td>Auto-assemble APV/Merton inputs from CVM + market for a ticker</td>
-          <td class="priority-med">med</td>
-          <td>pipeline-phase-3-modeling</td>
-        </tr><tr>
-          <td>IMP-037</td>
-          <td>Live lake/API feed for React UI (replace static samples)</td>
-          <td class="priority-med">med</td>
-          <td>pipeline-phase-5-schemas-ui</td>
-        </tr><tr>
-          <td>IMP-003</td>
-          <td>Expand CVM cache years toward config defaults (2020-2021 DFP/ITR; fato relevante)</td>
-          <td class="priority-med">med</td>
-          <td>greenfield-pipeline</td>
-        </tr><tr>
-          <td>IMP-008</td>
-          <td>Optionally wrap `sync_pilot.py` in a Cursor Automation once repo is on remote</td>
-          <td class="priority-low">low</td>
-          <td>automation-aar</td>
-        </tr><tr>
           <td>IMP-013</td>
           <td>Rename local folder `DecifraCR` -&gt; `decifra-invest-agent` after closing Cursor; re-run editable install</td>
           <td class="priority-med">med</td>
           <td>rename-and-github</td>
-        </tr><tr>
-          <td>IMP-015</td>
-          <td>Add EPS-implied shares-outstanding fallback when yfinance has no data for a ticker</td>
-          <td class="priority-low">low</td>
-          <td>valuation-capability</td>
-        </tr><tr>
-          <td>IMP-016</td>
-          <td>&quot;Defaults are a starting point, not a price target&quot; callout when \</td>
-          <td class="priority-low">upside_pct\</td>
-          <td>valuation-capability</td>
-        </tr><tr>
-          <td>IMP-017</td>
-          <td>Open PR for `feat/valuation-dashboard-docs` (Streamlit tab + docs) once 5-PR split confirmed</td>
-          <td class="priority-high">high</td>
-          <td>valuation-capability</td>
-        </tr><tr>
-          <td>IMP-018</td>
-          <td>Profile/cache Valuation tab cold-start cost (`sensitivity_grid` re-reads local CSVs 25x)</td>
-          <td class="priority-low">low</td>
-          <td>valuation-capability</td>
         </tr></tbody></table>
     </section>
 
@@ -317,11 +266,6 @@
           <td class="priority-med">med</td>
           <td>unified-pipeline-toolkit</td>
         </tr><tr>
-          <td>AUTO-001</td>
-          <td>Wrap `scripts/sync_pilot.py` in a Cursor Automation (scheduled or manual) now that the repo is on GitHub</td>
-          <td class="priority-low">low</td>
-          <td>automation-aar / IMP-008</td>
-        </tr><tr>
           <td>AUTO-003</td>
           <td>Prefer `sync_pilot` (or explicit closeout) over ad-hoc `decifra sync` so every collection run leaves AAR + dashboard</td>
           <td class="priority-med">med</td>
@@ -337,7 +281,7 @@
     <section>
       <h2>Lessons rollup</h2>
       <div class="lessons">
-        <ul><li><strong>Unified pipeline E2E closeout (Phases 1–5 on epic):</strong> Opt-in pipeline stages on `sync_pilot` prevent accidental multi-GB downloads.</li><li><strong>Unified pipeline E2E closeout (Phases 1–5 on epic):</strong> Avoid Unicode arrows in Windows console scripts (cp1252).</li><li><strong>Unified pipeline E2E closeout (Phases 1–5 on epic):</strong> Progress JSON + dashboard tab makes phase status visible without re-reading all AARs.</li><li><strong>Pipeline Phase 1 — Primary ingestion (FRE, ANBIMA, B3):</strong> Keep pipeline sync stages opt-in on `sync_pilot` so daily pilots do not download FRE/funds by default.</li><li><strong>Pipeline Phase 1 — Primary ingestion (FRE, ANBIMA, B3):</strong> Fixture-backed FI parsers unblock CI and lake shape before opaque vendor APIs stabilize.</li><li><strong>Pipeline Phase 1 — Primary ingestion (FRE, ANBIMA, B3):</strong> Avoid Unicode arrows in Rich CLI strings on Windows cp1252 consoles.</li><li><strong>Pipeline Phase 2 — Entity resolution &amp; fallbacks:</strong> Seed entities from existing Ibovespa meta first; debt ISINs are additive.</li><li><strong>Pipeline Phase 2 — Entity resolution &amp; fallbacks:</strong> Keep Hierarchy of Truth as a shared constant consumed by conflict helpers and docs.</li><li><strong>Pipeline Phase 3 — APV, Merton, capacity, waterfall:</strong> Keep new engines complementary — acceptance is coexistence with DCF/peer scores.</li><li><strong>Pipeline Phase 3 — APV, Merton, capacity, waterfall:</strong> Capacity thresholds (3.5x / 1.25x) belong in named constants for report/schema reuse.</li><li><strong>Pipeline Phase 4 — Fund exposure (CVM + EDGAR):</strong> Keep fund/EDGAR sync offline-default so CI and agents do not pull multi-GB CVM FI dumps accidentally.</li><li><strong>Pipeline Phase 5 — Schemas, alignment, React MVP:</strong> Ship schema contracts + sample UI together so agents can validate lineage shape without waiting for full API.</li></ul>
+        <ul><li><strong>Close open IMP backlog (034–039, 003, 008, 015–018):</strong> B3 `GetDetail` is identity-only; share counts require `GetListedSupplementCompany` + `issuingCompany`.</li><li><strong>Close open IMP backlog (034–039, 003, 008, 015–018):</strong> Screener/API should assemble from engines against the lake before polishing UI fixtures.</li><li><strong>Close open IMP backlog (034–039, 003, 008, 015–018):</strong> Patch tests at the consumer import (`load_identity`) when swapping identity helpers.</li><li><strong>Unified pipeline E2E closeout (Phases 1–5 on epic):</strong> Opt-in pipeline stages on `sync_pilot` prevent accidental multi-GB downloads.</li><li><strong>Unified pipeline E2E closeout (Phases 1–5 on epic):</strong> Avoid Unicode arrows in Windows console scripts (cp1252).</li><li><strong>Unified pipeline E2E closeout (Phases 1–5 on epic):</strong> Progress JSON + dashboard tab makes phase status visible without re-reading all AARs.</li><li><strong>Pipeline Phase 1 — Primary ingestion (FRE, ANBIMA, B3):</strong> Keep pipeline sync stages opt-in on `sync_pilot` so daily pilots do not download FRE/funds by default.</li><li><strong>Pipeline Phase 1 — Primary ingestion (FRE, ANBIMA, B3):</strong> Fixture-backed FI parsers unblock CI and lake shape before opaque vendor APIs stabilize.</li><li><strong>Pipeline Phase 1 — Primary ingestion (FRE, ANBIMA, B3):</strong> Avoid Unicode arrows in Rich CLI strings on Windows cp1252 consoles.</li><li><strong>Pipeline Phase 2 — Entity resolution &amp; fallbacks:</strong> Seed entities from existing Ibovespa meta first; debt ISINs are additive.</li><li><strong>Pipeline Phase 2 — Entity resolution &amp; fallbacks:</strong> Keep Hierarchy of Truth as a shared constant consumed by conflict helpers and docs.</li><li><strong>Pipeline Phase 3 — APV, Merton, capacity, waterfall:</strong> Keep new engines complementary — acceptance is coexistence with DCF/peer scores.</li><li><strong>Pipeline Phase 3 — APV, Merton, capacity, waterfall:</strong> Capacity thresholds (3.5x / 1.25x) belong in named constants for report/schema reuse.</li></ul>
       </div>
     </section>
 
@@ -372,8 +316,11 @@
           <strong>12. Phase 4–5 funds/schemas/UI (IMP-029..033)</strong>
           <div class="prompt-body">Pick from roadmap: CVM INF_DIARIO/CDA, EDGAR, three output schemas + lineage, ITR–debt alignment, or React frontend under frontend/. Streamlit stays until cutover.</div>
         </li><li>
-          <strong>13. Terminal Dark live feed (IMP-037..039)</strong>
-          <div class="prompt-body">React shell already uses Terminal Dark (frontend/: Tailwind, screener, catalyst feed). Wire live lake/API (IMP-037), assemble screener rows from APV/Merton/capacity (IMP-038), and/or draft Streamlit→React cutover gates (IMP-039). Preserve slate/indigo tokens and lineage freshness UX. Prefer .venv Scripts python for any backend.</div>
+          <strong>13. Terminal Dark live feed (IMP-037..039)** — mostly done  
+   `React + schemas serve/export-ui + screener assemblers shipped. Follow docs/workflows/streamlit-react-cutover.md for cutover gates. Prefer .venv Scripts python.`
+
+14. **Save sync_pilot Automation</strong>
+          <div class="prompt-body">Finish the Cursor Automation draft for scripts/sync_pilot.py (see docs/workflows/sync-pilot-automation.md): set schedule if desired, confirm repo scope, Save.</div>
         </li><li>
           <strong>5. Rename local folder (IMP-013)</strong>
           <div class="prompt-body">After closing Cursor, rename DecifraCR -&gt; decifra-invest-agent, reopen, re-run editable install, confirm decifra CLI.</div>

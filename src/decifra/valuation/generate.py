@@ -76,6 +76,17 @@ def render_valuation_markdown(context: dict[str, Any]) -> str:
     lines.append(f"- Value per share: {_fmt_num(dcf.get('value_per_share'))}")
     lines.append(f"- Current price: {_fmt_num(dcf.get('current_price'))}")
     lines.append(f"- Upside/downside: {_fmt_pct(dcf.get('upside_pct'))}")
+    try:
+        upside = float(dcf["upside_pct"]) if dcf.get("upside_pct") is not None else None
+    except (TypeError, ValueError):
+        upside = None
+    if upside is not None and abs(upside) > 1.0:
+        lines.append("")
+        lines.append(
+            "> **Note:** Defaults are a starting point, not a price target. "
+            f"Implied upside/downside of {_fmt_pct(upside)} is extreme — "
+            "revisit growth, margins, WACC, and scale before acting."
+        )
     if dcf.get("warnings"):
         lines.append("")
         lines.append("**Warnings:**")
