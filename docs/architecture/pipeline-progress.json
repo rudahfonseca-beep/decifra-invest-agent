@@ -4,35 +4,55 @@
   "gap_analysis": "unified-pipeline-gap-analysis.md",
   "overall_status": "in_progress",
   "pillars": {
-    "1_ingestion": {"grade": "Fail", "label": "Multi-source ingestion"},
-    "2_entities": {"grade": "Fail", "label": "Entity resolution & fallbacks"},
-    "3_modeling": {"grade": "Fail", "label": "Integrated modeling"},
-    "4_outputs": {"grade": "Fail", "label": "Output schema & UI"}
+    "1_ingestion": {
+      "grade": "Fail",
+      "label": "Multi-source ingestion"
+    },
+    "2_entities": {
+      "grade": "Fail",
+      "label": "Entity resolution & fallbacks"
+    },
+    "3_modeling": {
+      "grade": "Fail",
+      "label": "Integrated modeling"
+    },
+    "4_outputs": {
+      "grade": "Fail",
+      "label": "Output schema & UI"
+    }
   },
   "baseline": [
     {
       "id": "BASE-DFP-ITR",
       "title": "CVM DFP/ITR financials",
       "status": "done",
-      "evidence": ["src/decifra/cvm/financials.py"]
+      "evidence": [
+        "src/decifra/cvm/financials.py"
+      ]
     },
     {
       "id": "BASE-PEER-CREDIT",
       "title": "Industry peer credit scores",
       "status": "done",
-      "evidence": ["src/decifra/credit/scoring.py"]
+      "evidence": [
+        "src/decifra/credit/scoring.py"
+      ]
     },
     {
       "id": "BASE-FCFF-DCF",
       "title": "FCFF/WACC DCF + multiples",
       "status": "done",
-      "evidence": ["src/decifra/valuation/dcf.py"]
+      "evidence": [
+        "src/decifra/valuation/dcf.py"
+      ]
     },
     {
       "id": "BASE-STREAMLIT",
       "title": "Streamlit research UI (interim)",
       "status": "done",
-      "evidence": ["src/decifra/dashboard/app.py"]
+      "evidence": [
+        "src/decifra/dashboard/app.py"
+      ]
     }
   ],
   "phases": [
@@ -40,27 +60,33 @@
       "id": 1,
       "name": "Primary ingestion",
       "pillar": "1_ingestion",
-      "status": "todo",
-      "aar": null,
+      "status": "done",
+      "aar": "2026-08-01-pipeline-phase-1-ingestion.md",
       "branch": "feat/pipeline-phase-1",
       "deliverables": [
         {
           "id": "IMP-020",
           "title": "CVM FRE zip ingest + extracts",
-          "status": "todo",
-          "evidence": ["src/decifra/cvm/fre.py"]
+          "status": "done",
+          "evidence": [
+            "src/decifra/cvm/fre.py"
+          ]
         },
         {
           "id": "IMP-021",
           "title": "ANBIMA debentures/CRI/CRA",
-          "status": "todo",
-          "evidence": ["src/decifra/anbima/"]
+          "status": "done",
+          "evidence": [
+            "src/decifra/anbima/"
+          ]
         },
         {
           "id": "IMP-022",
           "title": "B3 shares/mcap + Balcão bonds",
-          "status": "todo",
-          "evidence": ["src/decifra/b3/"]
+          "status": "done",
+          "evidence": [
+            "src/decifra/b3/"
+          ]
         }
       ]
     },
@@ -76,13 +102,18 @@
           "id": "IMP-023",
           "title": "Entity graph CNPJ↔CVM↔ticker↔ISIN",
           "status": "todo",
-          "evidence": ["src/decifra/entities/", "data/universe/entities.json"]
+          "evidence": [
+            "src/decifra/entities/",
+            "data/universe/entities.json"
+          ]
         },
         {
           "id": "IMP-024",
           "title": "Hierarchy of Truth + private-issuer fallback",
           "status": "todo",
-          "evidence": ["src/decifra/entities/resolve.py"]
+          "evidence": [
+            "src/decifra/entities/resolve.py"
+          ]
         }
       ]
     },
@@ -98,25 +129,33 @@
           "id": "IMP-025",
           "title": "APV engine",
           "status": "todo",
-          "evidence": ["src/decifra/valuation/apv.py"]
+          "evidence": [
+            "src/decifra/valuation/apv.py"
+          ]
         },
         {
           "id": "IMP-026",
           "title": "Merton / Distance to Default",
           "status": "todo",
-          "evidence": ["src/decifra/credit/merton.py"]
+          "evidence": [
+            "src/decifra/credit/merton.py"
+          ]
         },
         {
           "id": "IMP-027",
           "title": "Debt capacity flags",
           "status": "todo",
-          "evidence": ["src/decifra/credit/capacity.py"]
+          "evidence": [
+            "src/decifra/credit/capacity.py"
+          ]
         },
         {
           "id": "IMP-028",
           "title": "OCF→FCFE waterfall",
           "status": "todo",
-          "evidence": ["src/decifra/valuation/waterfall.py"]
+          "evidence": [
+            "src/decifra/valuation/waterfall.py"
+          ]
         }
       ]
     },
@@ -132,13 +171,17 @@
           "id": "IMP-029",
           "title": "CVM INF_DIARIO + CDA",
           "status": "todo",
-          "evidence": ["src/decifra/funds/cvm.py"]
+          "evidence": [
+            "src/decifra/funds/cvm.py"
+          ]
         },
         {
           "id": "IMP-030",
           "title": "SEC EDGAR fund/issuer exposure",
           "status": "todo",
-          "evidence": ["src/decifra/funds/edgar.py"]
+          "evidence": [
+            "src/decifra/funds/edgar.py"
+          ]
         }
       ]
     },
@@ -154,19 +197,26 @@
           "id": "IMP-031",
           "title": "Three schemas + lineage",
           "status": "todo",
-          "evidence": ["src/decifra/schemas/", "docs/schemas/"]
+          "evidence": [
+            "src/decifra/schemas/",
+            "docs/schemas/"
+          ]
         },
         {
           "id": "IMP-032",
           "title": "ITR–debt DT_REFER alignment",
           "status": "todo",
-          "evidence": ["src/decifra/schemas/alignment.py"]
+          "evidence": [
+            "src/decifra/schemas/alignment.py"
+          ]
         },
         {
           "id": "IMP-033",
           "title": "React dark-mode research UI",
           "status": "todo",
-          "evidence": ["frontend/"]
+          "evidence": [
+            "frontend/"
+          ]
         }
       ]
     }

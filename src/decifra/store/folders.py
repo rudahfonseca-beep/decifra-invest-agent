@@ -18,6 +18,8 @@ def ensure_company_tree(ticker: str) -> Path:
     root = company_dir(ticker)
     for sub in (
         root / "financials",
+        root / "debt",
+        root / "fre",
         root / "notices" / "pdfs",
         root / "transcripts" / "pdfs",
         root / "transcripts" / "text",

@@ -57,7 +57,7 @@ def set_deliverable(imp_id: str, status: str, *, aar: str | None = None) -> None
     else:
         data["overall_status"] = "todo"
     save(data)
-    print(f"Updated {imp_id} → {status}")
+    print(f"Updated {imp_id} -> {status}")
 
 
 def set_pillar(pillar: str, grade: str) -> None:
@@ -66,7 +66,7 @@ def set_pillar(pillar: str, grade: str) -> None:
         raise SystemExit(f"Unknown pillar: {pillar}")
     data["pillars"][pillar]["grade"] = grade
     save(data)
-    print(f"Updated pillar {pillar} → {grade}")
+    print(f"Updated pillar {pillar} -> {grade}")
 
 
 def set_phase_aar(phase_id: int, aar: str) -> None:
@@ -75,7 +75,7 @@ def set_phase_aar(phase_id: int, aar: str) -> None:
         if phase["id"] == phase_id:
             phase["aar"] = aar
             save(data)
-            print(f"Phase {phase_id} aar → {aar}")
+            print(f"Phase {phase_id} aar -> {aar}")
             return
     raise SystemExit(f"Unknown phase: {phase_id}")
 

@@ -9,7 +9,13 @@ from rich.console import Console
 from rich.table import Table
 
 from decifra import __version__
-from decifra.config import DEFAULT_FINANCIAL_YEARS, DEFAULT_FORECAST_YEARS, DEFAULT_NOTICE_YEARS, ensure_dirs
+from decifra.config import (
+    DEFAULT_FINANCIAL_YEARS,
+    DEFAULT_FORECAST_YEARS,
+    DEFAULT_FRE_YEARS,
+    DEFAULT_NOTICE_YEARS,
+    ensure_dirs,
+)
 
 app = typer.Typer(help="decifra-invest-agent — Ibovespa research data pipeline and CLI", no_args_is_help=True)
 sync_app = typer.Typer(help="Sync data from B3/CVM/RI sources")
@@ -140,6 +146,67 @@ def sync_transcripts_cmd(
             crawl_ri=not no_ri,
         )
     console.print(f"[green]Transcripts OK[/green]: wrote indexes for {len(result['written'])} tickers")
+
+
+@sync_app.command("fre")
+def sync_fre_cmd(
+    ticker: Optional[str] = typer.Option(None, help="Single ticker"),
+    years: Optional[str] = typer.Option(None, help="Year range, e.g. 2022-2026"),
+    force: bool = typer.Option(False, help="Re-download FRE zips"),
+    cache_only: bool = typer.Option(False, help="Only use data/cache/cvm FRE zips"),
+) -> None:
+    """Download CVM Formulário de Referência (FRE) and write company extracts."""
+    from decifra.cvm.fre import sync_fre
+
+    y = _parse_years(years, DEFAULT_FRE_YEARS)
+    with console.status("Syncing FRE..."):
+        result = sync_fre(ticker=ticker, years=y, force=force, from_cache_only=cache_only)
+    console.print(
+        f"[green]FRE OK[/green]: {len(result['written'])} extracts · "
+        f"{len(result.get('errors') or [])} warnings"
+    )
+
+
+@sync_app.command("anbima")
+def sync_anbima_cmd(
+    ticker: Optional[str] = typer.Option(None, help="Single ticker"),
+) -> None:
+    """Sync ANBIMA debentures/CRI/CRA into company debt folders (cache/fixture)."""
+    from decifra.anbima import sync_anbima
+
+    with console.status("Syncing ANBIMA debt instruments..."):
+        result = sync_anbima(ticker=ticker)
+    console.print(
+        f"[green]ANBIMA OK[/green]: {result['instruments']} instruments · "
+        f"wrote {len(result['written'])} tickers"
+    )
+
+
+@sync_app.command("b3-shares")
+def sync_b3_shares_cmd(
+    ticker: Optional[str] = typer.Option(None, help="Single ticker"),
+    force: bool = typer.Option(False, help="Refresh all rows"),
+) -> None:
+    """Build B3 shares/mcap universe artifact from local meta (+ optional network)."""
+    from decifra.b3 import sync_b3_shares
+
+    with console.status("Syncing B3 shares artifact..."):
+        result = sync_b3_shares(ticker=ticker, force=force)
+    console.print(f"[green]B3 shares OK[/green]: {len(result['updated'])} tickers -> {result['path']}")
+
+
+@sync_app.command("b3-bonds")
+def sync_b3_bonds_cmd(
+    ticker: Optional[str] = typer.Option(None, help="Single ticker"),
+) -> None:
+    """Sync B3 Balcão bond registrations into company debt folders."""
+    from decifra.b3 import sync_b3_bonds
+
+    with console.status("Syncing B3 Balcão bonds..."):
+        result = sync_b3_bonds(ticker=ticker)
+    console.print(
+        f"[green]B3 Balcão OK[/green]: {result['bonds']} bonds · wrote {len(result['written'])} tickers"
+    )
 
 
 @sync_app.command("all")

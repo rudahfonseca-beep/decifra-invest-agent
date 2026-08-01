@@ -8,9 +8,7 @@ Lessons from AARs turned into trackable follow-ups. Newest first within each sta
 
 | ID | Date | Source AAR | Improvement | Priority | Notes |
 |----|------|------------|-------------|----------|-------|
-| IMP-020 | 2026-08-01 | unified-pipeline-toolkit | Phase 1: CVM FRE zip ingest + company extracts (`src/decifra/cvm/fre.py`) | high | Roadmap Phase 1 |
-| IMP-021 | 2026-08-01 | unified-pipeline-toolkit | Phase 1: ANBIMA debentures/CRI/CRA (yields, indexers, covenants) | high | `src/decifra/anbima/` |
-| IMP-022 | 2026-08-01 | unified-pipeline-toolkit | Phase 1: B3 official shares/mcap + Balcão bond registrations | high | Prefer over yfinance-only |
+| IMP-034 | 2026-08-01 | pipeline-phase-1-ingestion | Wire live B3 shares-outstanding detail API into `b3/shares.py` | med | Artifact path exists; network reserved |
 | IMP-023 | 2026-08-01 | unified-pipeline-toolkit | Phase 2: Entity graph CNPJ↔CVM↔ticker↔ISIN (`entities/` + `entities.json`) | high | |
 | IMP-024 | 2026-08-01 | unified-pipeline-toolkit | Phase 2: Hierarchy of Truth + private-issuer fallback chain | high | See workflow stub |
 | IMP-025 | 2026-08-01 | unified-pipeline-toolkit | Phase 3: APV engine (`valuation/apv.py`) | med | Keep FCFF/WACC |
@@ -34,6 +32,9 @@ Lessons from AARs turned into trackable follow-ups. Newest first within each sta
 
 | ID | Date | Source AAR | Improvement | Resolved |
 |----|------|------------|-------------|----------|
+| IMP-020 | 2026-08-01 | pipeline-phase-1-ingestion | Phase 1: CVM FRE zip ingest + company extracts | 2026-08-01 -- `cvm/fre.py` + `decifra sync fre` |
+| IMP-021 | 2026-08-01 | pipeline-phase-1-ingestion | Phase 1: ANBIMA debentures/CRI/CRA | 2026-08-01 -- `anbima/` + cache/fixture sync |
+| IMP-022 | 2026-08-01 | pipeline-phase-1-ingestion | Phase 1: B3 shares/mcap + Balcão bonds | 2026-08-01 -- `b3/` + CLI stages |
 | IMP-001 | 2026-07-20 | greenfield-pipeline | Backfill `prices.csv` for all Ibovespa tickers | 2026-07-31 -- BRAPI backfill via `scripts/backfill_prices.py`; lake now 78/78 |
 | IMP-014 | 2026-07-31 | dashboard-refresh | Session dashboard coverage from live lake (not stale automation AAR) + clean prompt parse | 2026-07-31 |
 | IMP-002 | 2026-07-20 | greenfield-pipeline | Investigate ASAI3 missing DFP/ITR financials; document if CVM dump gap | 2026-07-31 -- CNPJ 06057223000171 (Sendas) maps correctly, DFP has 2020 data only; 2021+ absent after GPA spinoff. Known CVM gap. |
