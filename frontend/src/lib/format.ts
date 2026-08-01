@@ -19,7 +19,17 @@ export function fmtRatio(value: number | null | undefined, digits = 1): string {
   return `${fmtNum(value, digits)}x`;
 }
 
-export function fmtBrlBn(value: number | null | undefined): string {
+export function fmtScore(value: number | null | undefined): string {
   if (value == null || Number.isNaN(value)) return "—";
-  return `R$ ${fmtNum(value, 1)}bn`;
+  return fmtNum(value, 1);
+}
+
+export function fmtMetric(
+  value: number | null | undefined,
+  pct: boolean
+): string {
+  if (value == null || Number.isNaN(value)) return "—";
+  if (pct) return `${fmtNum(value * 100, 1)}%`;
+  if (Math.abs(value) >= 1000) return fmtNum(value, 0);
+  return fmtNum(value, 2);
 }

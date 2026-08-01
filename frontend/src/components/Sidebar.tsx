@@ -1,7 +1,13 @@
 import {
   Activity,
+  BarChart3,
   Building2,
+  ClipboardList,
+  Factory,
+  FileText,
   LayoutGrid,
+  LineChart,
+  List,
   Shield,
   Waves,
 } from "lucide-react";
@@ -9,9 +15,16 @@ import type { ViewId } from "../types";
 
 const NAV: { id: ViewId; label: string; icon: typeof LayoutGrid }[] = [
   { id: "screener", label: "Opportunity Screener", icon: LayoutGrid },
-  { id: "profile", label: "Company Profile", icon: Building2 },
-  { id: "debt", label: "Credit & Debt", icon: Shield },
-  { id: "waterfall", label: "Valuation Waterfall", icon: Waves },
+  { id: "industries", label: "Industries", icon: Factory },
+  { id: "tickers", label: "Tickers", icon: List },
+  { id: "credit", label: "Credit overview", icon: BarChart3 },
+  { id: "detail", label: "Company detail", icon: Building2 },
+  { id: "valuation", label: "Valuation", icon: LineChart },
+  { id: "report", label: "Report builder", icon: FileText },
+  { id: "coverage", label: "Data coverage", icon: ClipboardList },
+  { id: "profile", label: "Schema · Profile", icon: Building2 },
+  { id: "debt", label: "Schema · Credit & Debt", icon: Shield },
+  { id: "waterfall", label: "Schema · Waterfall", icon: Waves },
 ];
 
 type Props = {
@@ -21,7 +34,7 @@ type Props = {
 
 export function Sidebar({ active, onNavigate }: Props) {
   return (
-    <aside className="flex h-full w-56 shrink-0 flex-col border-r border-slate-800 bg-slate-900">
+    <aside className="flex h-full w-60 shrink-0 flex-col border-r border-slate-800 bg-slate-900">
       <div className="border-b border-slate-800 px-4 py-4">
         <div className="text-sm font-semibold tracking-tight text-slate-100">decifra</div>
         <div className="mt-0.5 text-[11px] text-indigo-400">Unified Capital Analyst</div>
@@ -41,7 +54,7 @@ export function Sidebar({ active, onNavigate }: Props) {
         </div>
       </div>
 
-      <nav className="flex flex-1 flex-col gap-0.5 p-2">
+      <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto p-2">
         {NAV.map(({ id, label, icon: Icon }) => {
           const isActive = active === id;
           return (
@@ -63,7 +76,7 @@ export function Sidebar({ active, onNavigate }: Props) {
       </nav>
 
       <div className="border-t border-slate-800 px-4 py-3 text-[10px] text-slate-600">
-        Research-grade · sample fixtures
+        Streamlit parity · research-grade
       </div>
     </aside>
   );

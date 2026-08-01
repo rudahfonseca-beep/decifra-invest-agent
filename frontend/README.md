@@ -2,7 +2,7 @@
 
 Institutional **Unified Capital Analyst** shell: Vite + React 18 + Tailwind + lucide-react.
 
-Layout: fixed sidebar (brand + live pipeline status) · header search (CNPJ / ticker / ISIN) · cross-asset opportunity screener · action catalyst feed. Detail views render Phase 5 schema samples.
+Layout: fixed sidebar (brand + live pipeline status) · header search (CNPJ / ticker / ISIN) · Streamlit-parity research views (industries, tickers, credit overview/detail, valuation, report builder, coverage) · opportunity screener · catalyst feed · Phase 5 schema detail panes.
 
 ```bash
 cd frontend

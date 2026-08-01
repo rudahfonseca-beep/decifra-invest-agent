@@ -1,0 +1,226 @@
+{
+  "industries": [
+    {
+      "industry_group": "Agribusiness",
+      "cohort": "non_financial",
+      "companies": 1,
+      "median_credit_score": 50.0,
+      "mean_credit_score": 50.0,
+      "tickers": [
+        "SLCE3"
+      ]
+    },
+    {
+      "industry_group": "Banks",
+      "cohort": "financial",
+      "companies": 6,
+      "median_credit_score": 58.333333333333336,
+      "mean_credit_score": 58.33333333333334,
+      "tickers": [
+        "BBAS3",
+        "BBDC3",
+        "BBDC4",
+        "BPAC11",
+        "ITUB4",
+        "SANB11"
+      ]
+    },
+    {
+      "industry_group": "Education & Services",
+      "cohort": "non_financial",
+      "companies": 4,
+      "median_credit_score": 47.91666666666667,
+      "mean_credit_score": 54.16666666666667,
+      "tickers": [
+        "COGN3",
+        "SMFT3",
+        "TOTS3",
+        "YDUQ3"
+      ]
+    },
+    {
+      "industry_group": "Energy",
+      "cohort": "non_financial",
+      "companies": 13,
+      "median_credit_score": 47.43589743589743,
+      "mean_credit_score": 46.20512820512819,
+      "tickers": [
+        "AURE3",
+        "AXIA3",
+        "CMIG4",
+        "CPFE3",
+        "CPLE3",
+        "CSMG3",
+        "EGIE3",
+        "ENEV3",
+        "ENGI11",
+        "EQTL3",
+        "ISAE4",
+        "SBSP3",
+        "TAEE11"
+      ]
+    },
+    {
+      "industry_group": "Financial Services",
+      "cohort": "financial",
+      "companies": 1,
+      "median_credit_score": 50.0,
+      "mean_credit_score": 50.0,
+      "tickers": [
+        "B3SA3"
+      ]
+    },
+    {
+      "industry_group": "Health",
+      "cohort": "non_financial",
+      "companies": 5,
+      "median_credit_score": 50.0,
+      "mean_credit_score": 51.53333333333334,
+      "tickers": [
+        "FLRY3",
+        "HAPV3",
+        "HYPE3",
+        "RADL3",
+        "RDOR3"
+      ]
+    },
+    {
+      "industry_group": "Holdings",
+      "cohort": "non_financial",
+      "companies": 1,
+      "median_credit_score": 50.0,
+      "mean_credit_score": 50.0,
+      "tickers": [
+        "ITSA4"
+      ]
+    },
+    {
+      "industry_group": "Industrials",
+      "cohort": "non_financial",
+      "companies": 2,
+      "median_credit_score": 53.0,
+      "mean_credit_score": 53.0,
+      "tickers": [
+        "EMBJ3",
+        "WEGE3"
+      ]
+    },
+    {
+      "industry_group": "Insurance",
+      "cohort": "financial",
+      "companies": 3,
+      "median_credit_score": 83.33333333333333,
+      "mean_credit_score": 65.18518518518518,
+      "tickers": [
+        "BBSE3",
+        "CXSE3",
+        "PSSA3"
+      ]
+    },
+    {
+      "industry_group": "Oil & Gas",
+      "cohort": "non_financial",
+      "companies": 9,
+      "median_credit_score": 48.148148148148145,
+      "mean_credit_score": 46.629629629629626,
+      "tickers": [
+        "BRAV3",
+        "BRKM5",
+        "CSAN3",
+        "PETR3",
+        "PETR4",
+        "PRIO3",
+        "RECV3",
+        "UGPA3",
+        "VBBR3"
+      ]
+    },
+    {
+      "industry_group": "Pulp & Paper",
+      "cohort": "non_financial",
+      "companies": 2,
+      "median_credit_score": 56.333333333333336,
+      "mean_credit_score": 56.333333333333336,
+      "tickers": [
+        "KLBN11",
+        "SUZB3"
+      ]
+    },
+    {
+      "industry_group": "Real Estate",
+      "cohort": "non_financial",
+      "companies": 7,
+      "median_credit_score": 51.42857142857142,
+      "mean_credit_score": 47.285714285714285,
+      "tickers": [
+        "ALOS3",
+        "CURY3",
+        "CYRE3",
+        "DIRR3",
+        "IGTI11",
+        "MRVE3",
+        "MULT3"
+      ]
+    },
+    {
+      "industry_group": "Retail & Consumer",
+      "cohort": "non_financial",
+      "companies": 10,
+      "median_credit_score": 42.285714285714285,
+      "mean_credit_score": 49.4,
+      "tickers": [
+        "ABEV3",
+        "ASAI3",
+        "AZZA3",
+        "BEEF3",
+        "CEAB3",
+        "LREN3",
+        "MBRF3",
+        "MGLU3",
+        "NATU3",
+        "VIVA3"
+      ]
+    },
+    {
+      "industry_group": "Steel & Mining",
+      "cohort": "non_financial",
+      "companies": 7,
+      "median_credit_score": 52.523809523809526,
+      "mean_credit_score": 52.75963718820862,
+      "tickers": [
+        "BRAP4",
+        "CMIN3",
+        "CSNA3",
+        "GGBR4",
+        "GOAU4",
+        "USIM5",
+        "VALE3"
+      ]
+    },
+    {
+      "industry_group": "Telecom",
+      "cohort": "non_financial",
+      "companies": 2,
+      "median_credit_score": 46.0,
+      "mean_credit_score": 46.0,
+      "tickers": [
+        "TIMS3",
+        "VIVT3"
+      ]
+    },
+    {
+      "industry_group": "Transport & Infra",
+      "cohort": "non_financial",
+      "companies": 5,
+      "median_credit_score": 53.333333333333336,
+      "mean_credit_score": 53.333333333333336,
+      "tickers": [
+        "MOTV3",
+        "POMO4",
+        "RAIL3",
+        "RENT3",
+        "VAMO3"
+      ]
+    }
+  ]
+}
