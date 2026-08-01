@@ -10,10 +10,16 @@
   <div class="wrap">
     <header>
       <h1>decifra-invest-agent session dashboard</h1>
-      <p class="sub">Human view of agent AARs, automation traces, improvements, and future prompts.</p>
-      <p class="meta">Generated 2026-08-01 03:44 UTC · 12 agent · 2 automation AARs</p>
+      <p class="sub">Human view of agent AARs, automation traces, improvements, pipeline roadmap, and future prompts.</p>
+      <p class="meta">Generated 2026-08-01 04:11 UTC · 12 agent · 2 automation AARs</p>
     </header>
 
+    <nav class="tabs" role="tablist">
+      <button type="button" class="tab active" data-tab="session" role="tab" aria-selected="true">Session</button>
+      <button type="button" class="tab" data-tab="pipeline" role="tab" aria-selected="false">Pipeline</button>
+    </nav>
+
+    <div id="tab-session" class="tab-panel active" role="tabpanel">
     <section>
       <h2>Coverage snapshot</h2>
       <p class="sub">Live lake via <code>coverage_status</code> (falls back to latest automation AAR).</p>
@@ -354,12 +360,241 @@
         </li>
       </ul>
     </section>
+    </div>
+
+    <div id="tab-pipeline" class="tab-panel" role="tabpanel" hidden>
+    
+    <section>
+      <h2>Overall progress</h2>
+      <p class="sub">Tracked in <code>docs/architecture/pipeline-progress.json</code> ·
+        <a href="../architecture/unified-pipeline-roadmap.md">roadmap</a> ·
+        <a href="../architecture/unified-pipeline-gap-analysis.md">gap analysis</a> ·
+        <a href="../architecture/unified-pipeline-branches.md">branches</a></p>
+      <div class="progress-bar progress-bar-lg"><div class="progress-fill" style="width:0%"></div></div>
+      <div class="progress-label">0% · status <code>in_progress</code> · updated 2026-08-01</div>
+    </section>
+
+    <section>
+      <h2>Pillars</h2>
+      <div class="pillar-grid">
+      <div class="pillar-card">
+        <div class="pillar-head">
+          <span>Multi-source ingestion</span>
+          <span class="badge grade-fail">Fail</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+        <div class="progress-label">0% · 5 deliverables</div>
+      </div>
+      <div class="pillar-card">
+        <div class="pillar-head">
+          <span>Entity resolution &amp; fallbacks</span>
+          <span class="badge grade-fail">Fail</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+        <div class="progress-label">0% · 2 deliverables</div>
+      </div>
+      <div class="pillar-card">
+        <div class="pillar-head">
+          <span>Integrated modeling</span>
+          <span class="badge grade-fail">Fail</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+        <div class="progress-label">0% · 4 deliverables</div>
+      </div>
+      <div class="pillar-card">
+        <div class="pillar-head">
+          <span>Output schema &amp; UI</span>
+          <span class="badge grade-fail">Fail</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+        <div class="progress-label">0% · 3 deliverables</div>
+      </div></div>
+    </section>
+
+    <section>
+      <h2>End-state architecture</h2>
+      <p class="sub">Target flow: ingestion → entity resolution → modeling → schemas/UI. Existing DCF and peer credit remain complementary.</p>
+      <div class="end-state-wrap">
+<svg class="end-state-svg" viewBox="0 0 960 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Unified pipeline end state">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1a3a32"/><stop offset="100%" stop-color="#1a2838"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="420" fill="url(#g1)" rx="8"/>
+  <text x="24" y="36" fill="#8b9aab" font-size="13" font-family="Segoe UI,sans-serif">Desired end state — Unified Financial Data Pipeline</text>
+  <!-- Pillar 1 -->
+  <rect x="24" y="56" width="200" height="300" rx="8" fill="#1a222c" stroke="#2e3a48"/>
+  <text x="40" y="82" fill="#3d9a7a" font-size="12" font-weight="600">1 Ingestion</text>
+  <rect x="40" y="98" width="168" height="36" rx="4" fill="#243040"/><text x="52" y="120" fill="#e8eef4" font-size="11">CVM DFP/ITR</text>
+  <rect x="40" y="144" width="168" height="36" rx="4" fill="#243040"/><text x="52" y="166" fill="#e8eef4" font-size="11">CVM FRE</text>
+  <rect x="40" y="190" width="168" height="36" rx="4" fill="#243040"/><text x="52" y="212" fill="#e8eef4" font-size="11">ANBIMA FI</text>
+  <rect x="40" y="236" width="168" height="36" rx="4" fill="#243040"/><text x="52" y="258" fill="#e8eef4" font-size="11">B3 shares / Balcão</text>
+  <rect x="40" y="282" width="168" height="36" rx="4" fill="#243040"/><text x="52" y="304" fill="#e8eef4" font-size="11">Funds + EDGAR</text>
+  <!-- Arrow -->
+  <path d="M232 206 H268" stroke="#3d9a7a" stroke-width="2" marker-end="url(#arr)"/>
+  <!-- Pillar 2 -->
+  <rect x="276" y="100" width="180" height="210" rx="8" fill="#1a222c" stroke="#2e3a48"/>
+  <text x="292" y="126" fill="#3d9a7a" font-size="12" font-weight="600">2 Entities</text>
+  <rect x="292" y="142" width="148" height="36" rx="4" fill="#243040"/><text x="304" y="164" fill="#e8eef4" font-size="11">Resolve graph</text>
+  <rect x="292" y="188" width="148" height="36" rx="4" fill="#243040"/><text x="304" y="210" fill="#e8eef4" font-size="11">Hierarchy of Truth</text>
+  <rect x="292" y="234" width="148" height="36" rx="4" fill="#243040"/><text x="304" y="256" fill="#e8eef4" font-size="11">Private fallback</text>
+  <path d="M464 206 H500" stroke="#3d9a7a" stroke-width="2"/>
+  <!-- Pillar 3 -->
+  <rect x="508" y="56" width="200" height="300" rx="8" fill="#1a222c" stroke="#2e3a48"/>
+  <text x="524" y="82" fill="#3d9a7a" font-size="12" font-weight="600">3 Modeling</text>
+  <rect x="524" y="98" width="168" height="36" rx="4" fill="#243040"/><text x="536" y="120" fill="#e8eef4" font-size="11">FCFF/WACC (keep)</text>
+  <rect x="524" y="144" width="168" height="36" rx="4" fill="#243040"/><text x="536" y="166" fill="#e8eef4" font-size="11">APV</text>
+  <rect x="524" y="190" width="168" height="36" rx="4" fill="#243040"/><text x="536" y="212" fill="#e8eef4" font-size="11">Merton / DtD</text>
+  <rect x="524" y="236" width="168" height="36" rx="4" fill="#243040"/><text x="536" y="258" fill="#e8eef4" font-size="11">Debt capacity</text>
+  <rect x="524" y="282" width="168" height="36" rx="4" fill="#243040"/><text x="536" y="304" fill="#e8eef4" font-size="11">OCF→FCFE waterfall</text>
+  <path d="M716 206 H752" stroke="#3d9a7a" stroke-width="2"/>
+  <!-- Pillar 4 -->
+  <rect x="760" y="100" width="176" height="210" rx="8" fill="#1a222c" stroke="#2e3a48"/>
+  <text x="776" y="126" fill="#3d9a7a" font-size="12" font-weight="600">4 Outputs</text>
+  <rect x="776" y="142" width="144" height="36" rx="4" fill="#243040"/><text x="788" y="164" fill="#e8eef4" font-size="11">3 schemas + lineage</text>
+  <rect x="776" y="188" width="144" height="36" rx="4" fill="#243040"/><text x="788" y="210" fill="#e8eef4" font-size="11">Streamlit interim</text>
+  <rect x="776" y="234" width="144" height="36" rx="4" fill="#243040"/><text x="788" y="256" fill="#e8eef4" font-size="11">React dark MVP</text>
+</svg></div>
+    </section>
+
+    <section>
+      <h2>Baseline (already shipped)</h2>
+      <ul class="deliv-list"><li><span class="badge badge-done">done</span> CVM DFP/ITR financials</li><li><span class="badge badge-done">done</span> Industry peer credit scores</li><li><span class="badge badge-done">done</span> FCFF/WACC DCF + multiples</li><li><span class="badge badge-done">done</span> Streamlit research UI (interim)</li></ul>
+    </section>
+
+    <section>
+      <h2>Phases</h2>
+      <div class="grid">
+      <article class="card phase-card">
+        <div class="meta-row">
+          <span class="badge badge-phase">Phase 1</span>
+          <span class="badge badge-todo">todo</span>
+        </div>
+        <h3>Primary ingestion</h3>
+        <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+        <div class="progress-label">0% · branch <code>feat/pipeline-phase-1</code></div>
+        <ul class="deliv-list"><li class="deliv deliv-todo">
+            <span class="badge badge-todo">todo</span>
+            <strong>IMP-020</strong> CVM FRE zip ingest + extracts
+          </li><li class="deliv deliv-todo">
+            <span class="badge badge-todo">todo</span>
+            <strong>IMP-021</strong> ANBIMA debentures/CRI/CRA
+          </li><li class="deliv deliv-todo">
+            <span class="badge badge-todo">todo</span>
+            <strong>IMP-022</strong> B3 shares/mcap + Balcão bonds
+          </li></ul>
+        <div class="meta-row">AAR: <span class="muted">no AAR yet</span></div>
+      </article>
+      <article class="card phase-card">
+        <div class="meta-row">
+          <span class="badge badge-phase">Phase 2</span>
+          <span class="badge badge-todo">todo</span>
+        </div>
+        <h3>Entity resolution &amp; fallbacks</h3>
+        <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+        <div class="progress-label">0% · branch <code>feat/pipeline-phase-2</code></div>
+        <ul class="deliv-list"><li class="deliv deliv-todo">
+            <span class="badge badge-todo">todo</span>
+            <strong>IMP-023</strong> Entity graph CNPJ↔CVM↔ticker↔ISIN
+          </li><li class="deliv deliv-todo">
+            <span class="badge badge-todo">todo</span>
+            <strong>IMP-024</strong> Hierarchy of Truth + private-issuer fallback
+          </li></ul>
+        <div class="meta-row">AAR: <span class="muted">no AAR yet</span></div>
+      </article>
+      <article class="card phase-card">
+        <div class="meta-row">
+          <span class="badge badge-phase">Phase 3</span>
+          <span class="badge badge-todo">todo</span>
+        </div>
+        <h3>Valuation &amp; credit modeling</h3>
+        <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+        <div class="progress-label">0% · branch <code>feat/pipeline-phase-3</code></div>
+        <ul class="deliv-list"><li class="deliv deliv-todo">
+            <span class="badge badge-todo">todo</span>
+            <strong>IMP-025</strong> APV engine
+          </li><li class="deliv deliv-todo">
+            <span class="badge badge-todo">todo</span>
+            <strong>IMP-026</strong> Merton / Distance to Default
+          </li><li class="deliv deliv-todo">
+            <span class="badge badge-todo">todo</span>
+            <strong>IMP-027</strong> Debt capacity flags
+          </li><li class="deliv deliv-todo">
+            <span class="badge badge-todo">todo</span>
+            <strong>IMP-028</strong> OCF→FCFE waterfall
+          </li></ul>
+        <div class="meta-row">AAR: <span class="muted">no AAR yet</span></div>
+      </article>
+      <article class="card phase-card">
+        <div class="meta-row">
+          <span class="badge badge-phase">Phase 4</span>
+          <span class="badge badge-todo">todo</span>
+        </div>
+        <h3>Fund exposure</h3>
+        <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+        <div class="progress-label">0% · branch <code>feat/pipeline-phase-4</code></div>
+        <ul class="deliv-list"><li class="deliv deliv-todo">
+            <span class="badge badge-todo">todo</span>
+            <strong>IMP-029</strong> CVM INF_DIARIO + CDA
+          </li><li class="deliv deliv-todo">
+            <span class="badge badge-todo">todo</span>
+            <strong>IMP-030</strong> SEC EDGAR fund/issuer exposure
+          </li></ul>
+        <div class="meta-row">AAR: <span class="muted">no AAR yet</span></div>
+      </article>
+      <article class="card phase-card">
+        <div class="meta-row">
+          <span class="badge badge-phase">Phase 5</span>
+          <span class="badge badge-todo">todo</span>
+        </div>
+        <h3>Standardization &amp; UI</h3>
+        <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+        <div class="progress-label">0% · branch <code>feat/pipeline-phase-5</code></div>
+        <ul class="deliv-list"><li class="deliv deliv-todo">
+            <span class="badge badge-todo">todo</span>
+            <strong>IMP-031</strong> Three schemas + lineage
+          </li><li class="deliv deliv-todo">
+            <span class="badge badge-todo">todo</span>
+            <strong>IMP-032</strong> ITR–debt DT_REFER alignment
+          </li><li class="deliv deliv-todo">
+            <span class="badge badge-todo">todo</span>
+            <strong>IMP-033</strong> React dark-mode research UI
+          </li></ul>
+        <div class="meta-row">AAR: <span class="muted">no AAR yet</span></div>
+      </article></div>
+    </section>
+
+    </div>
 
     <footer>
       Agent sources: <code>docs/aar/</code> · Improvements: <code>docs/improvements/LOG.md</code> ·
       Automation: <code>docs/improvements/AUTOMATION.md</code> ·
+      Pipeline: <code>docs/architecture/pipeline-progress.json</code> ·
       Update: <code>python scripts/update_session_dashboard.py</code> (also via <code>sync_pilot</code>)
     </footer>
   </div>
+  <script>
+    document.querySelectorAll('.tab').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var id = btn.getAttribute('data-tab');
+        document.querySelectorAll('.tab').forEach(function(b) {
+          b.classList.toggle('active', b === btn);
+          b.setAttribute('aria-selected', b === btn ? 'true' : 'false');
+        });
+        document.querySelectorAll('.tab-panel').forEach(function(p) {
+          var on = p.id === 'tab-' + id;
+          p.classList.toggle('active', on);
+          if (on) p.removeAttribute('hidden'); else p.setAttribute('hidden', '');
+        });
+        if (location.hash !== '#' + id) history.replaceState(null, '', '#' + id);
+      });
+    });
+    var h = (location.hash || '').replace('#','');
+    if (h === 'pipeline' || h === 'session') {
+      var t = document.querySelector('.tab[data-tab="' + h + '"]');
+      if (t) t.click();
+    }
+  </script>
 </body>
 </html>

@@ -39,7 +39,7 @@ a:hover {
 }
 
 .wrap {
-  max-width: 1080px;
+  max-width: 1120px;
   margin: 0 auto;
   padding: 2.5rem 1.5rem 4rem;
 }
@@ -271,4 +271,161 @@ footer {
 .empty {
   color: var(--muted);
   font-style: italic;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 0.35rem;
+  margin: 0 0 1.75rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.5rem;
+}
+
+.tab {
+  appearance: none;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0.45rem 0.9rem;
+  border-radius: 6px 6px 0 0;
+  cursor: pointer;
+}
+
+.tab:hover {
+  color: var(--text);
+  background: var(--surface);
+}
+
+.tab.active {
+  color: var(--text);
+  background: var(--surface);
+  border-color: var(--border);
+  border-bottom-color: var(--surface);
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+
+.tab-panel[hidden] {
+  display: none;
+}
+
+/* Pipeline monitor */
+.progress-bar {
+  height: 8px;
+  background: var(--surface-2);
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  margin: 0.5rem 0 0.25rem;
+}
+
+.progress-bar-lg {
+  height: 14px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-dim), var(--accent));
+  border-radius: 999px;
+  min-width: 0;
+  transition: width 0.25s ease;
+}
+
+.progress-label {
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-family: var(--mono);
+}
+
+.pillar-grid {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
+.pillar-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.pillar-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 0.35rem;
+}
+
+.grade-pass {
+  background: #1e3d2e;
+  color: #8fd4a8;
+}
+
+.grade-fail {
+  background: #4a3030;
+  color: #f0a8a8;
+}
+
+.badge-phase {
+  background: #2a3a55;
+  color: #a8c4f0;
+}
+
+.badge-todo {
+  background: #2a3038;
+  color: #8b9aab;
+}
+
+.badge-done {
+  background: #1e3d2e;
+  color: #8fd4a8;
+}
+
+.deliv-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.75rem 0;
+}
+
+.deliv-list li {
+  font-size: 0.85rem;
+  margin-bottom: 0.45rem;
+  color: var(--muted);
+}
+
+.deliv-list li strong {
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  margin-right: 0.25rem;
+}
+
+.end-state-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.75rem;
+  overflow-x: auto;
+}
+
+.end-state-svg {
+  display: block;
+  width: 100%;
+  min-width: 720px;
+  height: auto;
+}
+
+.phase-card .deliv-list {
+  min-height: 4rem;
 }
