@@ -22,6 +22,12 @@ Completed work (do not re-run unless regressing): prices backfill (IMP-001), ASA
 4. **Report build smoke**  
    `Follow docs/workflows/report-build.md: run pytest on test_report_*, then decifra report build for PETR4/Energy (with --offline), inspect data/reports artifacts. Optional --generate if OPENAI_API_KEY is set.`
 
+4b. **Valuation smoke**  
+   `Follow docs/workflows/valuation.md: run pytest on test_valuation_*, then decifra valuation dcf/multiples/build for PETR4 vs VALE3,CSNA3. Sanity-check the DCF per-share value against the real current price (order of magnitude, not exact) — a scale mismatch between CVM's thousands-of-reais convention and market data's absolute reais silently produces a 1000x-wrong value (see IMP-019). Optional Streamlit "Valuation" tab check.`
+
+4c. **Valuation follow-ups (IMP-015..018)**  
+   `Pick one open item from docs/improvements/LOG.md tagged valuation-capability: EPS-implied shares fallback (IMP-015), extreme-upside UI callout (IMP-016), open the feat/valuation-dashboard-docs PR (IMP-017), or profile/cache the sensitivity grid (IMP-018).`
+
 ## Ops / hygiene
 
 5. **Rename local folder (IMP-013)**  

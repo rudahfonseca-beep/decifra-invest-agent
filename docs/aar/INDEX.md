@@ -13,6 +13,8 @@ Session and automation After Action Reports for decifra-invest-agent.
 | 2026-07-31 | 2026-07-31-implement-future-agent-prompts | Implement all FUTURE_AGENTS prompts | agent | completed | [2026-07-31-implement-future-agent-prompts.md](2026-07-31-implement-future-agent-prompts.md) |
 | 2026-07-31 | 2026-07-31-dashboard-refresh | Refresh session dashboard (live coverage) | agent | completed | [2026-07-31-dashboard-refresh.md](2026-07-31-dashboard-refresh.md) |
 | 2026-07-31 | 2026-07-31-automation-dashboard-track | Automation closeout + automation opportunity tracking | agent | completed | [2026-07-31-automation-dashboard-track.md](2026-07-31-automation-dashboard-track.md) |
+| 2026-07-31 | 2026-07-31-credit-report-generation | Credit report HTML generation from prompt | agent | completed | [2026-07-31-credit-report-generation.md](2026-07-31-credit-report-generation.md) |
+| 2026-07-31 | 2026-07-31-valuation-capability | Valuation capability (DCF + trading multiples) | agent | completed | [2026-07-31-valuation-capability.md](2026-07-31-valuation-capability.md) |
 
 ## Automation traces
 
