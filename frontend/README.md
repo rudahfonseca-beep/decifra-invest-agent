@@ -5,20 +5,19 @@ Institutional **Unified Capital Analyst** shell: Vite + React 18 + Tailwind + lu
 Layout: fixed sidebar (brand + live pipeline status) · header search (CNPJ / ticker / ISIN) · Streamlit-parity research views (industries, tickers, credit overview/detail, valuation, report builder, coverage) · opportunity screener · catalyst feed · Phase 5 schema detail panes.
 
 ```bash
-cd frontend
-npm install
-npm run dev
+# From repo root — installs frontend/node_modules if missing, starts lake API + Vite
+.\.venv\Scripts\python.exe -m decifra ui
+# or: .\scripts\dev_ui.ps1
 ```
 
-### Live lake feed (IMP-037)
+Vite proxies `/api/*` → `http://127.0.0.1:8765`. Use `--no-api` to skip the lake API (falls back to `public/sample/`).
 
-In another terminal:
+Manual two-terminal flow (optional):
 
 ```bash
 .\.venv\Scripts\python.exe -m decifra schemas serve --port 8765
+cd frontend && npm install && npm run dev
 ```
-
-Vite proxies `/api/*` → `http://127.0.0.1:8765`. Without the API, the UI falls back to `public/sample/`.
 
 Refresh committed sample fixtures + disk UI cache from the lake (also run by `sync_pilot` closeout):
 

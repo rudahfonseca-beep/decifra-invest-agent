@@ -28,7 +28,7 @@ Implement the open improvements listed on the session dashboard: pipeline/UI (IM
 
 ## 3. Gaps
 
-- **IMP-013** still open — cannot rename `DecifraCR` while Cursor has the workspace open.
+- **IMP-013** was still open at session time (folder rename blocked by Cursor lock); later closed when workspace lived at `decifra-invest-agent` and the editable venv was recreated.
 - Cursor Automation must be **saved** by the user in the Automations editor (draft only until then).
 - Dedicated `fato_relevante_*.csv` files were not observed in cache; notices path used IPE zips for 2020–22.
 - B3 supplement does not return market cap (shares only); mcap still from yfinance/implied.
@@ -43,5 +43,5 @@ Implement the open improvements listed on the session dashboard: pipeline/UI (IM
 
 | ID | Improvement | Priority | Status |
 |----|-------------|----------|--------|
-| IMP-013 | Rename local folder after closing Cursor | med | open |
+| IMP-013 | Rename local folder after closing Cursor | med | open → done (later) |
 | AUTO-001 | User saves Automation draft in editor | low | open→done draft; confirm save |
