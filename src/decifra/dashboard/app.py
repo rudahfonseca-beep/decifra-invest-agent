@@ -13,7 +13,7 @@ if str(_SRC) not in sys.path:
     sys.path.insert(0, str(_SRC))
 
 from decifra.assistant.retrieve import coverage_status  # noqa: E402
-from decifra.config import OPENAI_API_KEY  # noqa: E402
+from decifra.config import DEFAULT_FORECAST_YEARS, OPENAI_API_KEY  # noqa: E402
 from decifra.credit.scoring import (  # noqa: E402
     FINANCIAL_RATIOS,
     NON_FINANCIAL_RATIOS,
@@ -35,6 +35,13 @@ from decifra.report.spec import (  # noqa: E402
     SpecValidationError,
     validate_spec,
 )
+from decifra.valuation.assumptions import DcfAssumptions, build_default_assumptions  # noqa: E402
+from decifra.valuation.dcf import discount_cash_flow, sensitivity_grid  # noqa: E402
+from decifra.valuation.generate import build_valuation_artifacts  # noqa: E402
+from decifra.valuation.multiples import MULTIPLE_LABELS, relative_valuation  # noqa: E402
+from decifra.valuation.spec import ValuationSpec  # noqa: E402
+from decifra.valuation.spec import SpecValidationError as ValuationSpecValidationError  # noqa: E402
+from decifra.valuation.spec import validate_spec as validate_valuation_spec  # noqa: E402
 
 
 RATIO_LABELS = KPI_LABELS
@@ -190,6 +197,220 @@ def _render_report_builder(df: pd.DataFrame, include_signals: bool) -> None:
         st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
 
 
+def _render_valuation_tab(df: pd.DataFrame) -> None:
+    st.subheader("Valuation — DCF + trading multiples")
+    st.caption(
+        "Data-grounded defaults from local CVM financials + live market quotes, fully "
+        "overridable. Not investment advice."
+    )
+
+    all_tickers = sorted(df["ticker"].dropna().unique().tolist())
+    if not all_tickers:
+        st.info("No tickers available. Run `decifra sync universe` first.")
+        return
+
+    ticker = st.selectbox("Subject ticker", all_tickers, key="val_ticker")
+    row = df[df["ticker"] == ticker]
+    default_group = row.iloc[0]["industry_group"] if not row.empty else None
+    default_peers = (
+        df[(df["industry_group"] == default_group) & (df["ticker"] != ticker)]["ticker"].tolist()
+        if default_group
+        else []
+    )
+
+    comparatives = st.multiselect(
+        "Comparatives — any ticker in the universe (defaults to same industry group)",
+        options=[t for t in all_tickers if t != ticker],
+        default=[t for t in default_peers if t in all_tickers][:5],
+        key="val_peers",
+    )
+    c_years, c_stat = st.columns(2)
+    forecast_years = c_years.slider("Forecast years", 2, 10, DEFAULT_FORECAST_YEARS, key="val_years")
+    stat = c_stat.radio("Peer statistic", ["median", "mean"], horizontal=True, key="val_stat")
+
+    if st.button("Reset assumptions to defaults", key="val_reset"):
+        for k in [k for k in st.session_state if k.startswith("val_assump_")]:
+            del st.session_state[k]
+
+    with st.spinner("Computing data-grounded defaults…"):
+        try:
+            defaults, notes = build_default_assumptions(
+                ticker, peers=comparatives, forecast_years=forecast_years
+            )
+        except Exception as exc:
+            st.error(f"Could not build default assumptions: {exc}")
+            return
+
+    st.markdown("#### DCF assumptions (editable)")
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        growth = st.number_input(
+            "Year-1 revenue growth", value=float(defaults.revenue_growth_y1), format="%.4f", key="val_assump_growth"
+        )
+        terminal_growth = st.number_input(
+            "Terminal growth", value=float(defaults.terminal_growth), format="%.4f", key="val_assump_terminal"
+        )
+        ebit_margin = st.number_input(
+            "EBIT margin", value=float(defaults.ebit_margin), format="%.4f", key="val_assump_margin"
+        )
+    with c2:
+        tax_rate = st.number_input(
+            "Tax rate", value=float(defaults.tax_rate), format="%.4f", key="val_assump_tax"
+        )
+        da_pct = st.number_input(
+            "D&A (% revenue)", value=float(defaults.da_pct_revenue), format="%.4f", key="val_assump_da"
+        )
+        capex_pct = st.number_input(
+            "Capex (% revenue)", value=float(defaults.capex_pct_revenue), format="%.4f", key="val_assump_capex"
+        )
+    with c3:
+        nwc_pct = st.number_input(
+            "ΔNWC (% of revenue growth)", value=float(defaults.nwc_pct_revenue), format="%.4f", key="val_assump_nwc"
+        )
+        beta = st.number_input("Beta", value=float(defaults.beta), format="%.2f", key="val_assump_beta")
+        cost_of_debt = st.number_input(
+            "Pre-tax cost of debt", value=float(defaults.cost_of_debt), format="%.4f", key="val_assump_kd"
+        )
+
+    c4, c5, c6 = st.columns(3)
+    risk_free = c4.number_input(
+        "Risk-free rate", value=float(defaults.risk_free_rate), format="%.4f", key="val_assump_rf"
+    )
+    erp = c5.number_input(
+        "Equity risk premium", value=float(defaults.equity_risk_premium), format="%.4f", key="val_assump_erp"
+    )
+    crp = c6.number_input(
+        "Country risk premium", value=float(defaults.country_risk_premium), format="%.4f", key="val_assump_crp"
+    )
+
+    wacc_override = None
+    if st.checkbox("Override WACC directly (bypasses CAPM + weights)", key="val_wacc_toggle"):
+        wacc_override = st.number_input("WACC override", value=0.12, format="%.4f", key="val_assump_wacc")
+
+    assumptions = DcfAssumptions(
+        forecast_years=forecast_years,
+        revenue_growth_y1=growth,
+        terminal_growth=terminal_growth,
+        ebit_margin=ebit_margin,
+        tax_rate=tax_rate,
+        da_pct_revenue=da_pct,
+        capex_pct_revenue=capex_pct,
+        nwc_pct_revenue=nwc_pct,
+        risk_free_rate=risk_free,
+        equity_risk_premium=erp,
+        country_risk_premium=crp,
+        beta=beta,
+        cost_of_debt=cost_of_debt,
+        wacc_override=wacc_override,
+    )
+
+    with st.spinner("Running DCF…"):
+        try:
+            result = discount_cash_flow(ticker, assumptions, peers=comparatives)
+        except Exception as exc:
+            st.error(f"DCF failed: {exc}")
+            return
+
+    st.markdown("#### DCF results")
+    m1, m2, m3, m4 = st.columns(4)
+    m1.metric("WACC", f"{result.wacc:.1%}")
+    m2.metric("Enterprise value", f"{result.enterprise_value:,.0f}")
+    m3.metric("Equity value", f"{result.equity_value:,.0f}" if result.equity_value is not None else "—")
+    m4.metric(
+        "Value per share",
+        f"{result.value_per_share:.2f}" if result.value_per_share is not None else "—",
+        delta=f"{result.upside_pct:.1%} vs current price" if result.upside_pct is not None else None,
+    )
+    for w in result.warnings:
+        st.warning(w)
+
+    years_df = pd.DataFrame([y.to_dict() for y in result.years])
+    if not years_df.empty:
+        st.dataframe(years_df, use_container_width=True, hide_index=True)
+
+    st.markdown("##### Sensitivity: WACC × terminal growth")
+    grid_data = sensitivity_grid(ticker, assumptions)
+    grid_df = pd.DataFrame(
+        grid_data["grid"],
+        index=[f"{w:.1%}" for w in grid_data["wacc_values"]],
+        columns=[f"{g:.1%}" for g in grid_data["growth_values"]],
+    )
+    try:
+        import plotly.express as px
+
+        fig = px.imshow(
+            grid_df,
+            text_auto=".2f",
+            aspect="auto",
+            labels=dict(x="Terminal growth", y="WACC", color=grid_data["metric"]),
+            color_continuous_scale="RdYlGn",
+        )
+        st.plotly_chart(fig, use_container_width=True)
+    except ImportError:
+        st.dataframe(grid_df, use_container_width=True)
+
+    rel = None
+    if comparatives:
+        st.markdown("#### Trading multiples (relative valuation)")
+        rel = relative_valuation(ticker, comparatives, stat=stat)
+        rows = []
+        for key, label in MULTIPLE_LABELS.items():
+            rows.append(
+                {
+                    "Multiple": label,
+                    "Subject": rel.subject.to_dict().get(key),
+                    f"Peer {stat}": rel.peer_multiples.get(key),
+                    "Implied price": rel.implied_price.get(key),
+                }
+            )
+        st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
+        if rel.implied_price_avg is not None:
+            st.metric(
+                "Implied price range",
+                f"{rel.implied_price_low:.2f} – {rel.implied_price_high:.2f}",
+                delta=f"avg {rel.implied_price_avg:.2f}",
+            )
+        for w in rel.warnings:
+            st.warning(w)
+    else:
+        st.info("Select comparatives above to compute trading multiples.")
+
+    with st.expander("How these numbers were built"):
+        for note in notes:
+            value_str = f"{note.value:.4f}" if note.value is not None else "—"
+            st.markdown(f"**{note.label}** = {value_str}")
+            st.caption(f"Formula: {note.formula}")
+            st.caption(note.rationale)
+
+    if st.button("Save valuation artifacts", key="val_save"):
+        try:
+            spec = validate_valuation_spec(
+                ValuationSpec(
+                    ticker=ticker,
+                    comparatives=comparatives,
+                    multiples_stat=stat,
+                    forecast_years=forecast_years,
+                    dcf_assumptions=assumptions.to_dict(),
+                ),
+                known_tickers=all_tickers,
+            )
+        except ValuationSpecValidationError as exc:
+            st.error(str(exc))
+            return
+        with st.spinner("Writing artifacts…"):
+            out = build_valuation_artifacts(spec)
+        st.success(f"Wrote artifacts to `{out['dir']}`")
+        st.download_button(
+            "Download valuation.md", data=out["markdown"], file_name="valuation.md", mime="text/markdown"
+        )
+        st.download_button(
+            "Download context.json",
+            data=json.dumps(out["context"], ensure_ascii=False, indent=2),
+            file_name="context.json",
+            mime="application/json",
+        )
+
+
 def main() -> None:
     st.set_page_config(
         page_title="Decifra · Creditworthiness",
@@ -231,8 +452,8 @@ def main() -> None:
     if cohort != "All":
         view = view[view["cohort"] == cohort]
 
-    tab_overview, tab_detail, tab_report, tab_coverage = st.tabs(
-        ["Industry overview", "Company detail", "Report builder", "Data coverage"]
+    tab_overview, tab_detail, tab_report, tab_valuation, tab_coverage = st.tabs(
+        ["Industry overview", "Company detail", "Report builder", "Valuation", "Data coverage"]
     )
 
     with tab_overview:
@@ -375,6 +596,9 @@ def main() -> None:
 
     with tab_report:
         _render_report_builder(df, include_signals)
+
+    with tab_valuation:
+        _render_valuation_tab(df)
 
     with tab_coverage:
         cov = pd.DataFrame(coverage_status())
