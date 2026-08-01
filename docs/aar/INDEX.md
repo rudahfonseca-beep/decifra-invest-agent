@@ -4,6 +4,7 @@ Session and automation After Action Reports for decifra-invest-agent.
 
 | Date | ID | Title | Type | Status | File |
 |------|-----|-------|------|--------|------|
+| 2026-08-01 | 2026-08-01-unified-pipeline-toolkit | Unified pipeline gap audit + toolkit install | agent | completed | [2026-08-01-unified-pipeline-toolkit.md](2026-08-01-unified-pipeline-toolkit.md) |
 | 2026-07-20 | 2026-07-20-greenfield-pipeline | Greenfield Ibovespa pipeline | agent | completed | [2026-07-20-greenfield-pipeline.md](2026-07-20-greenfield-pipeline.md) |
 | 2026-07-20 | 2026-07-20-credit-dashboard | Creditworthiness Streamlit dashboard | agent | completed | [2026-07-20-credit-dashboard.md](2026-07-20-credit-dashboard.md) |
 | 2026-07-31 | 2026-07-31-report-platform-plan | Report platform planning | agent | superseded | [2026-07-31-report-platform-plan.md](2026-07-31-report-platform-plan.md) |

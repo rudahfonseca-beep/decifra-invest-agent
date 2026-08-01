@@ -11,7 +11,7 @@
     <header>
       <h1>decifra-invest-agent session dashboard</h1>
       <p class="sub">Human view of agent AARs, automation traces, improvements, and future prompts.</p>
-      <p class="meta">Generated 2026-08-01 00:34 UTC · 11 agent · 2 automation AARs</p>
+      <p class="meta">Generated 2026-08-01 03:44 UTC · 12 agent · 2 automation AARs</p>
     </header>
 
     <section>
@@ -30,6 +30,15 @@
       <h2>Session timeline</h2>
       <div class="grid">
         
+      <article class="card">
+        <div class="meta-row">
+          <span class="badge badge-agent">agent</span>
+          <span class="badge badge-completed">completed</span>
+          2026-08-01
+        </div>
+        <h3><a href="../aar/2026-08-01-unified-pipeline-toolkit.md">Unified pipeline gap audit + toolkit install</a></h3>
+        <div class="meta-row">2026-08-01-unified-pipeline-toolkit</div>
+      </article>
       <article class="card">
         <div class="meta-row">
           <span class="badge badge-agent">agent</span>
@@ -153,6 +162,76 @@
     <section>
       <h2>Open improvements</h2>
       <table><thead><tr><th>ID</th><th>Improvement</th><th>Priority</th><th>Source</th></tr></thead><tbody><tr>
+          <td>IMP-020</td>
+          <td>Phase 1: CVM FRE zip ingest + company extracts (`src/decifra/cvm/fre.py`)</td>
+          <td class="priority-high">high</td>
+          <td>unified-pipeline-toolkit</td>
+        </tr><tr>
+          <td>IMP-021</td>
+          <td>Phase 1: ANBIMA debentures/CRI/CRA (yields, indexers, covenants)</td>
+          <td class="priority-high">high</td>
+          <td>unified-pipeline-toolkit</td>
+        </tr><tr>
+          <td>IMP-022</td>
+          <td>Phase 1: B3 official shares/mcap + Balcão bond registrations</td>
+          <td class="priority-high">high</td>
+          <td>unified-pipeline-toolkit</td>
+        </tr><tr>
+          <td>IMP-023</td>
+          <td>Phase 2: Entity graph CNPJ↔CVM↔ticker↔ISIN (`entities/` + `entities.json`)</td>
+          <td class="priority-high">high</td>
+          <td>unified-pipeline-toolkit</td>
+        </tr><tr>
+          <td>IMP-024</td>
+          <td>Phase 2: Hierarchy of Truth + private-issuer fallback chain</td>
+          <td class="priority-high">high</td>
+          <td>unified-pipeline-toolkit</td>
+        </tr><tr>
+          <td>IMP-025</td>
+          <td>Phase 3: APV engine (`valuation/apv.py`)</td>
+          <td class="priority-med">med</td>
+          <td>unified-pipeline-toolkit</td>
+        </tr><tr>
+          <td>IMP-026</td>
+          <td>Phase 3: Merton / Distance to Default (`credit/merton.py`)</td>
+          <td class="priority-med">med</td>
+          <td>unified-pipeline-toolkit</td>
+        </tr><tr>
+          <td>IMP-027</td>
+          <td>Phase 3: Debt capacity flags ND/EBITDA≤3.5x, DSCR≥1.25x</td>
+          <td class="priority-med">med</td>
+          <td>unified-pipeline-toolkit</td>
+        </tr><tr>
+          <td>IMP-028</td>
+          <td>Phase 3: OCF→debt service→FCFE waterfall</td>
+          <td class="priority-med">med</td>
+          <td>unified-pipeline-toolkit</td>
+        </tr><tr>
+          <td>IMP-029</td>
+          <td>Phase 4: CVM Funds INF_DIARIO + CDA</td>
+          <td class="priority-med">med</td>
+          <td>unified-pipeline-toolkit</td>
+        </tr><tr>
+          <td>IMP-030</td>
+          <td>Phase 4: SEC EDGAR fund/issuer exposure</td>
+          <td class="priority-low">low</td>
+          <td>unified-pipeline-toolkit</td>
+        </tr><tr>
+          <td>IMP-031</td>
+          <td>Phase 5: Three schemas (Profile, Credit&amp;Debt Matrix, Val Waterfall) + lineage</td>
+          <td class="priority-high">high</td>
+          <td>unified-pipeline-toolkit</td>
+        </tr><tr>
+          <td>IMP-032</td>
+          <td>Phase 5: ITR–debt schedule DT_REFER alignment in credit/valuation readers</td>
+          <td class="priority-med">med</td>
+          <td>unified-pipeline-toolkit</td>
+        </tr><tr>
+          <td>IMP-033</td>
+          <td>Phase 5: React dark-mode research UI (`frontend/`); Streamlit interim</td>
+          <td class="priority-med">med</td>
+          <td>unified-pipeline-toolkit</td>
+        </tr><tr>
           <td>IMP-003</td>
           <td>Expand CVM cache years toward config defaults (2020-2021 DFP/ITR; fato relevante)</td>
           <td class="priority-med">med</td>
@@ -194,6 +273,21 @@
       <h2>Automation opportunities</h2>
       <p class="sub">Meta follow-ups from <code>docs/improvements/AUTOMATION.md</code> (runners, closeout, Cursor Automations).</p>
       <table><thead><tr><th>ID</th><th>Improvement</th><th>Priority</th><th>Source</th></tr></thead><tbody><tr>
+          <td>AUTO-008</td>
+          <td>Daily market &amp; fund sync Automation (INF_DIARIO + ANBIMA curves) once runners exist — see `docs/workflows/daily-market-fund-sync.md`</td>
+          <td class="priority-med">med</td>
+          <td>unified-pipeline-toolkit</td>
+        </tr><tr>
+          <td>AUTO-009</td>
+          <td>Quarterly earnings trigger: on new ITR/DFP detect → refresh 3-statements + models — `docs/workflows/quarterly-earnings-trigger.md`</td>
+          <td class="priority-med">med</td>
+          <td>unified-pipeline-toolkit</td>
+        </tr><tr>
+          <td>AUTO-010</td>
+          <td>Private-issuer fallback runner Automation — `docs/workflows/private-issuer-fallback.md`</td>
+          <td class="priority-med">med</td>
+          <td>unified-pipeline-toolkit</td>
+        </tr><tr>
           <td>AUTO-001</td>
           <td>Wrap `scripts/sync_pilot.py` in a Cursor Automation (scheduled or manual) now that the repo is on GitHub</td>
           <td class="priority-low">low</td>
@@ -214,7 +308,7 @@
     <section>
       <h2>Lessons rollup</h2>
       <div class="lessons">
-        <ul><li><strong>Automation + AAR memory:</strong> Encoding sync + AAR in one runner prevents “silent” collection runs with no handoff.</li><li><strong>Automation + AAR memory:</strong> Retrospective AARs from transcripts immediately reduce re-explore cost for the next agent.</li><li><strong>Automation + AAR memory:</strong> Human HTML should be generated from agent markdown sources, not maintained by hand.</li><li><strong>Automation closeout + automation opportunity tracking:</strong> Dashboard refresh belonging to the runner is not enough if failures are swallowed — closeout must be checked.</li><li><strong>Automation closeout + automation opportunity tracking:</strong> Product gaps (`IMP-*`) and automation meta (`AUTO-*`) mix poorly in one table; split keeps the human dashboard scannable.</li><li><strong>Automation closeout + automation opportunity tracking:</strong> Frozen automation AAR coverage must not be the dashboard source of truth after lake mutations (already fixed via live coverage).</li><li><strong>Refresh session dashboard (live coverage):</strong> Dashboard coverage must read the lake (or re-capture after agent backfills); automation AARs freeze mid-run gaps.</li><li><strong>Refresh session dashboard (live coverage):</strong> Closing an improvement in an AAR without moving it in `LOG.md` leaves the human dashboard wrong.</li><li><strong>Implement all FUTURE_AGENTS prompts:</strong> `3.06.02` sub-account mapping is critical for interest coverage on companies whose financial revenue exceeds expenses (making parent `3.06` net positive).</li><li><strong>Implement all FUTURE_AGENTS prompts:</strong> `BRAPI_API_KEY` enables fast, complete OHLCV price backfills (2,482 bars/ticker) across the entire Ibovespa universe in under 2 minutes.</li><li><strong>Implement all FUTURE_AGENTS prompts:</strong> Jinja2 + Plotly offline rendering allows zero-latency interactive HTML reports without LLM API dependency.</li><li><strong>Rename workspace + push to GitHub:</strong> Renaming the workspace directory cannot succeed while Cursor has that folder open; do branding + git first, rename after close/reopen.</li><li><strong>Rename workspace + push to GitHub:</strong> Keep PyPI/CLI package name `decifra` stable even when the GitHub repo name changes.</li></ul>
+        <ul><li><strong>Unified pipeline gap audit + toolkit install:</strong> Keep **implemented** vs **target** sources explicit in always-on rules so agents do not invent ANBIMA/FRE sync.</li><li><strong>Unified pipeline gap audit + toolkit install:</strong> Full end-state charter is large; track as IMP/AUTO phases and re-audit after each phase rather than one megapr.</li><li><strong>Unified pipeline gap audit + toolkit install:</strong> Existing FCFF/WACC DCF and peer credit remain complementary — do not treat them as APV/Merton substitutes or delete them.</li><li><strong>Automation + AAR memory:</strong> Encoding sync + AAR in one runner prevents “silent” collection runs with no handoff.</li><li><strong>Automation + AAR memory:</strong> Retrospective AARs from transcripts immediately reduce re-explore cost for the next agent.</li><li><strong>Automation + AAR memory:</strong> Human HTML should be generated from agent markdown sources, not maintained by hand.</li><li><strong>Automation closeout + automation opportunity tracking:</strong> Dashboard refresh belonging to the runner is not enough if failures are swallowed — closeout must be checked.</li><li><strong>Automation closeout + automation opportunity tracking:</strong> Product gaps (`IMP-*`) and automation meta (`AUTO-*`) mix poorly in one table; split keeps the human dashboard scannable.</li><li><strong>Automation closeout + automation opportunity tracking:</strong> Frozen automation AAR coverage must not be the dashboard source of truth after lake mutations (already fixed via live coverage).</li><li><strong>Refresh session dashboard (live coverage):</strong> Dashboard coverage must read the lake (or re-capture after agent backfills); automation AARs freeze mid-run gaps.</li><li><strong>Refresh session dashboard (live coverage):</strong> Closing an improvement in an AAR without moving it in `LOG.md` leaves the human dashboard wrong.</li><li><strong>Implement all FUTURE_AGENTS prompts:</strong> `3.06.02` sub-account mapping is critical for interest coverage on companies whose financial revenue exceeds expenses (making parent `3.06` net positive).</li><li><strong>Implement all FUTURE_AGENTS prompts:</strong> `BRAPI_API_KEY` enables fast, complete OHLCV price backfills (2,482 bars/ticker) across the entire Ibovespa universe in under 2 minutes.</li><li><strong>Implement all FUTURE_AGENTS prompts:</strong> Jinja2 + Plotly offline rendering allows zero-latency interactive HTML reports without LLM API dependency.</li></ul>
       </div>
     </section>
 
@@ -233,6 +327,21 @@
         </li><li>
           <strong>4. Report build smoke</strong>
           <div class="prompt-body">Follow docs/workflows/report-build.md: run pytest on test_report_*, then decifra report build for PETR4/Energy (with --offline), inspect data/reports artifacts. Optional --generate if OPENAI_API_KEY is set.</div>
+        </li><li>
+          <strong>8. Pipeline gap re-audit</strong>
+          <div class="prompt-body">Follow .cursor/skills/decifra-pipeline-auditor/SKILL.md and docs/prompts/unified-pipeline-auditor.md. Docs-first: docs/architecture/unified-pipeline-gap-analysis.md + unified-pipeline-roadmap.md. Grade Pass/Fail on all four pillars; update the gap analysis and append IMP-*/AUTO-* only for new findings.</div>
+        </li><li>
+          <strong>9. Phase 1 ingestion (IMP-020..022)</strong>
+          <div class="prompt-body">Implement the next open Phase 1 item from docs/architecture/unified-pipeline-roadmap.md (FRE, ANBIMA, or B3 shares/Balcão). Do not claim sources exist in README until CLI sync + lake artifacts work. Prefer .venv Scripts python.</div>
+        </li><li>
+          <strong>10. Phase 2 entity graph (IMP-023..024)</strong>
+          <div class="prompt-body">Build src/decifra/entities/ with CNPJ↔CVM↔ticker↔ISIN and Hierarchy of Truth (CVM &gt; ANBIMA &gt; Rating Agency &gt; Web screeners). Wire private-issuer fallback per docs/workflows/private-issuer-fallback.md.</div>
+        </li><li>
+          <strong>11. Phase 3 modeling (IMP-025..028)</strong>
+          <div class="prompt-body">Add APV, Merton/DtD, debt capacity flags (ND/EBITDA ≤3.5x, DSCR ≥1.25x), and OCF→FCFE waterfall. Keep existing FCFF/WACC DCF and peer credit scoring.</div>
+        </li><li>
+          <strong>12. Phase 4–5 funds/schemas/UI (IMP-029..033)</strong>
+          <div class="prompt-body">Pick from roadmap: CVM INF_DIARIO/CDA, EDGAR, three output schemas + lineage, ITR–debt alignment, or React frontend under frontend/. Streamlit stays until cutover.</div>
         </li><li>
           <strong>5. Rename local folder (IMP-013)</strong>
           <div class="prompt-body">After closing Cursor, rename DecifraCR -&gt; decifra-invest-agent, reopen, re-run editable install, confirm decifra CLI.</div>

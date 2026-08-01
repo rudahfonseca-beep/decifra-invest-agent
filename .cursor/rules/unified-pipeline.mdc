@@ -1,0 +1,43 @@
+---
+description: Unified Financial Data Pipeline operational rules (hierarchy, lineage, fallbacks)
+alwaysApply: true
+---
+
+# Unified pipeline rules
+
+Target architecture: `docs/architecture/unified-pipeline-roadmap.md`. Gap status: `docs/architecture/unified-pipeline-gap-analysis.md`.
+
+## Hierarchy of Truth
+
+When metrics conflict across sources, resolve in this order only:
+
+1. **CVM Open Data** (DFP / ITR / FRE when present)
+2. **ANBIMA** data
+3. **Rating agency** reports / press releases
+4. **Web screeners** (e.g. Fundamentus-class sites) last
+
+Do not invent a different precedence without updating the roadmap and this rule.
+
+## Private issuer fallback
+
+If a CNPJ has no Category A equity filings:
+
+1. ANBIMA prospectuses  
+2. B3 Balcão registrations  
+3. Credit rating agency releases  
+
+Workflow: `docs/workflows/private-issuer-fallback.md`.
+
+## Unit standardization
+
+- Normalize monetary values to **BRL** (or explicitly USD with FX disclosed).
+- Align quarterly **ITR** `DT_REFER` with corresponding debt schedules when both exist.
+- Respect CVM scale (`ESCALA_MOEDA` — thousands vs absolute reais); see valuation historical helpers and IMP-019.
+
+## Data lineage
+
+Every financial metric in pipeline outputs must carry provenance pointing to its origin document (e.g. source system + filing + note/account). Prefer structured fields (`lineage.source_doc`, period, account code) over silent floats.
+
+## Modeling note
+
+Existing FCFF/WACC DCF and peer credit scores remain valid research paths. APV, Merton/DtD, capacity covenants, and FCFE waterfall are **additional** end-state engines — do not delete the current ones when adding them.

@@ -8,6 +8,20 @@ Lessons from AARs turned into trackable follow-ups. Newest first within each sta
 
 | ID | Date | Source AAR | Improvement | Priority | Notes |
 |----|------|------------|-------------|----------|-------|
+| IMP-020 | 2026-08-01 | unified-pipeline-toolkit | Phase 1: CVM FRE zip ingest + company extracts (`src/decifra/cvm/fre.py`) | high | Roadmap Phase 1 |
+| IMP-021 | 2026-08-01 | unified-pipeline-toolkit | Phase 1: ANBIMA debentures/CRI/CRA (yields, indexers, covenants) | high | `src/decifra/anbima/` |
+| IMP-022 | 2026-08-01 | unified-pipeline-toolkit | Phase 1: B3 official shares/mcap + Balcão bond registrations | high | Prefer over yfinance-only |
+| IMP-023 | 2026-08-01 | unified-pipeline-toolkit | Phase 2: Entity graph CNPJ↔CVM↔ticker↔ISIN (`entities/` + `entities.json`) | high | |
+| IMP-024 | 2026-08-01 | unified-pipeline-toolkit | Phase 2: Hierarchy of Truth + private-issuer fallback chain | high | See workflow stub |
+| IMP-025 | 2026-08-01 | unified-pipeline-toolkit | Phase 3: APV engine (`valuation/apv.py`) | med | Keep FCFF/WACC |
+| IMP-026 | 2026-08-01 | unified-pipeline-toolkit | Phase 3: Merton / Distance to Default (`credit/merton.py`) | med | |
+| IMP-027 | 2026-08-01 | unified-pipeline-toolkit | Phase 3: Debt capacity flags ND/EBITDA≤3.5x, DSCR≥1.25x | med | `credit/capacity.py` |
+| IMP-028 | 2026-08-01 | unified-pipeline-toolkit | Phase 3: OCF→debt service→FCFE waterfall | med | `valuation/waterfall.py` |
+| IMP-029 | 2026-08-01 | unified-pipeline-toolkit | Phase 4: CVM Funds INF_DIARIO + CDA | med | `src/decifra/funds/cvm.py` |
+| IMP-030 | 2026-08-01 | unified-pipeline-toolkit | Phase 4: SEC EDGAR fund/issuer exposure | low | `funds/edgar.py` |
+| IMP-031 | 2026-08-01 | unified-pipeline-toolkit | Phase 5: Three schemas (Profile, Credit&Debt Matrix, Val Waterfall) + lineage | high | `schemas/` + `docs/schemas/` |
+| IMP-032 | 2026-08-01 | unified-pipeline-toolkit | Phase 5: ITR–debt schedule DT_REFER alignment in credit/valuation readers | med | Today DFP-preferred |
+| IMP-033 | 2026-08-01 | unified-pipeline-toolkit | Phase 5: React dark-mode research UI (`frontend/`); Streamlit interim | med | |
 | IMP-003 | 2026-07-20 | greenfield-pipeline | Expand CVM cache years toward config defaults (2020-2021 DFP/ITR; fato relevante) | med | Partial cache 2022-2025 |
 | IMP-008 | 2026-07-31 | automation-aar | Optionally wrap `sync_pilot.py` in a Cursor Automation once repo is on remote | low | See AUTO-001 |
 | IMP-013 | 2026-07-31 | rename-and-github | Rename local folder `DecifraCR` -> `decifra-invest-agent` after closing Cursor; re-run editable install | med | Dir locked while workspace open |

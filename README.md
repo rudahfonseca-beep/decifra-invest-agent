@@ -136,6 +136,14 @@ See [`.env.example`](.env.example):
 - **CVM Dados Abertos** — cadastro, DFP, ITR, IPE, fatos relevantes
 - **Company RI sites** — best-effort harvest of call/presentation links
 
+## Architecture target (Unified Financial Data Pipeline)
+
+End-state vision (equity + credit + fixed income + funds) is documented under [`docs/architecture/`](docs/architecture/). **Not all layers are implemented yet** — current product remains Ibovespa + CVM DFP/ITR + research credit/valuation.
+
+- Gap analysis (pillar Pass/Fail): [`docs/architecture/unified-pipeline-gap-analysis.md`](docs/architecture/unified-pipeline-gap-analysis.md)
+- Phased roadmap: [`docs/architecture/unified-pipeline-roadmap.md`](docs/architecture/unified-pipeline-roadmap.md)
+- Auditor skill: [`.cursor/skills/decifra-pipeline-auditor/SKILL.md`](.cursor/skills/decifra-pipeline-auditor/SKILL.md)
+
 ## Session docs & automation
 
 - Agent AARs (markdown): [`docs/aar/`](docs/aar/) — see [`docs/aar/INDEX.md`](docs/aar/INDEX.md)

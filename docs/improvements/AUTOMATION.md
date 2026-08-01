@@ -8,6 +8,9 @@ Newest first within each status. IDs use `AUTO-NNN`. Cross-link product IMPs whe
 
 | ID | Date | Source | Opportunity | Priority | Notes |
 |----|------|--------|-------------|----------|-------|
+| AUTO-008 | 2026-08-01 | unified-pipeline-toolkit | Daily market & fund sync Automation (INF_DIARIO + ANBIMA curves) once runners exist — see `docs/workflows/daily-market-fund-sync.md` | med | Depends IMP-021 / IMP-029 |
+| AUTO-009 | 2026-08-01 | unified-pipeline-toolkit | Quarterly earnings trigger: on new ITR/DFP detect → refresh 3-statements + models — `docs/workflows/quarterly-earnings-trigger.md` | med | Extends sync_pilot pattern |
+| AUTO-010 | 2026-08-01 | unified-pipeline-toolkit | Private-issuer fallback runner Automation — `docs/workflows/private-issuer-fallback.md` | med | Depends IMP-024 |
 | AUTO-001 | 2026-07-31 | automation-aar / IMP-008 | Wrap `scripts/sync_pilot.py` in a Cursor Automation (scheduled or manual) now that the repo is on GitHub | low | Local pilot is the runner; Automation is the trigger |
 | AUTO-003 | 2026-07-31 | dashboard-refresh | Prefer `sync_pilot` (or explicit closeout) over ad-hoc `decifra sync` so every collection run leaves AAR + dashboard | med | Ad-hoc sync skips traces |
 | AUTO-004 | 2026-07-31 | dashboard-refresh | After lake mutations outside the pilot (backfills, diagnose scripts), always run `update_session_dashboard.py` | med | Stale coverage when agents skip closeout |

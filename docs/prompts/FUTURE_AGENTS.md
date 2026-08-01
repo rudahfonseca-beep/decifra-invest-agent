@@ -28,6 +28,23 @@ Completed work (do not re-run unless regressing): prices backfill (IMP-001), ASA
 4c. **Valuation follow-ups (IMP-015..018)**  
    `Pick one open item from docs/improvements/LOG.md tagged valuation-capability: EPS-implied shares fallback (IMP-015), extreme-upside UI callout (IMP-016), open the feat/valuation-dashboard-docs PR (IMP-017), or profile/cache the sensitivity grid (IMP-018).`
 
+## Unified pipeline
+
+8. **Pipeline gap re-audit**  
+   `Follow .cursor/skills/decifra-pipeline-auditor/SKILL.md and docs/prompts/unified-pipeline-auditor.md. Docs-first: docs/architecture/unified-pipeline-gap-analysis.md + unified-pipeline-roadmap.md. Grade Pass/Fail on all four pillars; update the gap analysis and append IMP-*/AUTO-* only for new findings.`
+
+9. **Phase 1 ingestion (IMP-020..022)**  
+   `Implement the next open Phase 1 item from docs/architecture/unified-pipeline-roadmap.md (FRE, ANBIMA, or B3 shares/Balcão). Do not claim sources exist in README until CLI sync + lake artifacts work. Prefer .venv Scripts python.`
+
+10. **Phase 2 entity graph (IMP-023..024)**  
+   `Build src/decifra/entities/ with CNPJ↔CVM↔ticker↔ISIN and Hierarchy of Truth (CVM > ANBIMA > Rating Agency > Web screeners). Wire private-issuer fallback per docs/workflows/private-issuer-fallback.md.`
+
+11. **Phase 3 modeling (IMP-025..028)**  
+   `Add APV, Merton/DtD, debt capacity flags (ND/EBITDA ≤3.5x, DSCR ≥1.25x), and OCF→FCFE waterfall. Keep existing FCFF/WACC DCF and peer credit scoring.`
+
+12. **Phase 4–5 funds/schemas/UI (IMP-029..033)**  
+   `Pick from roadmap: CVM INF_DIARIO/CDA, EDGAR, three output schemas + lineage, ITR–debt alignment, or React frontend under frontend/. Streamlit stays until cutover.`
+
 ## Ops / hygiene
 
 5. **Rename local folder (IMP-013)**  

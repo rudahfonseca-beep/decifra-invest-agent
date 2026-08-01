@@ -5,7 +5,20 @@ alwaysApply: true
 
 # Data sources truth
 
+## Implemented today
+
 - Local lake under `data/companies/{TICKER}/` (gitignored) + `data/cache/cvm/` + `data/universe/`.
 - Sources: **B3** (Ibovespa + CNPJ), **CVM Dados Abertos** (DFP/ITR/IPE), **brapi/yfinance** (prices), company **RI** sites (best-effort).
 - Credit scores are **research-grade industry peer ranks**, not bureau/Serasa ratings and not Open Finance / Pluggy personal banking.
 - Filesystem store — not SQL. Prefer README + `docs/aar/` over re-deriving the layout.
+
+## Target sources (not implemented unless code + lake prove it)
+
+End-state Unified Financial Data Pipeline — see `docs/architecture/unified-pipeline-roadmap.md`. Do **not** claim these are synced already:
+
+- CVM **FRE**
+- **ANBIMA** debentures / CRI / CRA (+ curves)
+- Official **B3** share counts / mcap sync and **Balcão** bond registrations
+- Credit rating agency press-release parsers (Adjusted Net Debt / EBITDA)
+- CVM Funds **INF_DIARIO** / **CDA** and **SEC EDGAR**
+- Canonical entity graph with **ISIN** (`data/universe/entities.json`)
