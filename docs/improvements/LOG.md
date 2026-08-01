@@ -10,10 +10,7 @@ Lessons from AARs turned into trackable follow-ups. Newest first within each sta
 |----|------|------------|-------------|----------|-------|
 | IMP-034 | 2026-08-01 | pipeline-phase-1-ingestion | Wire live B3 shares-outstanding detail API into `b3/shares.py` | med | Artifact path exists; network reserved |
 | IMP-035 | 2026-08-01 | pipeline-phase-2-entities | Migrate credit/valuation/report joins to `load_identity` / resolver | med | Helper shipped |
-| IMP-025 | 2026-08-01 | unified-pipeline-toolkit | Phase 3: APV engine (`valuation/apv.py`) | med | Keep FCFF/WACC |
-| IMP-026 | 2026-08-01 | unified-pipeline-toolkit | Phase 3: Merton / Distance to Default (`credit/merton.py`) | med | |
-| IMP-027 | 2026-08-01 | unified-pipeline-toolkit | Phase 3: Debt capacity flags ND/EBITDA≤3.5x, DSCR≥1.25x | med | `credit/capacity.py` |
-| IMP-028 | 2026-08-01 | unified-pipeline-toolkit | Phase 3: OCF→debt service→FCFE waterfall | med | `valuation/waterfall.py` |
+| IMP-036 | 2026-08-01 | pipeline-phase-3-modeling | Auto-assemble APV/Merton inputs from CVM + market for a ticker | med | Engines are CLI/formula-first |
 | IMP-029 | 2026-08-01 | unified-pipeline-toolkit | Phase 4: CVM Funds INF_DIARIO + CDA | med | `src/decifra/funds/cvm.py` |
 | IMP-030 | 2026-08-01 | unified-pipeline-toolkit | Phase 4: SEC EDGAR fund/issuer exposure | low | `funds/edgar.py` |
 | IMP-031 | 2026-08-01 | unified-pipeline-toolkit | Phase 5: Three schemas (Profile, Credit&Debt Matrix, Val Waterfall) + lineage | high | `schemas/` + `docs/schemas/` |
@@ -31,6 +28,10 @@ Lessons from AARs turned into trackable follow-ups. Newest first within each sta
 
 | ID | Date | Source AAR | Improvement | Resolved |
 |----|------|------------|-------------|----------|
+| IMP-025 | 2026-08-01 | pipeline-phase-3-modeling | Phase 3: APV engine | 2026-08-01 -- `valuation/apv.py` |
+| IMP-026 | 2026-08-01 | pipeline-phase-3-modeling | Phase 3: Merton / DtD | 2026-08-01 -- `credit/merton.py` |
+| IMP-027 | 2026-08-01 | pipeline-phase-3-modeling | Phase 3: Debt capacity flags | 2026-08-01 -- `credit/capacity.py` |
+| IMP-028 | 2026-08-01 | pipeline-phase-3-modeling | Phase 3: OCF→FCFE waterfall | 2026-08-01 -- `valuation/waterfall.py` |
 | IMP-023 | 2026-08-01 | pipeline-phase-2-entities | Phase 2: Entity graph CNPJ↔CVM↔ticker↔ISIN | 2026-08-01 -- `entities/` + `entities sync` |
 | IMP-024 | 2026-08-01 | pipeline-phase-2-entities | Phase 2: Hierarchy of Truth + private-issuer fallback | 2026-08-01 -- resolve + CLI + workflow |
 | IMP-020 | 2026-08-01 | pipeline-phase-1-ingestion | Phase 1: CVM FRE zip ingest + company extracts | 2026-08-01 -- `cvm/fre.py` + `decifra sync fre` |

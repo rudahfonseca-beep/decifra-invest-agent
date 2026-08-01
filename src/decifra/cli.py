@@ -324,6 +324,62 @@ def ask_cmd(
     console.print(result.get("answer") or "")
 
 
+@app.command("merton")
+def merton_cmd(
+    asset_value: float = typer.Option(..., help="Asset value V"),
+    debt_face: float = typer.Option(..., help="Debt face value D"),
+    risk_free: float = typer.Option(0.07, help="Risk-free rate"),
+    horizon: float = typer.Option(1.0, help="Horizon years T"),
+    asset_vol: float = typer.Option(..., help="Asset volatility sigma_V"),
+    json_out: bool = typer.Option(False, "--json", help="Print JSON"),
+) -> None:
+    """Merton structural model / Distance to Default."""
+    from decifra.credit.merton import merton_dtd
+
+    result = merton_dtd(
+        asset_value=asset_value,
+        debt_face=debt_face,
+        risk_free=risk_free,
+        horizon_years=horizon,
+        asset_vol=asset_vol,
+    )
+    if json_out:
+        console.print_json(json.dumps(result.to_dict(), ensure_ascii=False))
+        return
+    console.print(
+        f"Equity={result.equity_value:,.2f}  DtD={result.distance_to_default:.3f}  "
+        f"PD={result.default_probability:.2%}"
+    )
+
+
+@app.command("capacity")
+def capacity_cmd(
+    net_debt: float = typer.Option(..., help="Net debt"),
+    ebitda: float = typer.Option(..., help="EBITDA"),
+    ocf: float = typer.Option(..., help="OCF or EBITDA proxy for DSCR numerator"),
+    debt_service: float = typer.Option(..., help="Debt service (interest + mandatory amort)"),
+    json_out: bool = typer.Option(False, "--json", help="Print JSON"),
+) -> None:
+    """Debt capacity flags: ND/EBITDA <= 3.5x and DSCR >= 1.25x."""
+    from decifra.credit.capacity import evaluate_capacity
+
+    result = evaluate_capacity(
+        net_debt=net_debt,
+        ebitda=ebitda,
+        ocf_or_ebitda_proxy=ocf,
+        debt_service=debt_service,
+    )
+    if json_out:
+        console.print_json(json.dumps(result.to_dict(), ensure_ascii=False))
+        return
+    nd = result.net_debt_ebitda
+    ds = result.dscr
+    console.print(
+        f"ND/EBITDA={nd.value} (breach={nd.breach})  DSCR={ds.value} (breach={ds.breach})  "
+        f"any_breach={result.any_breach}"
+    )
+
+
 @app.command("credit")
 def credit_cmd(
     industry: Optional[str] = typer.Option(None, help="Filter by industry group, e.g. Energy"),
@@ -570,6 +626,64 @@ def valuation_dcf_cmd(
         console.print(f"Value per share: {result.value_per_share:.2f} (current: {price}, upside {upside})")
     for w in result.warnings:
         console.print(f"[yellow]Warning:[/yellow] {w}")
+
+
+@valuation_app.command("apv")
+def valuation_apv_cmd(
+    fcff: str = typer.Option(..., help="Comma-separated unlevered FCFF path"),
+    ku: float = typer.Option(..., "--ku", help="Unlevered cost of capital"),
+    interest: Optional[str] = typer.Option(None, help="Comma-separated interest path"),
+    tax_rate: float = typer.Option(0.34, help="Corporate tax rate"),
+    distress_pv: float = typer.Option(0.0, help="PV of financial distress costs"),
+    terminal_growth: float = typer.Option(0.0, help="Gordon growth on terminal FCFF"),
+    json_out: bool = typer.Option(False, "--json", help="Print JSON"),
+) -> None:
+    """Adjusted Present Value: V_L = V_U + PV(tax shield) - PV(distress)."""
+    from decifra.valuation.apv import compute_apv
+
+    fcff_path = [float(x) for x in _split_csv(fcff)]
+    interest_path = [float(x) for x in _split_csv(interest)] if interest else None
+    result = compute_apv(
+        unlevered_fcff=fcff_path,
+        unlevered_cost_of_capital=ku,
+        debt_interest=interest_path,
+        tax_rate=tax_rate,
+        distress_cost_pv=distress_pv,
+        terminal_growth=terminal_growth,
+    )
+    if json_out:
+        console.print_json(json.dumps(result.to_dict(), ensure_ascii=False))
+        return
+    console.print(f"V_U={result.v_u:,.2f}  PV(TS)={result.pv_tax_shield:,.2f}  "
+                  f"PV(distress)={result.pv_distress_costs:,.2f}  V_L={result.v_l:,.2f}")
+
+
+@valuation_app.command("waterfall")
+def valuation_waterfall_cmd(
+    ocf: float = typer.Option(..., help="Operating cash flow"),
+    interest: float = typer.Option(..., help="Interest expense"),
+    amortization: float = typer.Option(0.0, help="Mandatory debt amortization"),
+    equity_capex: float = typer.Option(0.0, help="Equity-financed capex"),
+    net_borrowing: float = typer.Option(0.0, help="Net borrowing (+ inflow)"),
+    json_out: bool = typer.Option(False, "--json", help="Print JSON"),
+) -> None:
+    """OCF -> mandatory debt service -> residual FCFE waterfall."""
+    from decifra.valuation.waterfall import ocf_to_fcfe_waterfall
+
+    result = ocf_to_fcfe_waterfall(
+        ocf=ocf,
+        interest=interest,
+        mandatory_amortization=amortization,
+        capex_equity_financed=equity_capex,
+        net_borrowing=net_borrowing,
+    )
+    if json_out:
+        console.print_json(json.dumps(result.to_dict(), ensure_ascii=False))
+        return
+    console.print(
+        f"OCF={result.ocf:,.2f}  debt_service={result.debt_service:,.2f}  "
+        f"FCFE={result.fcfe:,.2f}  covered={result.covered}"
+    )
 
 
 @valuation_app.command("multiples")

@@ -13,7 +13,7 @@
       "label": "Entity resolution & fallbacks"
     },
     "3_modeling": {
-      "grade": "Fail",
+      "grade": "Pass",
       "label": "Integrated modeling"
     },
     "4_outputs": {
@@ -121,14 +121,14 @@
       "id": 3,
       "name": "Valuation & credit modeling",
       "pillar": "3_modeling",
-      "status": "todo",
-      "aar": null,
+      "status": "done",
+      "aar": "2026-08-01-pipeline-phase-3-modeling.md",
       "branch": "feat/pipeline-phase-3",
       "deliverables": [
         {
           "id": "IMP-025",
           "title": "APV engine",
-          "status": "todo",
+          "status": "done",
           "evidence": [
             "src/decifra/valuation/apv.py"
           ]
@@ -136,7 +136,7 @@
         {
           "id": "IMP-026",
           "title": "Merton / Distance to Default",
-          "status": "todo",
+          "status": "done",
           "evidence": [
             "src/decifra/credit/merton.py"
           ]
@@ -144,7 +144,7 @@
         {
           "id": "IMP-027",
           "title": "Debt capacity flags",
-          "status": "todo",
+          "status": "done",
           "evidence": [
             "src/decifra/credit/capacity.py"
           ]
@@ -152,7 +152,7 @@
         {
           "id": "IMP-028",
           "title": "OCF→FCFE waterfall",
-          "status": "todo",
+          "status": "done",
           "evidence": [
             "src/decifra/valuation/waterfall.py"
           ]

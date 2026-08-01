@@ -4,6 +4,7 @@ Session and automation After Action Reports for decifra-invest-agent.
 
 | Date | ID | Title | Type | Status | File |
 |------|-----|-------|------|--------|------|
+| 2026-08-01 | 2026-08-01-pipeline-phase-3-modeling | Pipeline Phase 3 — Modeling engines | agent | completed | [2026-08-01-pipeline-phase-3-modeling.md](2026-08-01-pipeline-phase-3-modeling.md) |
 | 2026-08-01 | 2026-08-01-pipeline-phase-2-entities | Pipeline Phase 2 — Entity resolution | agent | completed | [2026-08-01-pipeline-phase-2-entities.md](2026-08-01-pipeline-phase-2-entities.md) |
 | 2026-08-01 | 2026-08-01-pipeline-phase-1-ingestion | Pipeline Phase 1 — Primary ingestion | agent | completed | [2026-08-01-pipeline-phase-1-ingestion.md](2026-08-01-pipeline-phase-1-ingestion.md) |
 | 2026-08-01 | 2026-08-01-unified-pipeline-toolkit | Unified pipeline gap audit + toolkit install | agent | completed | [2026-08-01-unified-pipeline-toolkit.md](2026-08-01-unified-pipeline-toolkit.md) |
