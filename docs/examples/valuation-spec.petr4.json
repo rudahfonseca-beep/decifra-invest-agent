@@ -1,0 +1,10 @@
+{
+  "ticker": "PETR4",
+  "comparatives": ["VALE3", "CSNA3"],
+  "dcf_assumptions": {
+    "terminal_growth": 0.03
+  },
+  "multiples_stat": "median",
+  "forecast_years": 5,
+  "title": "Valuation — PETR4 vs VALE3, CSNA3"
+}

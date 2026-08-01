@@ -90,6 +90,39 @@ Full smoke checklist: [`docs/workflows/report-build.md`](docs/workflows/report-b
 
 Artifacts per run: `spec.json`, `context.json`, `report.prompt.md`, and `report.html` when `--generate` succeeds.
 
+## Valuation (DCF + trading multiples)
+
+Equity valuation with **data-grounded, fully overridable defaults**: FCFF/WACC DCF and
+trading multiples (P/E, EV/EBITDA, EV/Revenue, EV/EBIT, P/B), both against
+comparables of your choice — not limited to the same industry.
+
+```bash
+# DCF — defaults come from this company's own multi-year CVM history + live market data
+.\.venv\Scripts\python.exe -m decifra valuation dcf --ticker PETR4 --peers VALE3,CSNA3
+
+# Override any assumption directly, or point --wacc at a number to bypass CAPM entirely
+.\.venv\Scripts\python.exe -m decifra valuation dcf --ticker PETR4 --terminal-growth 0.03 --beta 1.1
+
+# Trading multiples vs. comparables you pick
+.\.venv\Scripts\python.exe -m decifra valuation multiples --ticker PETR4 --peers VALE3,CSNA3 --stat median
+
+# Full artifact set (spec/context/markdown) under data/valuations/
+.\.venv\Scripts\python.exe -m decifra valuation build --ticker PETR4 --peers VALE3,CSNA3
+.\.venv\Scripts\python.exe -m decifra valuation build --spec docs/examples/valuation-spec.petr4.json
+
+# Or use the Streamlit "Valuation" tab
+.\.venv\Scripts\python.exe -m decifra dashboard
+```
+
+Every default (revenue growth, EBIT margin, tax rate, D&A/capex/ΔNWC intensity, beta,
+cost of debt, WACC) is disclosed with its exact formula and this company's own numbers
+in a "How these numbers were built" section — CLI table, Streamlit expander, and
+`valuation.md` all show the same methodology.
+
+Full smoke checklist: [`docs/workflows/valuation.md`](docs/workflows/valuation.md) · skill [`.cursor/skills/decifra-valuation/SKILL.md`](.cursor/skills/decifra-valuation/SKILL.md)
+
+Artifacts per run: `spec.json`, `context.json`, `valuation.md` under `data/valuations/{slug}/`.
+
 ## Optional env vars
 
 See [`.env.example`](.env.example):
