@@ -74,12 +74,30 @@ def capture_coverage() -> tuple[list[dict[str, Any]], dict[str, Any]]:
     return rows, summarize_coverage(rows)
 
 
-def run_stage(stage: str, dry_run: bool, ticker: str | None) -> dict[str, Any]:
+# Stages that default to core (IBOV ∪ watchlist) under tiered sync.
+CORE_DEFAULT_STAGES = frozenset(
+    {"notices", "transcripts", "fre", "anbima", "b3-bonds"}
+)
+
+
+def run_stage(
+    stage: str,
+    dry_run: bool,
+    ticker: str | None,
+    *,
+    heavy_scope: str = "core",
+    financials_scope: str = "all",
+) -> dict[str, Any]:
     """Run one sync stage via `python -m decifra`."""
     py = _python()
     cmd = [py, "-m", "decifra", "sync", stage]
     if ticker and stage != "universe":
         cmd.extend(["--ticker", ticker])
+    elif stage != "universe":
+        if stage == "financials":
+            cmd.extend(["--scope", financials_scope])
+        elif stage in CORE_DEFAULT_STAGES or stage == "b3-shares":
+            cmd.extend(["--scope", heavy_scope])
     if dry_run:
         return {"stage": stage, "cmd": cmd, "dry_run": True, "ok": True, "returncode": 0}
     proc = subprocess.run(cmd, cwd=str(ROOT), capture_output=True, text=True)
@@ -176,7 +194,7 @@ status: {status}
 
 Automate existing decifra-invest-agent data collection (`decifra sync`) for stages: **{", ".join(stages)}**.
 Capture before/after coverage, write this automation AAR, and **refresh the human HTML dashboard** (required closeout).
-{"Ticker filter: " + ticker if ticker else "Universe: full Ibovespa set."}
+{"Ticker filter: " + ticker if ticker else "Universe: listed equities (tiered — financials=all, heavy=core)."}
 Dry-run: **{dry_run}**.
 
 ## 2. What actually happened
@@ -308,6 +326,46 @@ def refresh_dashboard() -> bool:
     return True
 
 
+def export_ui_caches() -> bool:
+    """Persist UI JSON bundle + disk lake-API cache (IMP-041)."""
+    py = _python()
+    sample_out = ROOT / "frontend" / "public" / "sample"
+    cmds = [
+        [
+            py,
+            "-m",
+            "decifra",
+            "schemas",
+            "export-ui",
+            "--out",
+            str(sample_out),
+            "--limit",
+            "8",
+        ],
+        [
+            py,
+            "-m",
+            "decifra",
+            "schemas",
+            "warm-ui-cache",
+        ],
+    ]
+    ok = True
+    for cmd in cmds:
+        proc = subprocess.run(cmd, cwd=str(ROOT), capture_output=True, text=True)
+        if proc.stdout:
+            print(proc.stdout.rstrip())
+        if proc.returncode != 0:
+            ok = False
+            print(
+                f"UI cache step failed (rc={proc.returncode}): {' '.join(cmd)}",
+                file=sys.stderr,
+            )
+            if proc.stderr:
+                print(proc.stderr[-1500:], file=sys.stderr)
+    return ok
+
+
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p = argparse.ArgumentParser(description="decifra-invest-agent sync pilot with AAR output")
     p.add_argument(
@@ -320,6 +378,23 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     p.add_argument("--skip-transcripts", action="store_true", help="Omit transcripts stage")
     p.add_argument("--ticker", default=None, help="Limit non-universe stages to one ticker")
+    p.add_argument(
+        "--financials-scope",
+        default="all",
+        choices=("all", "core"),
+        help="Scope for financials stage (default all)",
+    )
+    p.add_argument(
+        "--heavy-scope",
+        default="core",
+        choices=("all", "core"),
+        help="Scope for notices/transcripts/fre/… (default core)",
+    )
+    p.add_argument(
+        "--skip-ui-export",
+        action="store_true",
+        help="Skip schemas export-ui + warm-ui-cache on closeout",
+    )
     p.add_argument("--dry-run", action="store_true", help="Plan only; do not call network sync")
     return p.parse_args(argv)
 
@@ -335,7 +410,10 @@ def main(argv: list[str] | None = None) -> int:
         stages = [s for s in stages if s != "transcripts"]
 
     print(f"Interpreter: {_python()}")
-    print(f"Stages: {stages} dry_run={args.dry_run} ticker={args.ticker}")
+    print(
+        f"Stages: {stages} dry_run={args.dry_run} ticker={args.ticker} "
+        f"financials_scope={args.financials_scope} heavy_scope={args.heavy_scope}"
+    )
 
     before_rows, before = capture_coverage()
     print(f"Coverage before: {before}")
@@ -343,7 +421,13 @@ def main(argv: list[str] | None = None) -> int:
     results: list[dict[str, Any]] = []
     for stage in stages:
         print(f"Running stage: {stage}...")
-        r = run_stage(stage, dry_run=args.dry_run, ticker=args.ticker)
+        r = run_stage(
+            stage,
+            dry_run=args.dry_run,
+            ticker=args.ticker,
+            heavy_scope=args.heavy_scope,
+            financials_scope=args.financials_scope,
+        )
         results.append(r)
         print(f"  -> {'OK' if r['ok'] else 'FAIL'} (rc={r.get('returncode')})")
 
@@ -366,8 +450,13 @@ def main(argv: list[str] | None = None) -> int:
     else:
         print("Dashboard refresh failed — treating as automation failure.", file=sys.stderr)
 
+    ui_ok = True
+    if not args.dry_run and not args.skip_ui_export:
+        print("Exporting UI sample + warm disk cache (IMP-041)...")
+        ui_ok = export_ui_caches()
+
     stages_ok = all(r.get("ok") for r in results)
-    return 0 if stages_ok and dash_ok else 1
+    return 0 if stages_ok and dash_ok and ui_ok else 1
 
 
 if __name__ == "__main__":

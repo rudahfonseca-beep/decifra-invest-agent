@@ -7,8 +7,10 @@ alwaysApply: true
 
 ## Implemented today
 
-- Local lake under `data/companies/{TICKER}/` (gitignored) + `data/cache/cvm/` + `data/universe/`.
-- Sources: **B3** (Ibovespa + CNPJ), **CVM Dados Abertos** (DFP/ITR/IPE), **brapi/yfinance** (prices), company **RI** sites (best-effort).
+- Local lake under `data/companies/{TICKER}/` (gitignored) + `data/cache/cvm/` + `data/universe/` + `data/cache/ui/`.
+- Universe: **all B3 listed equities** in `equities.json` (tiered); Ibovespa snapshot in `ibovespa.json`; optional `watchlist.json` for core.
+- Sync tiers: financials default **all**; notices/transcripts/FRE/heavy engines default **core** (IBOV ∪ watchlist).
+- Sources: **B3** (listed issuers + Ibovespa + CNPJ), **CVM Dados Abertos** (DFP/ITR/IPE), **brapi/yfinance** (prices), company **RI** sites (best-effort).
 - Credit scores are **research-grade industry peer ranks**, not bureau/Serasa ratings and not Open Finance / Pluggy personal banking.
 - Filesystem store — not SQL. Prefer README + `docs/aar/` over re-deriving the layout.
 

@@ -61,7 +61,7 @@ def resolve_conflict(values: list[dict[str, Any]]) -> dict[str, Any] | None:
 
 
 def build_entities_from_universe(*, include_isin_from_debt: bool = True) -> dict[str, Any]:
-    """Build canonical entities from Ibovespa meta (+ optional debt ISINs)."""
+    """Build canonical entities from listed-equity meta (+ optional debt ISINs)."""
     universe = load_universe()
     by_cnpj: dict[str, dict[str, Any]] = {}
 

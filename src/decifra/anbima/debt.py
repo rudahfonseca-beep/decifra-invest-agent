@@ -123,6 +123,7 @@ def sync_anbima(
     ticker: str | None = None,
     source_path: Path | None = None,
     write_fixture_if_missing: bool = True,
+    scope: str = "core",
 ) -> dict[str, Any]:
     ensure_dirs()
     path = source_path or default_cache_csv()
@@ -130,7 +131,7 @@ def sync_anbima(
         write_sample_fixture(path)
 
     df = load_anbima_source(path)
-    tickers = list_tickers(ticker)
+    tickers = list_tickers(ticker, scope=scope)  # type: ignore[arg-type]
     written: list[str] = []
 
     for t in tickers:

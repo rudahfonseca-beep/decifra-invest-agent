@@ -3,10 +3,12 @@ from __future__ import annotations
 import json
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
-from decifra.config import COMPANIES_DIR, IBOVESPA_JSON, ensure_dirs
+from decifra.config import COMPANIES_DIR, EQUITIES_JSON, IBOVESPA_JSON, ensure_dirs
 from decifra.http_util import normalize_ticker
+
+TickerScope = Literal["all", "core"]
 
 
 def company_dir(ticker: str) -> Path:
@@ -70,13 +72,46 @@ def save_meta(ticker: str, meta: dict[str, Any]) -> Path:
 
 
 def load_universe() -> dict[str, Any]:
-    if not IBOVESPA_JSON.exists():
-        return {"constituents": []}
-    return json.loads(IBOVESPA_JSON.read_text(encoding="utf-8"))
+    """Load canonical equities universe; fall back to legacy ibovespa.json."""
+    if EQUITIES_JSON.exists():
+        return json.loads(EQUITIES_JSON.read_text(encoding="utf-8"))
+    if IBOVESPA_JSON.exists():
+        data = json.loads(IBOVESPA_JSON.read_text(encoding="utf-8"))
+        # Legacy IBOV-only file: treat every constituent as core.
+        for c in data.get("constituents", []):
+            c.setdefault("indexes", ["IBOV"])
+            c.setdefault("sync_tier", "core")
+            c.setdefault("source", "ibovespa")
+        return data
+    return {"constituents": [], "count": 0}
 
 
-def list_tickers(ticker: str | None = None) -> list[str]:
+def _is_core(constituent: dict[str, Any]) -> bool:
+    if constituent.get("sync_tier") == "core":
+        return True
+    indexes = constituent.get("indexes") or []
+    return "IBOV" in indexes
+
+
+def list_tickers(
+    ticker: str | None = None,
+    *,
+    scope: TickerScope = "all",
+) -> list[str]:
+    """List universe tickers.
+
+    ``scope='all'`` — every listed equity in equities.json (or legacy IBOV).
+    ``scope='core'`` — IBOV ∪ watchlist (``sync_tier=core``).
+    """
     if ticker:
         return [normalize_ticker(ticker)]
     data = load_universe()
-    return [normalize_ticker(c["ticker"]) for c in data.get("constituents", [])]
+    out: list[str] = []
+    for c in data.get("constituents", []):
+        t = normalize_ticker(c.get("ticker") or "")
+        if not t:
+            continue
+        if scope == "core" and not _is_core(c):
+            continue
+        out.append(t)
+    return out

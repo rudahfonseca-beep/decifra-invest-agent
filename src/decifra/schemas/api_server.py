@@ -70,26 +70,48 @@ def _waterfall_live(ticker: str) -> dict[str, Any]:
     return assemble_valuation_waterfall(ticker, ocf=ocf, interest=interest, amortization=0.0)
 
 
+def _int(qs: dict[str, list[str]], key: str, default: int | None = None) -> int | None:
+    raw = (qs.get(key) or [None])[0]
+    if raw is None or raw == "":
+        return default
+    try:
+        return int(raw)
+    except (TypeError, ValueError):
+        return default
+
+
+def _scope(qs: dict[str, list[str]], default: str = "core") -> str:
+    raw = ((qs.get("scope") or [default])[0] or default).strip().lower()
+    return raw if raw in ("all", "core") else default
+
+
 def handle_api(path: str, query: dict[str, list[str]]) -> tuple[int, dict[str, Any]]:
     if path in ("/api/health", "/health"):
         return 200, {"ok": True, "service": "decifra-lake-api"}
 
     if path in ("/api/screener", "/api/opportunity_screener"):
         tickers = query.get("tickers", [None])[0]
-        limit_raw = (query.get("limit") or [None])[0]
-        limit = int(limit_raw) if limit_raw else None
+        limit = _int(query, "limit")
+        offset = _int(query, "offset", 0) or 0
+        scope = _scope(query, "core")
+        q = (query.get("q") or [None])[0]
         names = [normalize_ticker(x) for x in tickers.split(",")] if tickers else None
         return 200, assemble_opportunity_screener(
-            names, limit=limit, refresh=_bool(query, "refresh", False)
+            names,
+            limit=limit,
+            offset=offset,
+            refresh=_bool(query, "refresh", False),
+            scope=scope,
+            q=q,
         )
 
     if path in ("/api/catalysts", "/api/catalyst_feed"):
-        limit_raw = (query.get("limit") or ["12"])[0]
-        limit = int(limit_raw)
+        limit = _int(query, "limit", 12) or 12
         refresh = _bool(query, "refresh", False)
+        scope = _scope(query, "core")
         # Reuse screener TTL entry so /api/screener + /api/catalysts share one build.
-        screener = assemble_opportunity_screener(limit=limit, refresh=refresh)
-        return 200, assemble_catalyst_feed(screener, limit=limit, refresh=refresh)
+        screener = assemble_opportunity_screener(limit=limit, refresh=refresh, scope=scope)
+        return 200, assemble_catalyst_feed(screener, limit=limit, refresh=refresh, scope=scope)
 
     if path.startswith("/api/profile/"):
         ticker = normalize_ticker(path.rsplit("/", 1)[-1])
@@ -125,6 +147,10 @@ def handle_api(path: str, query: dict[str, list[str]]) -> tuple[int, dict[str, A
             include_signals=_bool(query, "signals", False),
             show_incomplete=_bool(query, "incomplete", False),
             refresh=_bool(query, "refresh", False),
+            scope=_scope(query, "core"),
+            q=(query.get("q") or [None])[0],
+            limit=_int(query, "limit"),
+            offset=_int(query, "offset", 0) or 0,
         )
 
     if path.startswith("/api/credit/"):
@@ -134,20 +160,32 @@ def handle_api(path: str, query: dict[str, list[str]]) -> tuple[int, dict[str, A
         )
 
     if path == "/api/industries":
-        return 200, industries_payload(include_signals=_bool(query, "signals", False))
+        return 200, industries_payload(
+            include_signals=_bool(query, "signals", False),
+            scope=_scope(query, "core"),
+        )
 
     if path == "/api/tickers":
+        scope = _scope(query, "core")
         # Rich ticker list (credit-enriched); plain universe list via ?plain=1
         if _bool(query, "plain", False):
-            return 200, {"tickers": list_tickers()}
+            return 200, {
+                "tickers": list_tickers(scope=scope),  # type: ignore[arg-type]
+                "scope": scope,
+                "count": len(list_tickers(scope=scope)),  # type: ignore[arg-type]
+            }
         return 200, tickers_payload(
             industry=(query.get("industry") or [None])[0],
             include_signals=_bool(query, "signals", False),
             show_incomplete=_bool(query, "incomplete", True),
+            scope=scope,
+            q=(query.get("q") or [None])[0],
+            limit=_int(query, "limit"),
+            offset=_int(query, "offset", 0) or 0,
         )
 
     if path == "/api/coverage":
-        return 200, coverage_payload()
+        return 200, coverage_payload(scope=_scope(query, "all"))
 
     if path == "/api/valuation/defaults":
         ticker = (query.get("ticker") or [None])[0]
@@ -256,12 +294,22 @@ class LakeAPIHandler(BaseHTTPRequestHandler):
 
 
 def serve_lake_api(host: str = "127.0.0.1", port: int = 8765) -> None:
-    # Warm fundamental credit cache so first UI clicks are fast.
+    # Warm fundamental credit + disk UI caches so first UI clicks are fast.
     try:
         from decifra.schemas.research_api import get_credit_df
+        from decifra.schemas.ui_cache import disk_read, ttl_set
 
-        print("Warming credit table cache (fundamentals, no signal scan)…")
-        get_credit_df(include_signals=False)
+        print("Warming credit table cache (core fundamentals, no signal scan)…")
+        get_credit_df(include_signals=False, scope="core")
+        for name, mem_key in (
+            ("screener_core", "disk:screener_core"),
+            ("tickers", "disk:tickers"),
+            ("industries", "disk:industries"),
+            ("credit_fundamentals", "disk:credit_fundamentals"),
+        ):
+            payload = disk_read(name)
+            if payload is not None:
+                ttl_set(mem_key, payload)
         print("Cache ready.")
     except Exception as exc:
         print(f"Cache warm skipped: {exc}")
@@ -282,15 +330,17 @@ def export_ui_bundle(
 
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
-    screener = assemble_opportunity_screener(tickers, limit=limit)
-    catalysts = assemble_catalyst_feed(screener)
+    screener = assemble_opportunity_screener(tickers, limit=limit, scope="core")
+    catalysts = assemble_catalyst_feed(screener, scope="core")
     profile = assemble_company_profile(detail_ticker)
     debt = _debt_matrix_live(detail_ticker)
     waterfall = _waterfall_live(detail_ticker)
-    credit = credit_table_payload(include_signals=True, show_incomplete=True)
-    industries = industries_payload()
-    tickers_rich = tickers_payload(show_incomplete=True)
-    coverage = coverage_payload()
+    credit = credit_table_payload(
+        include_signals=False, show_incomplete=True, scope="core"
+    )
+    industries = industries_payload(scope="core")
+    tickers_rich = tickers_payload(show_incomplete=True, scope="core")
+    coverage = coverage_payload(scope="all")
     written = {}
     for name, payload in (
         ("opportunity_screener.json", screener),

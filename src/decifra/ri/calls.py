@@ -69,9 +69,10 @@ def sync_transcripts(
     download_files: bool = True,
     max_docs_per_ticker: int = 40,
     crawl_ri: bool = True,
+    scope: str = "core",
 ) -> dict[str, Any]:
     years = years or DEFAULT_NOTICE_YEARS
-    tickers = list_tickers(ticker)
+    tickers = list_tickers(ticker, scope=scope)  # type: ignore[arg-type]
     if not tickers:
         raise RuntimeError("No universe loaded. Run: decifra sync universe")
 

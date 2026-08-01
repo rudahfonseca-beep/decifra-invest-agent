@@ -56,6 +56,7 @@ def sync_b3_bonds(
     ticker: str | None = None,
     source_path: Path | None = None,
     write_fixture_if_missing: bool = True,
+    scope: str = "core",
 ) -> dict[str, Any]:
     ensure_dirs()
     path = source_path or default_balcao_csv()
@@ -63,7 +64,7 @@ def sync_b3_bonds(
         write_sample_balcao(path)
 
     df = load_balcao(path)
-    tickers = list_tickers(ticker)
+    tickers = list_tickers(ticker, scope=scope)  # type: ignore[arg-type]
     written: list[str] = []
     universe_rows: list[dict[str, Any]] = []
 

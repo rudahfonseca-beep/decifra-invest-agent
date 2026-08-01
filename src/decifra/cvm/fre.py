@@ -87,10 +87,11 @@ def sync_fre(
     years: list[int] | None = None,
     force: bool = False,
     from_cache_only: bool = False,
+    scope: str = "core",
 ) -> dict[str, Any]:
     """Download FRE zips (unless from_cache_only) and write per-ticker extracts."""
     years = years or DEFAULT_FRE_YEARS
-    tickers = list_tickers(ticker)
+    tickers = list_tickers(ticker, scope=scope)  # type: ignore[arg-type]
     written: list[str] = []
     errors: list[str] = []
 

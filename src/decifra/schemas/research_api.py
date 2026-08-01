@@ -20,6 +20,7 @@ from decifra.report.catalog import ALL_KPIS, KPI_LABELS, PCT_KPIS, default_kpis,
 from decifra.report.generate import build_report_artifacts
 from decifra.report.spec import EntitySelection, ReportSpec, SpecValidationError, validate_spec
 from decifra.schemas.ui_cache import get_cached_credit_df, set_cached_credit_df
+from decifra.store.folders import list_tickers
 from decifra.valuation.assumptions import DcfAssumptions, build_default_assumptions
 from decifra.valuation.dcf import discount_cash_flow, sensitivity_grid
 from decifra.valuation.multiples import MULTIPLE_LABELS, relative_valuation
@@ -52,14 +53,20 @@ def _df_records(df: pd.DataFrame) -> list[dict[str, Any]]:
     return out
 
 
-def get_credit_df(*, include_signals: bool = False, refresh: bool = False) -> pd.DataFrame:
-    """Return credit table; keep fundamentals and signals caches independently."""
+def get_credit_df(
+    *,
+    include_signals: bool = False,
+    refresh: bool = False,
+    scope: str = "core",
+) -> pd.DataFrame:
+    """Return credit table; keep fundamentals/signals and scope caches independently."""
     if not refresh:
-        cached = get_cached_credit_df(include_signals=include_signals)
+        cached = get_cached_credit_df(include_signals=include_signals, scope=scope)
         if cached is not None:
             return cached
-    df = build_credit_table(include_signals=include_signals)
-    set_cached_credit_df(include_signals=include_signals, df=df)
+    names = list_tickers(scope=scope)  # type: ignore[arg-type]
+    df = build_credit_table(names, include_signals=include_signals)
+    set_cached_credit_df(include_signals=include_signals, scope=scope, df=df)
     return df
 
 
@@ -87,6 +94,29 @@ DISPLAY_COLS = [
 ]
 
 
+def _filter_q(df: pd.DataFrame, q: str | None) -> pd.DataFrame:
+    if not q or df.empty:
+        return df
+    needle = q.strip().lower()
+    if not needle:
+        return df
+    cols = [c for c in ("ticker", "company", "cnpj", "sector", "industry_group") if c in df.columns]
+    if not cols:
+        return df
+    mask = False
+    for c in cols:
+        mask = mask | df[c].astype(str).str.lower().str.contains(needle, regex=False, na=False)
+    return df[mask]
+
+
+def _paginate(rows: list[dict[str, Any]], *, limit: int | None, offset: int) -> tuple[list[dict[str, Any]], int]:
+    total = len(rows)
+    start = max(0, offset)
+    if limit is None:
+        return rows[start:], total
+    return rows[start : start + max(0, limit)], total
+
+
 def credit_table_payload(
     *,
     industry: str | None = None,
@@ -94,8 +124,12 @@ def credit_table_payload(
     include_signals: bool = False,
     show_incomplete: bool = False,
     refresh: bool = False,
+    scope: str = "core",
+    q: str | None = None,
+    limit: int | None = None,
+    offset: int = 0,
 ) -> dict[str, Any]:
-    df = get_credit_df(include_signals=include_signals, refresh=refresh)
+    df = get_credit_df(include_signals=include_signals, refresh=refresh, scope=scope)
     view = df if show_incomplete else df[df["has_financials"]].copy()
     industries = sorted(view["industry_group"].dropna().unique().tolist())
     cohorts = sorted(view["cohort"].dropna().unique().tolist())
@@ -103,9 +137,11 @@ def credit_table_payload(
         view = view[view["industry_group"] == industry]
     if cohort and cohort != "All":
         view = view[view["cohort"] == cohort]
+    view = _filter_q(view, q)
 
     cols = [c for c in DISPLAY_COLS if c in view.columns]
-    rows = _df_records(view[cols] if cols else view)
+    all_rows = _df_records(view[cols] if cols else view)
+    rows, total = _paginate(all_rows, limit=limit, offset=offset)
     meds = peer_medians(df, industry) if industry and industry != "All" else {}
     scored = view["credit_score"].dropna() if "credit_score" in view.columns else pd.Series(dtype=float)
     return {
@@ -116,9 +152,13 @@ def credit_table_payload(
             "cohort": cohort or "All",
             "include_signals": include_signals,
             "show_incomplete": show_incomplete,
+            "scope": scope,
+            "q": q or "",
+            "limit": limit,
+            "offset": offset,
         },
         "summary": {
-            "companies": int(len(view)),
+            "companies": int(total),
             "median_credit_score": _jsonable(float(scored.median())) if len(scored) else None,
             "mean_credit_score": _jsonable(float(scored.mean())) if len(scored) else None,
             "with_peer_benchmark": int(view["peer_benchmark"].fillna(False).sum())
@@ -128,12 +168,13 @@ def credit_table_payload(
         "peer_medians": {k: _jsonable(v) for k, v in meds.items()},
         "peer_median_labels": {k: KPI_LABELS.get(k, k) for k in meds},
         "pct_kpis": list(PCT_KPIS),
+        "total": total,
         "rows": rows,
     }
 
 
-def industries_payload(*, include_signals: bool = False) -> dict[str, Any]:
-    df = get_credit_df(include_signals=include_signals)
+def industries_payload(*, include_signals: bool = False, scope: str = "core") -> dict[str, Any]:
+    df = get_credit_df(include_signals=include_signals, scope=scope)
     view = df[df["has_financials"]].copy() if "has_financials" in df.columns else df
     items: list[dict[str, Any]] = []
     for group, gdf in view.groupby("industry_group", sort=True):
@@ -148,7 +189,7 @@ def industries_payload(*, include_signals: bool = False) -> dict[str, Any]:
                 "tickers": sorted(gdf["ticker"].astype(str).tolist()),
             }
         )
-    return {"industries": items}
+    return {"industries": items, "scope": scope}
 
 
 def tickers_payload(
@@ -156,11 +197,16 @@ def tickers_payload(
     industry: str | None = None,
     include_signals: bool = False,
     show_incomplete: bool = True,
+    scope: str = "core",
+    q: str | None = None,
+    limit: int | None = None,
+    offset: int = 0,
 ) -> dict[str, Any]:
-    df = get_credit_df(include_signals=include_signals)
+    df = get_credit_df(include_signals=include_signals, scope=scope)
     view = df if show_incomplete else df[df["has_financials"]].copy()
     if industry and industry != "All":
         view = view[view["industry_group"] == industry]
+    view = _filter_q(view, q)
     cols = [
         c
         for c in (
@@ -178,8 +224,10 @@ def tickers_payload(
         )
         if c in view.columns
     ]
-    rows = _df_records(view[cols].sort_values(["industry_group", "ticker"]))
-    return {"tickers": rows, "count": len(rows)}
+    sorted_view = view[cols].sort_values(["industry_group", "ticker"]) if cols else view
+    all_rows = _df_records(sorted_view)
+    rows, total = _paginate(all_rows, limit=limit, offset=offset)
+    return {"tickers": rows, "count": total, "total": total, "scope": scope, "offset": offset, "limit": limit}
 
 
 def credit_detail_payload(ticker: str, *, include_signals: bool = False) -> dict[str, Any]:
@@ -255,14 +303,21 @@ def credit_detail_payload(ticker: str, *, include_signals: bool = False) -> dict
     }
 
 
-def coverage_payload() -> dict[str, Any]:
-    rows = coverage_status()
+def coverage_payload(*, scope: str = "all") -> dict[str, Any]:
+    rows_all = coverage_status(scope="all")
+    rows_core = coverage_status(scope="core")
+    rows = rows_all if scope == "all" else rows_core
     missing = [
         r
         for r in rows
         if not r.get("income_statement") or not r.get("balance_sheet")
     ]
-    return {"rows": rows, "missing_financials": len(missing)}
+    return {
+        "rows": rows,
+        "missing_financials": len(missing),
+        "scope": scope,
+        "totals": {"all": len(rows_all), "core": len(rows_core)},
+    }
 
 
 def valuation_defaults_payload(ticker: str, peers: list[str] | None = None) -> dict[str, Any]:

@@ -105,6 +105,7 @@ def sync_b3_shares(
     ticker: str | None = None,
     force: bool = False,
     use_network: bool = False,
+    scope: str = "all",
 ) -> dict[str, Any]:
     """Build ``data/universe/b3_shares.json`` from universe meta (+ optional live B3).
 
@@ -117,7 +118,7 @@ def sync_b3_shares(
         normalize_ticker(r["ticker"]): r for r in existing.get("shares", []) if r.get("ticker")
     }
 
-    tickers = list_tickers(ticker)
+    tickers = list_tickers(ticker, scope=scope)  # type: ignore[arg-type]
     universe = load_universe()
     part_by_t = {
         normalize_ticker(c["ticker"]): c for c in universe.get("constituents", [])
