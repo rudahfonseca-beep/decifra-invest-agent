@@ -39,6 +39,27 @@ def load_meta(ticker: str) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def load_identity(ticker: str) -> dict[str, Any]:
+    """Company meta enriched via entity resolver (ISIN / multi-ticker) when available."""
+    meta = load_meta(ticker)
+    try:
+        from decifra.entities.resolve import resolve_entity
+
+        ent = resolve_entity(ticker=ticker)
+        if not ent:
+            return meta
+        return {
+            **meta,
+            "cnpj": ent.get("cnpj") or meta.get("cnpj"),
+            "cvm_code": ent.get("cvm_code") or meta.get("cvm_code"),
+            "isins": ent.get("isins") or meta.get("isins") or [],
+            "entity_tickers": ent.get("tickers") or [normalize_ticker(ticker)],
+            "entity_sources": ent.get("sources") or [],
+        }
+    except Exception:
+        return meta
+
+
 def save_meta(ticker: str, meta: dict[str, Any]) -> Path:
     ensure_company_tree(ticker)
     meta = {**meta, "ticker": normalize_ticker(ticker)}

@@ -11,7 +11,7 @@
     <header>
       <h1>decifra-invest-agent session dashboard</h1>
       <p class="sub">Human view of agent AARs, automation traces, improvements, pipeline roadmap, and future prompts.</p>
-      <p class="meta">Generated 2026-08-01 04:15 UTC · 13 agent · 2 automation AARs</p>
+      <p class="meta">Generated 2026-08-01 04:33 UTC · 14 agent · 2 automation AARs</p>
     </header>
 
     <nav class="tabs" role="tablist">
@@ -44,6 +44,15 @@
         </div>
         <h3><a href="../aar/2026-08-01-pipeline-phase-1-ingestion.md">Pipeline Phase 1 — Primary ingestion (FRE, ANBIMA, B3)</a></h3>
         <div class="meta-row">2026-08-01-pipeline-phase-1-ingestion</div>
+      </article>
+      <article class="card">
+        <div class="meta-row">
+          <span class="badge badge-agent">agent</span>
+          <span class="badge badge-completed">completed</span>
+          2026-08-01
+        </div>
+        <h3><a href="../aar/2026-08-01-pipeline-phase-2-entities.md">Pipeline Phase 2 — Entity resolution &amp; fallbacks</a></h3>
+        <div class="meta-row">2026-08-01-pipeline-phase-2-entities</div>
       </article>
       <article class="card">
         <div class="meta-row">
@@ -182,15 +191,10 @@
           <td class="priority-med">med</td>
           <td>pipeline-phase-1-ingestion</td>
         </tr><tr>
-          <td>IMP-023</td>
-          <td>Phase 2: Entity graph CNPJ↔CVM↔ticker↔ISIN (`entities/` + `entities.json`)</td>
-          <td class="priority-high">high</td>
-          <td>unified-pipeline-toolkit</td>
-        </tr><tr>
-          <td>IMP-024</td>
-          <td>Phase 2: Hierarchy of Truth + private-issuer fallback chain</td>
-          <td class="priority-high">high</td>
-          <td>unified-pipeline-toolkit</td>
+          <td>IMP-035</td>
+          <td>Migrate credit/valuation/report joins to `load_identity` / resolver</td>
+          <td class="priority-med">med</td>
+          <td>pipeline-phase-2-entities</td>
         </tr><tr>
           <td>IMP-025</td>
           <td>Phase 3: APV engine (`valuation/apv.py`)</td>
@@ -313,7 +317,7 @@
     <section>
       <h2>Lessons rollup</h2>
       <div class="lessons">
-        <ul><li><strong>Pipeline Phase 1 — Primary ingestion (FRE, ANBIMA, B3):</strong> Keep pipeline sync stages opt-in on `sync_pilot` so daily pilots do not download FRE/funds by default.</li><li><strong>Pipeline Phase 1 — Primary ingestion (FRE, ANBIMA, B3):</strong> Fixture-backed FI parsers unblock CI and lake shape before opaque vendor APIs stabilize.</li><li><strong>Pipeline Phase 1 — Primary ingestion (FRE, ANBIMA, B3):</strong> Avoid Unicode arrows in Rich CLI strings on Windows cp1252 consoles.</li><li><strong>Unified pipeline gap audit + toolkit install:</strong> Keep **implemented** vs **target** sources explicit in always-on rules so agents do not invent ANBIMA/FRE sync.</li><li><strong>Unified pipeline gap audit + toolkit install:</strong> Full end-state charter is large; track as IMP/AUTO phases and re-audit after each phase rather than one megapr.</li><li><strong>Unified pipeline gap audit + toolkit install:</strong> Existing FCFF/WACC DCF and peer credit remain complementary — do not treat them as APV/Merton substitutes or delete them.</li><li><strong>Automation + AAR memory:</strong> Encoding sync + AAR in one runner prevents “silent” collection runs with no handoff.</li><li><strong>Automation + AAR memory:</strong> Retrospective AARs from transcripts immediately reduce re-explore cost for the next agent.</li><li><strong>Automation + AAR memory:</strong> Human HTML should be generated from agent markdown sources, not maintained by hand.</li><li><strong>Automation closeout + automation opportunity tracking:</strong> Dashboard refresh belonging to the runner is not enough if failures are swallowed — closeout must be checked.</li><li><strong>Automation closeout + automation opportunity tracking:</strong> Product gaps (`IMP-*`) and automation meta (`AUTO-*`) mix poorly in one table; split keeps the human dashboard scannable.</li><li><strong>Automation closeout + automation opportunity tracking:</strong> Frozen automation AAR coverage must not be the dashboard source of truth after lake mutations (already fixed via live coverage).</li></ul>
+        <ul><li><strong>Pipeline Phase 1 — Primary ingestion (FRE, ANBIMA, B3):</strong> Keep pipeline sync stages opt-in on `sync_pilot` so daily pilots do not download FRE/funds by default.</li><li><strong>Pipeline Phase 1 — Primary ingestion (FRE, ANBIMA, B3):</strong> Fixture-backed FI parsers unblock CI and lake shape before opaque vendor APIs stabilize.</li><li><strong>Pipeline Phase 1 — Primary ingestion (FRE, ANBIMA, B3):</strong> Avoid Unicode arrows in Rich CLI strings on Windows cp1252 consoles.</li><li><strong>Pipeline Phase 2 — Entity resolution &amp; fallbacks:</strong> Seed entities from existing Ibovespa meta first; debt ISINs are additive.</li><li><strong>Pipeline Phase 2 — Entity resolution &amp; fallbacks:</strong> Keep Hierarchy of Truth as a shared constant consumed by conflict helpers and docs.</li><li><strong>Unified pipeline gap audit + toolkit install:</strong> Keep **implemented** vs **target** sources explicit in always-on rules so agents do not invent ANBIMA/FRE sync.</li><li><strong>Unified pipeline gap audit + toolkit install:</strong> Full end-state charter is large; track as IMP/AUTO phases and re-audit after each phase rather than one megapr.</li><li><strong>Unified pipeline gap audit + toolkit install:</strong> Existing FCFF/WACC DCF and peer credit remain complementary — do not treat them as APV/Merton substitutes or delete them.</li><li><strong>Automation + AAR memory:</strong> Encoding sync + AAR in one runner prevents “silent” collection runs with no handoff.</li><li><strong>Automation + AAR memory:</strong> Retrospective AARs from transcripts immediately reduce re-explore cost for the next agent.</li><li><strong>Automation + AAR memory:</strong> Human HTML should be generated from agent markdown sources, not maintained by hand.</li><li><strong>Automation closeout + automation opportunity tracking:</strong> Dashboard refresh belonging to the runner is not enough if failures are swallowed — closeout must be checked.</li><li><strong>Automation closeout + automation opportunity tracking:</strong> Product gaps (`IMP-*`) and automation meta (`AUTO-*`) mix poorly in one table; split keeps the human dashboard scannable.</li><li><strong>Automation closeout + automation opportunity tracking:</strong> Frozen automation AAR coverage must not be the dashboard source of truth after lake mutations (already fixed via live coverage).</li></ul>
       </div>
     </section>
 
@@ -369,8 +373,8 @@
         <a href="../architecture/unified-pipeline-roadmap.md">roadmap</a> ·
         <a href="../architecture/unified-pipeline-gap-analysis.md">gap analysis</a> ·
         <a href="../architecture/unified-pipeline-branches.md">branches</a></p>
-      <div class="progress-bar progress-bar-lg"><div class="progress-fill" style="width:21%"></div></div>
-      <div class="progress-label">21% · status <code>in_progress</code> · updated 2026-08-01</div>
+      <div class="progress-bar progress-bar-lg"><div class="progress-fill" style="width:36%"></div></div>
+      <div class="progress-label">36% · status <code>in_progress</code> · updated 2026-08-01</div>
     </section>
 
     <section>
@@ -389,8 +393,8 @@
           <span>Entity resolution &amp; fallbacks</span>
           <span class="badge grade-fail">Fail</span>
         </div>
-        <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
-        <div class="progress-label">0% · 2 deliverables</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+        <div class="progress-label">100% · 2 deliverables</div>
       </div>
       <div class="pillar-card">
         <div class="pillar-head">
@@ -488,19 +492,19 @@
       <article class="card phase-card">
         <div class="meta-row">
           <span class="badge badge-phase">Phase 2</span>
-          <span class="badge badge-todo">todo</span>
+          <span class="badge badge-done">done</span>
         </div>
         <h3>Entity resolution &amp; fallbacks</h3>
-        <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
-        <div class="progress-label">0% · branch <code>feat/pipeline-phase-2</code></div>
-        <ul class="deliv-list"><li class="deliv deliv-todo">
-            <span class="badge badge-todo">todo</span>
+        <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+        <div class="progress-label">100% · branch <code>feat/pipeline-phase-2</code></div>
+        <ul class="deliv-list"><li class="deliv deliv-done">
+            <span class="badge badge-done">done</span>
             <strong>IMP-023</strong> Entity graph CNPJ↔CVM↔ticker↔ISIN
-          </li><li class="deliv deliv-todo">
-            <span class="badge badge-todo">todo</span>
+          </li><li class="deliv deliv-done">
+            <span class="badge badge-done">done</span>
             <strong>IMP-024</strong> Hierarchy of Truth + private-issuer fallback
           </li></ul>
-        <div class="meta-row">AAR: <span class="muted">no AAR yet</span></div>
+        <div class="meta-row">AAR: <a href="../aar/2026-08-01-pipeline-phase-2-entities.md">2026-08-01-pipeline-phase-2-entities.md</a></div>
       </article>
       <article class="card phase-card">
         <div class="meta-row">

@@ -94,14 +94,14 @@
       "id": 2,
       "name": "Entity resolution & fallbacks",
       "pillar": "2_entities",
-      "status": "todo",
-      "aar": null,
+      "status": "done",
+      "aar": "2026-08-01-pipeline-phase-2-entities.md",
       "branch": "feat/pipeline-phase-2",
       "deliverables": [
         {
           "id": "IMP-023",
           "title": "Entity graph CNPJ↔CVM↔ticker↔ISIN",
-          "status": "todo",
+          "status": "done",
           "evidence": [
             "src/decifra/entities/",
             "data/universe/entities.json"
@@ -110,7 +110,7 @@
         {
           "id": "IMP-024",
           "title": "Hierarchy of Truth + private-issuer fallback",
-          "status": "todo",
+          "status": "done",
           "evidence": [
             "src/decifra/entities/resolve.py"
           ]

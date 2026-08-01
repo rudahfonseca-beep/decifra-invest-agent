@@ -9,8 +9,7 @@ Lessons from AARs turned into trackable follow-ups. Newest first within each sta
 | ID | Date | Source AAR | Improvement | Priority | Notes |
 |----|------|------------|-------------|----------|-------|
 | IMP-034 | 2026-08-01 | pipeline-phase-1-ingestion | Wire live B3 shares-outstanding detail API into `b3/shares.py` | med | Artifact path exists; network reserved |
-| IMP-023 | 2026-08-01 | unified-pipeline-toolkit | Phase 2: Entity graph CNPJ↔CVM↔ticker↔ISIN (`entities/` + `entities.json`) | high | |
-| IMP-024 | 2026-08-01 | unified-pipeline-toolkit | Phase 2: Hierarchy of Truth + private-issuer fallback chain | high | See workflow stub |
+| IMP-035 | 2026-08-01 | pipeline-phase-2-entities | Migrate credit/valuation/report joins to `load_identity` / resolver | med | Helper shipped |
 | IMP-025 | 2026-08-01 | unified-pipeline-toolkit | Phase 3: APV engine (`valuation/apv.py`) | med | Keep FCFF/WACC |
 | IMP-026 | 2026-08-01 | unified-pipeline-toolkit | Phase 3: Merton / Distance to Default (`credit/merton.py`) | med | |
 | IMP-027 | 2026-08-01 | unified-pipeline-toolkit | Phase 3: Debt capacity flags ND/EBITDA≤3.5x, DSCR≥1.25x | med | `credit/capacity.py` |
@@ -32,6 +31,8 @@ Lessons from AARs turned into trackable follow-ups. Newest first within each sta
 
 | ID | Date | Source AAR | Improvement | Resolved |
 |----|------|------------|-------------|----------|
+| IMP-023 | 2026-08-01 | pipeline-phase-2-entities | Phase 2: Entity graph CNPJ↔CVM↔ticker↔ISIN | 2026-08-01 -- `entities/` + `entities sync` |
+| IMP-024 | 2026-08-01 | pipeline-phase-2-entities | Phase 2: Hierarchy of Truth + private-issuer fallback | 2026-08-01 -- resolve + CLI + workflow |
 | IMP-020 | 2026-08-01 | pipeline-phase-1-ingestion | Phase 1: CVM FRE zip ingest + company extracts | 2026-08-01 -- `cvm/fre.py` + `decifra sync fre` |
 | IMP-021 | 2026-08-01 | pipeline-phase-1-ingestion | Phase 1: ANBIMA debentures/CRI/CRA | 2026-08-01 -- `anbima/` + cache/fixture sync |
 | IMP-022 | 2026-08-01 | pipeline-phase-1-ingestion | Phase 1: B3 shares/mcap + Balcão bonds | 2026-08-01 -- `b3/` + CLI stages |

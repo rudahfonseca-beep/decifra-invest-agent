@@ -1,6 +1,6 @@
-# Workflow: Private issuer fallback (stub)
+# Workflow: Private issuer fallback
 
-**Status:** Planned — not implemented. Tracked as `AUTO-010` / `IMP-024`.  
+**Status:** Implemented (CLI + resolver) — rating agency scrapers still stub. Tracked as `AUTO-010` / IMP-024.  
 **Roadmap:** Phase 2.
 
 ## Purpose
@@ -9,24 +9,26 @@ When a CNPJ query returns **no Category A** CVM equity filings (companhia fechad
 
 ## Fallback order (strict)
 
-1. **ANBIMA** prospectuses / fixed-income issuer docs  
+1. **ANBIMA** prospectuses / fixed-income issuer docs (`data/cache/anbima/`)  
 2. **B3 Balcão** bond registrations  
-3. **Credit rating agency** public press releases (Adjusted Net Debt / Adjusted EBITDA)
+3. **Credit rating agency** public press releases (Adjusted Net Debt / Adjusted EBITDA) — stub until parsers land
 
-Hierarchy of Truth still applies for conflicting figures: CVM > ANBIMA > Rating Agency > Web screeners.
+Hierarchy of Truth still applies for conflicting figures: **CVM > ANBIMA > Rating Agency > Web screeners**.
 
-## Intended CLI (future)
+## CLI
 
 ```bash
-.\.venv\Scripts\python.exe -m decifra entities resolve --cnpj 00000000000191
-.\.venv\Scripts\python.exe -m decifra sync private-issuer --cnpj 00000000000191
+.\.venv\Scripts\python.exe -m decifra entities sync
+.\.venv\Scripts\python.exe -m decifra entities resolve --ticker PETR4
+.\.venv\Scripts\python.exe -m decifra entities resolve --cnpj 33000167000101
+.\.venv\Scripts\python.exe -m decifra entities private-issuer --cnpj 33000167000101
 ```
 
 ## Artifacts
 
-- Entity record under `data/universe/entities.json` (or per-issuer folder when designed)
-- Debt / prospectus extracts under a non-ticker path if no B3 equity ticker exists
-- Lineage tags on every scraped metric
+- `data/universe/entities.json` — canonical CNPJ ↔ CVM ↔ ticker ↔ ISIN
+- Debt extracts under `data/companies/{TICKER}/debt/`
+- Lineage tags on fallback steps (`lineage.source_doc`)
 
 ## Do not
 

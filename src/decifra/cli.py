@@ -19,9 +19,11 @@ from decifra.config import (
 
 app = typer.Typer(help="decifra-invest-agent — Ibovespa research data pipeline and CLI", no_args_is_help=True)
 sync_app = typer.Typer(help="Sync data from B3/CVM/RI sources")
+entities_app = typer.Typer(help="Entity graph: CNPJ/CVM/ticker/ISIN + private-issuer fallback")
 report_app = typer.Typer(help="Build credit/equity research report prompts and HTML")
 valuation_app = typer.Typer(help="Equity valuation: DCF (FCFF/WACC) and trading multiples")
 app.add_typer(sync_app, name="sync")
+app.add_typer(entities_app, name="entities")
 app.add_typer(report_app, name="report")
 app.add_typer(valuation_app, name="valuation")
 console = Console()
@@ -220,6 +222,49 @@ def sync_all_cmd(
     sync_financials_cmd(ticker=ticker, years=financial_years, no_prices=False)
     sync_notices_cmd(ticker=ticker, years=years, no_pdfs=False, max_pdfs=40)
     sync_transcripts_cmd(ticker=ticker, years=years, no_download=False, no_ri=False, max_docs=20)
+
+
+@entities_app.command("sync")
+def entities_sync_cmd() -> None:
+    """Build data/universe/entities.json from Ibovespa meta + debt ISINs."""
+    from decifra.entities.resolve import sync_entities
+
+    with console.status("Building entity graph..."):
+        result = sync_entities(write=True)
+    console.print(
+        f"[green]Entities OK[/green]: {result.get('count', 0)} entities -> {result.get('path', '')}"
+    )
+
+
+@entities_app.command("resolve")
+def entities_resolve_cmd(
+    ticker: Optional[str] = typer.Option(None, help="B3 ticker"),
+    cnpj: Optional[str] = typer.Option(None, help="CNPJ digits or formatted"),
+    isin: Optional[str] = typer.Option(None, help="ISIN"),
+    cvm_code: Optional[str] = typer.Option(None, "--cvm", help="CVM code"),
+) -> None:
+    """Resolve CNPJ <-> CVM <-> ticker <-> ISIN via entities.json (+ meta fallback)."""
+    from decifra.entities.resolve import resolve_entity
+
+    if not any([ticker, cnpj, isin, cvm_code]):
+        console.print("[red]Provide --ticker, --cnpj, --isin, or --cvm[/red]")
+        raise typer.Exit(2)
+    ent = resolve_entity(ticker=ticker, cnpj=cnpj, isin=isin, cvm_code=cvm_code)
+    if not ent:
+        console.print("[yellow]No entity found[/yellow]")
+        raise typer.Exit(1)
+    console.print_json(json.dumps(ent, ensure_ascii=False))
+
+
+@entities_app.command("private-issuer")
+def entities_private_issuer_cmd(
+    cnpj: str = typer.Option(..., help="Issuer CNPJ"),
+) -> None:
+    """Run private-issuer fallback chain (ANBIMA -> Balcao -> rating stub)."""
+    from decifra.entities.resolve import private_issuer_fallback
+
+    result = private_issuer_fallback(cnpj)
+    console.print_json(json.dumps(result, ensure_ascii=False))
 
 
 @app.command("status")
