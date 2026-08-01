@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://decifra.local/schemas/company-profile.schema.json",
+  "title": "CompanyProfile",
+  "type": "object",
+  "required": ["ticker", "cnpj", "metrics"],
+  "properties": {
+    "ticker": { "type": "string" },
+    "cnpj": { "type": "string" },
+    "cvm_code": { "type": "string" },
+    "company_name": { "type": "string" },
+    "isins": { "type": "array", "items": { "type": "string" } },
+    "currency": { "type": "string", "enum": ["BRL", "USD"] },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/metric" }
+    }
+  },
+  "$defs": {
+    "metric": {
+      "type": "object",
+      "required": ["value", "lineage"],
+      "properties": {
+        "value": { "type": ["number", "null"] },
+        "period": { "type": "string" },
+        "lineage": {
+          "type": "object",
+          "required": ["source_doc"],
+          "properties": {
+            "source_doc": { "type": "string" },
+            "account_code": { "type": "string" },
+            "dt_refer": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

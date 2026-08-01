@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://decifra.local/schemas/valuation-waterfall.schema.json",
+  "title": "ValuationWaterfallAnalysis",
+  "type": "object",
+  "required": ["ticker", "inputs", "outputs"],
+  "properties": {
+    "ticker": { "type": "string" },
+    "method": { "type": "string", "enum": ["APV", "OCF_FCFE", "FCFF_WACC"] },
+    "inputs": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["value", "lineage"],
+        "properties": {
+          "value": { "type": ["number", "null"] },
+          "lineage": {
+            "type": "object",
+            "required": ["source_doc"],
+            "properties": { "source_doc": { "type": "string" } }
+          }
+        }
+      }
+    },
+    "outputs": {
+      "type": "object",
+      "properties": {
+        "v_u": { "type": ["number", "null"] },
+        "pv_tax_shield": { "type": ["number", "null"] },
+        "v_l": { "type": ["number", "null"] },
+        "ocf": { "type": ["number", "null"] },
+        "debt_service": { "type": ["number", "null"] },
+        "fcfe": { "type": ["number", "null"] }
+      }
+    },
+    "lineage": {
+      "type": "object",
+      "properties": { "source_doc": { "type": "string" } }
+    }
+  }
+}

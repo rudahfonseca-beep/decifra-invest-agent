@@ -2,7 +2,7 @@
   "updated": "2026-08-01",
   "roadmap": "unified-pipeline-roadmap.md",
   "gap_analysis": "unified-pipeline-gap-analysis.md",
-  "overall_status": "in_progress",
+  "overall_status": "done",
   "pillars": {
     "1_ingestion": {
       "grade": "Fail",
@@ -17,7 +17,7 @@
       "label": "Integrated modeling"
     },
     "4_outputs": {
-      "grade": "Fail",
+      "grade": "Pass",
       "label": "Output schema & UI"
     }
   },
@@ -189,14 +189,14 @@
       "id": 5,
       "name": "Standardization & UI",
       "pillar": "4_outputs",
-      "status": "todo",
-      "aar": null,
+      "status": "done",
+      "aar": "2026-08-01-pipeline-phase-5-schemas-ui.md",
       "branch": "feat/pipeline-phase-5",
       "deliverables": [
         {
           "id": "IMP-031",
           "title": "Three schemas + lineage",
-          "status": "todo",
+          "status": "done",
           "evidence": [
             "src/decifra/schemas/",
             "docs/schemas/"
@@ -205,7 +205,7 @@
         {
           "id": "IMP-032",
           "title": "ITR–debt DT_REFER alignment",
-          "status": "todo",
+          "status": "done",
           "evidence": [
             "src/decifra/schemas/alignment.py"
           ]
@@ -213,7 +213,7 @@
         {
           "id": "IMP-033",
           "title": "React dark-mode research UI",
-          "status": "todo",
+          "status": "done",
           "evidence": [
             "frontend/"
           ]

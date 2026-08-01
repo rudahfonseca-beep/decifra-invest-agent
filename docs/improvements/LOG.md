@@ -11,9 +11,7 @@ Lessons from AARs turned into trackable follow-ups. Newest first within each sta
 | IMP-034 | 2026-08-01 | pipeline-phase-1-ingestion | Wire live B3 shares-outstanding detail API into `b3/shares.py` | med | Artifact path exists; network reserved |
 | IMP-035 | 2026-08-01 | pipeline-phase-2-entities | Migrate credit/valuation/report joins to `load_identity` / resolver | med | Helper shipped |
 | IMP-036 | 2026-08-01 | pipeline-phase-3-modeling | Auto-assemble APV/Merton inputs from CVM + market for a ticker | med | Engines are CLI/formula-first |
-| IMP-031 | 2026-08-01 | unified-pipeline-toolkit | Phase 5: Three schemas (Profile, Credit&Debt Matrix, Val Waterfall) + lineage | high | `schemas/` + `docs/schemas/` |
-| IMP-032 | 2026-08-01 | unified-pipeline-toolkit | Phase 5: ITR–debt schedule DT_REFER alignment in credit/valuation readers | med | Today DFP-preferred |
-| IMP-033 | 2026-08-01 | unified-pipeline-toolkit | Phase 5: React dark-mode research UI (`frontend/`); Streamlit interim | med | |
+| IMP-037 | 2026-08-01 | pipeline-phase-5-schemas-ui | Live lake/API feed for React UI (replace static samples) | med | MVP uses public/sample |
 | IMP-003 | 2026-07-20 | greenfield-pipeline | Expand CVM cache years toward config defaults (2020-2021 DFP/ITR; fato relevante) | med | Partial cache 2022-2025 |
 | IMP-008 | 2026-07-31 | automation-aar | Optionally wrap `sync_pilot.py` in a Cursor Automation once repo is on remote | low | See AUTO-001 |
 | IMP-013 | 2026-07-31 | rename-and-github | Rename local folder `DecifraCR` -> `decifra-invest-agent` after closing Cursor; re-run editable install | med | Dir locked while workspace open |
@@ -26,6 +24,9 @@ Lessons from AARs turned into trackable follow-ups. Newest first within each sta
 
 | ID | Date | Source AAR | Improvement | Resolved |
 |----|------|------------|-------------|----------|
+| IMP-031 | 2026-08-01 | pipeline-phase-5-schemas-ui | Phase 5: Three schemas + lineage | 2026-08-01 -- `schemas/` + `docs/schemas/` |
+| IMP-032 | 2026-08-01 | pipeline-phase-5-schemas-ui | Phase 5: ITR–debt DT_REFER alignment | 2026-08-01 -- `schemas/alignment.py` |
+| IMP-033 | 2026-08-01 | pipeline-phase-5-schemas-ui | Phase 5: React dark-mode MVP | 2026-08-01 -- `frontend/` |
 | IMP-029 | 2026-08-01 | pipeline-phase-4-funds | Phase 4: CVM INF_DIARIO + CDA | 2026-08-01 -- `funds/cvm.py` |
 | IMP-030 | 2026-08-01 | pipeline-phase-4-funds | Phase 4: SEC EDGAR exposure | 2026-08-01 -- `funds/edgar.py` |
 | IMP-025 | 2026-08-01 | pipeline-phase-3-modeling | Phase 3: APV engine | 2026-08-01 -- `valuation/apv.py` |

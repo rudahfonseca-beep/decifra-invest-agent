@@ -20,10 +20,12 @@ from decifra.config import (
 app = typer.Typer(help="decifra-invest-agent — Ibovespa research data pipeline and CLI", no_args_is_help=True)
 sync_app = typer.Typer(help="Sync data from B3/CVM/RI sources")
 entities_app = typer.Typer(help="Entity graph: CNPJ/CVM/ticker/ISIN + private-issuer fallback")
+schemas_app = typer.Typer(help="Standardized Profile / Credit&Debt / Valuation Waterfall schemas")
 report_app = typer.Typer(help="Build credit/equity research report prompts and HTML")
 valuation_app = typer.Typer(help="Equity valuation: DCF (FCFF/WACC) and trading multiples")
 app.add_typer(sync_app, name="sync")
 app.add_typer(entities_app, name="entities")
+app.add_typer(schemas_app, name="schemas")
 app.add_typer(report_app, name="report")
 app.add_typer(valuation_app, name="valuation")
 console = Console()
@@ -294,6 +296,57 @@ def entities_private_issuer_cmd(
     from decifra.entities.resolve import private_issuer_fallback
 
     result = private_issuer_fallback(cnpj)
+    console.print_json(json.dumps(result, ensure_ascii=False))
+
+
+@schemas_app.command("assemble")
+def schemas_assemble_cmd(
+    ticker: str = typer.Option(..., "--ticker", help="Ticker"),
+    ocf: float = typer.Option(250.0, help="OCF for waterfall sample"),
+    interest: float = typer.Option(80.0, help="Interest for waterfall"),
+    amortization: float = typer.Option(20.0, help="Mandatory amortization"),
+    out: Optional[str] = typer.Option(None, help="Output directory for JSON bundle"),
+) -> None:
+    """Assemble Company Profile, Credit&Debt Matrix, Valuation Waterfall with lineage."""
+    from pathlib import Path
+
+    from decifra.schemas.assemble import (
+        assemble_company_profile,
+        assemble_credit_debt_matrix,
+        assemble_valuation_waterfall,
+        write_sample_bundle,
+    )
+
+    if out:
+        paths = write_sample_bundle(Path(out), ticker=ticker)
+        for name, path in paths.items():
+            console.print(f"{name}: {path}")
+        return
+    profile = assemble_company_profile(ticker)
+    matrix = assemble_credit_debt_matrix(
+        ticker, net_debt=700, ebitda=200, ocf=ocf, debt_service=interest + amortization
+    )
+    waterfall = assemble_valuation_waterfall(
+        ticker, ocf=ocf, interest=interest, amortization=amortization
+    )
+    console.print_json(
+        json.dumps(
+            {"profile": profile, "credit_debt_matrix": matrix, "valuation_waterfall": waterfall},
+            ensure_ascii=False,
+        )
+    )
+
+
+@schemas_app.command("align")
+def schemas_align_cmd(
+    statements: str = typer.Option(..., help="Comma-separated statement DT_REFER dates"),
+    debt: str = typer.Option(..., help="Comma-separated debt schedule dates"),
+    max_days: int = typer.Option(45, help="Max day delta for a match"),
+) -> None:
+    """Align ITR DT_REFER dates with debt schedule dates."""
+    from decifra.schemas.alignment import align_itr_debt_dates
+
+    result = align_itr_debt_dates(_split_csv(statements), _split_csv(debt), max_days=max_days)
     console.print_json(json.dumps(result, ensure_ascii=False))
 
 
