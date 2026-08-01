@@ -129,7 +129,10 @@ def _to_float(value: Any) -> float | None:
 def _load_statement(path: Path) -> pd.DataFrame:
     if not path.exists():
         return pd.DataFrame()
-    return pd.read_csv(path, dtype=str).fillna("")
+    try:
+        return pd.read_csv(path, dtype=str).fillna("")
+    except pd.errors.EmptyDataError:
+        return pd.DataFrame()
 
 
 def _dfp_only(df: pd.DataFrame) -> pd.DataFrame:
@@ -148,13 +151,33 @@ def _dfp_only(df: pd.DataFrame) -> pd.DataFrame:
     return work
 
 
+def _scale_factor(period_df: pd.DataFrame) -> float:
+    """CVM reports monetary accounts in thousands (`ESCALA_MOEDA=MIL`) by convention.
+
+    Valuation combines these figures with market data (price x shares, in
+    absolute R$), so every monetary value read here is normalized to
+    absolute reais — unlike `credit/metrics.py`, which only ever computes
+    scale-invariant ratios and can safely leave figures in "thousands".
+    """
+    if period_df.empty or "ESCALA_MOEDA" not in period_df.columns:
+        return 1.0
+    escala = _norm(str(period_df["ESCALA_MOEDA"].iloc[0]))
+    if "milh" in escala:  # "MILHÃO" / "MILHOES"
+        return 1_000_000.0
+    if "mil" in escala:  # "MIL"
+        return 1_000.0
+    return 1.0
+
+
 def _pick_for_period(period_df: pd.DataFrame, kpi: str, codes: list[str]) -> float | None:
     if period_df.empty or "CD_CONTA" not in period_df.columns:
         return None
+    scale = _scale_factor(period_df)
     for code in codes:
         exact = period_df[period_df["CD_CONTA"] == code]
         if not exact.empty:
-            return _to_float(exact.iloc[0]["VL_CONTA"])
+            v = _to_float(exact.iloc[0]["VL_CONTA"])
+            return v * scale if v is not None else None
     needles = DESC_FALLBACK.get(kpi, [])
     if not needles or "DS_CONTA" not in period_df.columns:
         return None
@@ -171,9 +194,11 @@ def _pick_for_period(period_df: pd.DataFrame, kpi: str, codes: list[str]) -> flo
             for code in codes:
                 exact = hits[hits["CD_CONTA"] == code]
                 if not exact.empty:
-                    return _to_float(exact.iloc[0]["VL_CONTA"])
+                    v = _to_float(exact.iloc[0]["VL_CONTA"])
+                    return v * scale if v is not None else None
             continue
-        return _to_float(hits.iloc[0]["VL_CONTA"])
+        v = _to_float(hits.iloc[0]["VL_CONTA"])
+        return v * scale if v is not None else None
     return None
 
 
@@ -234,6 +259,8 @@ def build_annual_history(ticker: str, *, max_years: int = 6) -> pd.DataFrame:
         rows.append(row)
 
     hist = pd.DataFrame(rows).sort_values("period").tail(max_years).reset_index(drop=True)
+    numeric_cols = [c for c in hist.columns if c != "period"]
+    hist[numeric_cols] = hist[numeric_cols].apply(pd.to_numeric, errors="coerce")
 
     def _safe_div(a: pd.Series, b: pd.Series) -> pd.Series:
         b_safe = b.mask(b == 0)
