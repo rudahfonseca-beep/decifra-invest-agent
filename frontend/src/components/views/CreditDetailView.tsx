@@ -70,9 +70,12 @@ export function CreditDetailView({ ticker, tickers, filters, onTickerChange }: P
       </div>
 
       {error && <p className="mb-2 text-xs text-rose-400">{error}</p>}
-      {loading && <p className="text-xs italic text-slate-500">Loading…</p>}
+      {loading && !detail && <p className="text-xs italic text-slate-500">Loading…</p>}
+      {loading && detail && (
+        <p className="mb-2 text-[10px] italic text-slate-600">Refreshing…</p>
+      )}
 
-      {detail?.found && !loading && (
+      {detail?.found && (
         <>
           <div className="mb-3 rounded-md border border-slate-800 bg-slate-900 px-3 py-2.5">
             <div className="text-sm text-slate-100">

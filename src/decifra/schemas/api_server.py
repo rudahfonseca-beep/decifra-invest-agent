@@ -27,6 +27,7 @@ from decifra.schemas.research_api import (
     valuation_run_payload,
 )
 from decifra.schemas.screener import assemble_catalyst_feed, assemble_opportunity_screener
+from decifra.schemas.ui_cache import ttl_get_or_set
 from decifra.store.folders import list_tickers
 from decifra.valuation.dcf import _CVM_THOUSANDS_SCALE
 
@@ -78,30 +79,50 @@ def handle_api(path: str, query: dict[str, list[str]]) -> tuple[int, dict[str, A
         limit_raw = (query.get("limit") or [None])[0]
         limit = int(limit_raw) if limit_raw else None
         names = [normalize_ticker(x) for x in tickers.split(",")] if tickers else None
-        return 200, assemble_opportunity_screener(names, limit=limit)
+        return 200, assemble_opportunity_screener(
+            names, limit=limit, refresh=_bool(query, "refresh", False)
+        )
 
     if path in ("/api/catalysts", "/api/catalyst_feed"):
         limit_raw = (query.get("limit") or ["12"])[0]
-        screener = assemble_opportunity_screener(limit=int(limit_raw))
-        return 200, assemble_catalyst_feed(screener)
+        limit = int(limit_raw)
+        refresh = _bool(query, "refresh", False)
+        # Reuse screener TTL entry so /api/screener + /api/catalysts share one build.
+        screener = assemble_opportunity_screener(limit=limit, refresh=refresh)
+        return 200, assemble_catalyst_feed(screener, limit=limit, refresh=refresh)
 
     if path.startswith("/api/profile/"):
         ticker = normalize_ticker(path.rsplit("/", 1)[-1])
-        return 200, assemble_company_profile(ticker)
+        refresh = _bool(query, "refresh", False)
+        return 200, ttl_get_or_set(
+            f"profile:{ticker}",
+            lambda: assemble_company_profile(ticker),
+            refresh=refresh,
+        )
 
     if path.startswith("/api/debt/"):
         ticker = normalize_ticker(path.rsplit("/", 1)[-1])
-        return 200, _debt_matrix_live(ticker)
+        refresh = _bool(query, "refresh", False)
+        return 200, ttl_get_or_set(
+            f"debt:{ticker}",
+            lambda: _debt_matrix_live(ticker),
+            refresh=refresh,
+        )
 
     if path.startswith("/api/waterfall/"):
         ticker = normalize_ticker(path.rsplit("/", 1)[-1])
-        return 200, _waterfall_live(ticker)
+        refresh = _bool(query, "refresh", False)
+        return 200, ttl_get_or_set(
+            f"waterfall:{ticker}",
+            lambda: _waterfall_live(ticker),
+            refresh=refresh,
+        )
 
     if path == "/api/credit":
         return 200, credit_table_payload(
             industry=(query.get("industry") or [None])[0],
             cohort=(query.get("cohort") or [None])[0],
-            include_signals=_bool(query, "signals", True),
+            include_signals=_bool(query, "signals", False),
             show_incomplete=_bool(query, "incomplete", False),
             refresh=_bool(query, "refresh", False),
         )
@@ -109,11 +130,11 @@ def handle_api(path: str, query: dict[str, list[str]]) -> tuple[int, dict[str, A
     if path.startswith("/api/credit/"):
         ticker = normalize_ticker(path.rsplit("/", 1)[-1])
         return 200, credit_detail_payload(
-            ticker, include_signals=_bool(query, "signals", True)
+            ticker, include_signals=_bool(query, "signals", False)
         )
 
     if path == "/api/industries":
-        return 200, industries_payload(include_signals=_bool(query, "signals", True))
+        return 200, industries_payload(include_signals=_bool(query, "signals", False))
 
     if path == "/api/tickers":
         # Rich ticker list (credit-enriched); plain universe list via ?plain=1
@@ -121,7 +142,7 @@ def handle_api(path: str, query: dict[str, list[str]]) -> tuple[int, dict[str, A
             return 200, {"tickers": list_tickers()}
         return 200, tickers_payload(
             industry=(query.get("industry") or [None])[0],
-            include_signals=_bool(query, "signals", True),
+            include_signals=_bool(query, "signals", False),
             show_incomplete=_bool(query, "incomplete", True),
         )
 

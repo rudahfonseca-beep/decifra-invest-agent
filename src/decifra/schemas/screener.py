@@ -7,6 +7,7 @@ from typing import Any, Literal
 
 from decifra.credit.assemble_models import assemble_capacity, assemble_merton
 from decifra.http_util import normalize_ticker
+from decifra.schemas.ui_cache import ttl_get_or_set
 from decifra.store.folders import list_tickers, load_identity
 from decifra.valuation.assemble_apv import assemble_apv
 from decifra.valuation.market_data import fetch_market_data
@@ -98,28 +99,48 @@ def assemble_opportunity_screener(
     tickers: list[str] | None = None,
     *,
     limit: int | None = None,
+    refresh: bool = False,
 ) -> dict[str, Any]:
-    """Build screener payload for React / API."""
+    """Build screener payload for React / API (TTL-cached)."""
     names = [normalize_ticker(t) for t in (tickers or list_tickers())]
     if limit is not None:
         names = names[:limit]
-    rows: list[dict[str, Any]] = []
-    errors: list[dict[str, str]] = []
-    for t in names:
-        try:
-            rows.append(assemble_screener_row(t))
-        except Exception as exc:  # pragma: no cover - lake gaps
-            errors.append({"ticker": t, "error": str(exc)})
-    return {
-        "as_of": datetime.now(timezone.utc).isoformat(),
-        "rows": rows,
-        "errors": errors,
-    }
+    cache_key = f"screener:{limit}:{','.join(names)}"
+
+    def _build() -> dict[str, Any]:
+        rows: list[dict[str, Any]] = []
+        errors: list[dict[str, str]] = []
+        for t in names:
+            try:
+                rows.append(assemble_screener_row(t))
+            except Exception as exc:  # pragma: no cover - lake gaps
+                errors.append({"ticker": t, "error": str(exc)})
+        return {
+            "as_of": datetime.now(timezone.utc).isoformat(),
+            "rows": rows,
+            "errors": errors,
+        }
+
+    return ttl_get_or_set(cache_key, _build, refresh=refresh)
 
 
-def assemble_catalyst_feed(screener: dict[str, Any] | None = None) -> dict[str, Any]:
+def assemble_catalyst_feed(
+    screener: dict[str, Any] | None = None,
+    *,
+    limit: int = 12,
+    refresh: bool = False,
+) -> dict[str, Any]:
     """Derive a simple catalyst timeline from screener signals + capacity breaches."""
-    payload = screener or assemble_opportunity_screener(limit=12)
+    if screener is not None:
+        return _catalyst_items(screener)
+
+    def _from_screener() -> dict[str, Any]:
+        return _catalyst_items(assemble_opportunity_screener(limit=limit, refresh=refresh))
+
+    return ttl_get_or_set(f"catalysts:{limit}", _from_screener, refresh=refresh)
+
+
+def _catalyst_items(payload: dict[str, Any]) -> dict[str, Any]:
     items: list[dict[str, Any]] = []
     for i, row in enumerate(payload.get("rows") or []):
         sig = row.get("signal") or "safe"

@@ -52,33 +52,29 @@ export default function App() {
 
   const [error, setError] = useState<string | null>(null);
   const [loadingShell, setLoadingShell] = useState(true);
+  const [loadingTicker, setLoadingTicker] = useState(true);
   const [loadingCredit, setLoadingCredit] = useState(true);
   const [feedSource, setFeedSource] = useState<"api" | "sample">("sample");
 
-  const loadCredit = useCallback(
-    (f: FilterState, refresh = false) => {
-      setLoadingCredit(true);
-      const q = qs({
-        industry: f.industry,
-        cohort: f.cohort,
-        signals: f.includeSignals,
-        incomplete: f.showIncomplete,
-        refresh,
-      });
-      fetchJson<CreditTablePayload>([`/api/credit${q}`, `/sample/credit_table.json`])
-        .then((d) => {
-          setCredit(d);
-          if (d.rows?.[0]?.ticker && !d.rows.find((r) => r.ticker === selectedTicker)) {
-            // keep selected if still present; else first row
-          }
-        })
-        .catch((e) => setError(String(e)))
-        .finally(() => setLoadingCredit(false));
-    },
-    [selectedTicker]
-  );
+  const loadCredit = useCallback((f: FilterState, refresh = false) => {
+    setLoadingCredit(true);
+    const q = qs({
+      industry: f.industry,
+      cohort: f.cohort,
+      signals: f.includeSignals,
+      incomplete: f.showIncomplete,
+      refresh,
+    });
+    fetchJson<CreditTablePayload>([`/api/credit${q}`, `/sample/credit_table.json`])
+      .then((d) => setCredit(d))
+      .catch((e) => setError(String(e)))
+      .finally(() => setLoadingCredit(false));
+  }, []);
 
+  // Universe / list shell — once on mount (not on ticker change).
   useEffect(() => {
+    let cancelled = false;
+    setLoadingShell(true);
     Promise.all([
       fetchJson<ScreenerPayload>([
         "/api/screener?limit=12",
@@ -89,13 +85,40 @@ export default function App() {
         "/sample/catalyst_feed.json",
       ]),
       fetchJson<{ industries: IndustryItem[] }>([
-        "/api/industries",
+        `/api/industries${qs({ signals: false })}`,
         "/sample/industries.json",
       ]),
       fetchJson<{ tickers: TickerListItem[] }>([
-        "/api/tickers?incomplete=true",
+        `/api/tickers${qs({ incomplete: true, signals: false })}`,
         "/sample/tickers.json",
       ]),
+    ])
+      .then(([s, c, ind, tix]) => {
+        if (cancelled) return;
+        setScreener(s);
+        setCatalysts(c);
+        setIndustries(ind.industries || []);
+        setTickers(tix.tickers || []);
+        setFeedSource(
+          Array.isArray(ind.industries) && ind.industries.length > 3 ? "api" : "sample"
+        );
+      })
+      .catch((e) => {
+        if (!cancelled) setError(String(e));
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingShell(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Ticker-scoped panes only — keep list data warm when switching names.
+  useEffect(() => {
+    let cancelled = false;
+    setLoadingTicker(true);
+    Promise.all([
       fetchJson<CompanyProfile>([
         `/api/profile/${selectedTicker}`,
         "/sample/company_profile.json",
@@ -109,18 +132,21 @@ export default function App() {
         "/sample/valuation_waterfall.json",
       ]),
     ])
-      .then(([s, c, ind, tix, p, d, w]) => {
-        setScreener(s);
-        setCatalysts(c);
-        setIndustries(ind.industries || []);
-        setTickers(tix.tickers || []);
+      .then(([p, d, w]) => {
+        if (cancelled) return;
         setProfile(p);
         setDebt(d);
         setWaterfall(w);
-        setFeedSource(Array.isArray(ind.industries) && ind.industries.length > 3 ? "api" : "sample");
       })
-      .catch((e) => setError(String(e)))
-      .finally(() => setLoadingShell(false));
+      .catch((e) => {
+        if (!cancelled) setError(String(e));
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingTicker(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [selectedTicker]);
 
   useEffect(() => {
@@ -154,6 +180,11 @@ export default function App() {
   const showCatalyst =
     view === "screener" || view === "credit" || view === "industries" || view === "tickers";
 
+  // Progressive: only block the pane when there is nothing to show yet.
+  const shellBlocking = loadingShell && industries.length === 0 && !screener;
+  const creditBlocking = loadingCredit && !credit;
+  const tickerBlocking = loadingTicker && !profile;
+
   return (
     <div className="flex h-screen overflow-hidden bg-slate-950">
       <Sidebar active={view} onNavigate={setView} />
@@ -168,22 +199,29 @@ export default function App() {
             )}
             <p className="mb-2 text-[10px] text-slate-600">
               Feed: {feedSource === "api" ? "lake API" : "sample JSON"} · `decifra schemas serve`
+              {(loadingShell || loadingCredit || loadingTicker) && " · refreshing…"}
             </p>
 
             {view === "screener" && (
-              <ScreenerView rows={filteredScreener} loading={loadingShell} />
+              <ScreenerView
+                rows={filteredScreener}
+                loading={shellBlocking}
+                refreshing={loadingShell && !shellBlocking}
+              />
             )}
             {view === "industries" && (
               <IndustriesView
                 items={industries}
-                loading={loadingShell}
+                loading={shellBlocking}
+                refreshing={loadingShell && !shellBlocking}
                 onSelectIndustry={goIndustry}
               />
             )}
             {view === "tickers" && (
               <TickersView
                 rows={tickers}
-                loading={loadingShell}
+                loading={shellBlocking}
+                refreshing={loadingShell && !shellBlocking}
                 query={query}
                 onSelectTicker={goTicker}
               />
@@ -192,7 +230,8 @@ export default function App() {
               <CreditOverviewView
                 data={credit}
                 filters={filters}
-                loading={loadingCredit}
+                loading={creditBlocking}
+                refreshing={loadingCredit && !creditBlocking}
                 onFilters={setFilters}
                 onRefresh={() => loadCredit(filters, true)}
                 onSelectTicker={goTicker}
@@ -209,15 +248,35 @@ export default function App() {
             {view === "valuation" && <ValuationView initialTicker={selectedTicker} />}
             {view === "report" && <ReportView />}
             {view === "coverage" && <CoverageView onSelectTicker={goTicker} />}
-            {view === "profile" && <ProfileView profile={profile} loading={loadingShell} />}
-            {view === "debt" && <DebtView debt={debt} loading={loadingShell} />}
+            {view === "profile" && (
+              <ProfileView
+                profile={profile}
+                loading={tickerBlocking}
+                refreshing={loadingTicker && !tickerBlocking}
+              />
+            )}
+            {view === "debt" && (
+              <DebtView
+                debt={debt}
+                loading={tickerBlocking}
+                refreshing={loadingTicker && !tickerBlocking}
+              />
+            )}
             {view === "waterfall" && (
-              <WaterfallView waterfall={waterfall} loading={loadingShell} />
+              <WaterfallView
+                waterfall={waterfall}
+                loading={tickerBlocking}
+                refreshing={loadingTicker && !tickerBlocking}
+              />
             )}
           </main>
 
           {showCatalyst && (
-            <CatalystFeed items={catalysts?.items ?? []} loading={loadingShell} />
+            <CatalystFeed
+              items={catalysts?.items ?? []}
+              loading={shellBlocking}
+              refreshing={loadingShell && !shellBlocking}
+            />
           )}
         </div>
       </div>

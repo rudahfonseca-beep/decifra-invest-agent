@@ -6,6 +6,7 @@ import type { ScreenerRow, Signal } from "../types";
 type Props = {
   rows: ScreenerRow[];
   loading?: boolean;
+  refreshing?: boolean;
 };
 
 function apvTone(pct: number | null | undefined): Signal | "default" {
@@ -36,7 +37,7 @@ function leverageTone(nd: number | null | undefined): Signal | "default" {
   return "default";
 }
 
-export function OpportunityScreener({ rows, loading }: Props) {
+export function OpportunityScreener({ rows, loading, refreshing }: Props) {
   return (
     <div className="min-h-0 flex-1 overflow-auto">
       <div className="mb-3 flex items-end justify-between gap-3">
@@ -46,12 +47,17 @@ export function OpportunityScreener({ rows, loading }: Props) {
             Equity APV and credit leverage / default side-by-side
           </p>
         </div>
-        <div className="text-[10px] text-slate-600">{rows.length} names</div>
+        <div className="text-[10px] text-slate-600">
+          {rows.length} names
+          {refreshing ? " · refreshing…" : ""}
+        </div>
       </div>
 
-      {loading && <p className="text-xs italic text-slate-500">Loading…</p>}
+      {loading && rows.length === 0 && (
+        <p className="text-xs italic text-slate-500">Loading…</p>
+      )}
 
-      {!loading && (
+      {(!loading || rows.length > 0) && (
         <table className="w-full border-collapse text-xs">
           <thead className="sticky top-0 z-10 bg-[#0B1120]">
             <tr className="border-b border-slate-800">

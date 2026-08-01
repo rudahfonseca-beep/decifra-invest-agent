@@ -4,6 +4,7 @@ Session and automation After Action Reports for decifra-invest-agent.
 
 | Date | ID | Title | Type | Status | File |
 |------|-----|-------|------|--------|------|
+| 2026-08-01 | 2026-08-01-ui-load-performance | React / lake API load performance | agent | completed | [2026-08-01-ui-load-performance.md](2026-08-01-ui-load-performance.md) |
 | 2026-08-01 | 2026-08-01-react-streamlit-parity | React Streamlit parity — industries, tickers, research views | agent | completed | [2026-08-01-react-streamlit-parity.md](2026-08-01-react-streamlit-parity.md) |
 | 2026-08-01 | 2026-08-01-backlog-imp-closeout | Close open IMP backlog (034–039, 003, 008, 015–018) | agent | completed | [2026-08-01-backlog-imp-closeout.md](2026-08-01-backlog-imp-closeout.md) |
 | 2026-08-01 | 2026-08-01-terminal-dark-ui | Terminal Dark UI revamp (React MVP) | agent | completed | [2026-08-01-terminal-dark-ui.md](2026-08-01-terminal-dark-ui.md) |
