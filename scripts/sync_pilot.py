@@ -18,7 +18,7 @@ if str(SRC) not in sys.path:
 
 # Core lake stages (default). Pipeline phases 1+ add fre/anbima/b3-* when opted in.
 CORE_STAGES = ("universe", "financials", "notices", "transcripts")
-PIPELINE_STAGES = ("fre", "anbima", "b3-shares", "b3-bonds")
+PIPELINE_STAGES = ("fre", "anbima", "b3-shares", "b3-bonds", "funds", "edgar")
 ALL_STAGES = CORE_STAGES + PIPELINE_STAGES
 
 

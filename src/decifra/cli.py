@@ -211,6 +211,36 @@ def sync_b3_bonds_cmd(
     )
 
 
+@sync_app.command("funds")
+def sync_funds_cmd(
+    year: int = typer.Option(2026, help="Reference year"),
+    month: int = typer.Option(7, help="Reference month"),
+    network: bool = typer.Option(False, help="Download CVM zips (default: fixture/cache)"),
+) -> None:
+    """Sync CVM Funds INF_DIARIO + CDA into data/funds/."""
+    from decifra.funds import sync_cvm_funds
+
+    with console.status("Syncing CVM funds..."):
+        result = sync_cvm_funds(year=year, month=month, from_cache_only=not network)
+    console.print(
+        f"[green]Funds OK[/green]: wrote {len(result.get('written') or [])} files · "
+        f"{len(result.get('errors') or [])} warnings"
+    )
+
+
+@sync_app.command("edgar")
+def sync_edgar_cmd(
+    query: Optional[str] = typer.Option(None, help="Issuer search query"),
+    network: bool = typer.Option(False, help="Hit SEC EDGAR (default: sample fixture)"),
+) -> None:
+    """Sync SEC EDGAR ADR/foreign exposure snapshot."""
+    from decifra.funds import sync_edgar
+
+    with console.status("Syncing EDGAR exposure..."):
+        result = sync_edgar(query=query, use_network=network)
+    console.print(f"[green]EDGAR OK[/green]: {result['count']} exposures -> {result['path']}")
+
+
 @sync_app.command("all")
 def sync_all_cmd(
     ticker: Optional[str] = typer.Option(None, help="Limit to one ticker after universe sync"),

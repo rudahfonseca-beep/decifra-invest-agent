@@ -11,7 +11,7 @@
     <header>
       <h1>decifra-invest-agent session dashboard</h1>
       <p class="sub">Human view of agent AARs, automation traces, improvements, pipeline roadmap, and future prompts.</p>
-      <p class="meta">Generated 2026-08-01 04:36 UTC · 15 agent · 2 automation AARs</p>
+      <p class="meta">Generated 2026-08-01 04:37 UTC · 16 agent · 2 automation AARs</p>
     </header>
 
     <nav class="tabs" role="tablist">
@@ -62,6 +62,15 @@
         </div>
         <h3><a href="../aar/2026-08-01-pipeline-phase-3-modeling.md">Pipeline Phase 3 — APV, Merton, capacity, waterfall</a></h3>
         <div class="meta-row">2026-08-01-pipeline-phase-3-modeling</div>
+      </article>
+      <article class="card">
+        <div class="meta-row">
+          <span class="badge badge-agent">agent</span>
+          <span class="badge badge-completed">completed</span>
+          2026-08-01
+        </div>
+        <h3><a href="../aar/2026-08-01-pipeline-phase-4-funds.md">Pipeline Phase 4 — Fund exposure (CVM + EDGAR)</a></h3>
+        <div class="meta-row">2026-08-01-pipeline-phase-4-funds</div>
       </article>
       <article class="card">
         <div class="meta-row">
@@ -210,16 +219,6 @@
           <td class="priority-med">med</td>
           <td>pipeline-phase-3-modeling</td>
         </tr><tr>
-          <td>IMP-029</td>
-          <td>Phase 4: CVM Funds INF_DIARIO + CDA</td>
-          <td class="priority-med">med</td>
-          <td>unified-pipeline-toolkit</td>
-        </tr><tr>
-          <td>IMP-030</td>
-          <td>Phase 4: SEC EDGAR fund/issuer exposure</td>
-          <td class="priority-low">low</td>
-          <td>unified-pipeline-toolkit</td>
-        </tr><tr>
           <td>IMP-031</td>
           <td>Phase 5: Three schemas (Profile, Credit&amp;Debt Matrix, Val Waterfall) + lineage</td>
           <td class="priority-high">high</td>
@@ -311,7 +310,7 @@
     <section>
       <h2>Lessons rollup</h2>
       <div class="lessons">
-        <ul><li><strong>Pipeline Phase 1 — Primary ingestion (FRE, ANBIMA, B3):</strong> Keep pipeline sync stages opt-in on `sync_pilot` so daily pilots do not download FRE/funds by default.</li><li><strong>Pipeline Phase 1 — Primary ingestion (FRE, ANBIMA, B3):</strong> Fixture-backed FI parsers unblock CI and lake shape before opaque vendor APIs stabilize.</li><li><strong>Pipeline Phase 1 — Primary ingestion (FRE, ANBIMA, B3):</strong> Avoid Unicode arrows in Rich CLI strings on Windows cp1252 consoles.</li><li><strong>Pipeline Phase 2 — Entity resolution &amp; fallbacks:</strong> Seed entities from existing Ibovespa meta first; debt ISINs are additive.</li><li><strong>Pipeline Phase 2 — Entity resolution &amp; fallbacks:</strong> Keep Hierarchy of Truth as a shared constant consumed by conflict helpers and docs.</li><li><strong>Pipeline Phase 3 — APV, Merton, capacity, waterfall:</strong> Keep new engines complementary — acceptance is coexistence with DCF/peer scores.</li><li><strong>Pipeline Phase 3 — APV, Merton, capacity, waterfall:</strong> Capacity thresholds (3.5x / 1.25x) belong in named constants for report/schema reuse.</li><li><strong>Unified pipeline gap audit + toolkit install:</strong> Keep **implemented** vs **target** sources explicit in always-on rules so agents do not invent ANBIMA/FRE sync.</li><li><strong>Unified pipeline gap audit + toolkit install:</strong> Full end-state charter is large; track as IMP/AUTO phases and re-audit after each phase rather than one megapr.</li><li><strong>Unified pipeline gap audit + toolkit install:</strong> Existing FCFF/WACC DCF and peer credit remain complementary — do not treat them as APV/Merton substitutes or delete them.</li><li><strong>Automation + AAR memory:</strong> Encoding sync + AAR in one runner prevents “silent” collection runs with no handoff.</li><li><strong>Automation + AAR memory:</strong> Retrospective AARs from transcripts immediately reduce re-explore cost for the next agent.</li><li><strong>Automation + AAR memory:</strong> Human HTML should be generated from agent markdown sources, not maintained by hand.</li></ul>
+        <ul><li><strong>Pipeline Phase 1 — Primary ingestion (FRE, ANBIMA, B3):</strong> Keep pipeline sync stages opt-in on `sync_pilot` so daily pilots do not download FRE/funds by default.</li><li><strong>Pipeline Phase 1 — Primary ingestion (FRE, ANBIMA, B3):</strong> Fixture-backed FI parsers unblock CI and lake shape before opaque vendor APIs stabilize.</li><li><strong>Pipeline Phase 1 — Primary ingestion (FRE, ANBIMA, B3):</strong> Avoid Unicode arrows in Rich CLI strings on Windows cp1252 consoles.</li><li><strong>Pipeline Phase 2 — Entity resolution &amp; fallbacks:</strong> Seed entities from existing Ibovespa meta first; debt ISINs are additive.</li><li><strong>Pipeline Phase 2 — Entity resolution &amp; fallbacks:</strong> Keep Hierarchy of Truth as a shared constant consumed by conflict helpers and docs.</li><li><strong>Pipeline Phase 3 — APV, Merton, capacity, waterfall:</strong> Keep new engines complementary — acceptance is coexistence with DCF/peer scores.</li><li><strong>Pipeline Phase 3 — APV, Merton, capacity, waterfall:</strong> Capacity thresholds (3.5x / 1.25x) belong in named constants for report/schema reuse.</li><li><strong>Pipeline Phase 4 — Fund exposure (CVM + EDGAR):</strong> Keep fund/EDGAR sync offline-default so CI and agents do not pull multi-GB CVM FI dumps accidentally.</li><li><strong>Unified pipeline gap audit + toolkit install:</strong> Keep **implemented** vs **target** sources explicit in always-on rules so agents do not invent ANBIMA/FRE sync.</li><li><strong>Unified pipeline gap audit + toolkit install:</strong> Full end-state charter is large; track as IMP/AUTO phases and re-audit after each phase rather than one megapr.</li><li><strong>Unified pipeline gap audit + toolkit install:</strong> Existing FCFF/WACC DCF and peer credit remain complementary — do not treat them as APV/Merton substitutes or delete them.</li><li><strong>Automation + AAR memory:</strong> Encoding sync + AAR in one runner prevents “silent” collection runs with no handoff.</li><li><strong>Automation + AAR memory:</strong> Retrospective AARs from transcripts immediately reduce re-explore cost for the next agent.</li><li><strong>Automation + AAR memory:</strong> Human HTML should be generated from agent markdown sources, not maintained by hand.</li></ul>
       </div>
     </section>
 
@@ -367,8 +366,8 @@
         <a href="../architecture/unified-pipeline-roadmap.md">roadmap</a> ·
         <a href="../architecture/unified-pipeline-gap-analysis.md">gap analysis</a> ·
         <a href="../architecture/unified-pipeline-branches.md">branches</a></p>
-      <div class="progress-bar progress-bar-lg"><div class="progress-fill" style="width:64%"></div></div>
-      <div class="progress-label">64% · status <code>in_progress</code> · updated 2026-08-01</div>
+      <div class="progress-bar progress-bar-lg"><div class="progress-fill" style="width:79%"></div></div>
+      <div class="progress-label">79% · status <code>in_progress</code> · updated 2026-08-01</div>
     </section>
 
     <section>
@@ -379,8 +378,8 @@
           <span>Multi-source ingestion</span>
           <span class="badge grade-fail">Fail</span>
         </div>
-        <div class="progress-bar"><div class="progress-fill" style="width:60%"></div></div>
-        <div class="progress-label">60% · 5 deliverables</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+        <div class="progress-label">100% · 5 deliverables</div>
       </div>
       <div class="pillar-card">
         <div class="pillar-head">
@@ -526,19 +525,19 @@
       <article class="card phase-card">
         <div class="meta-row">
           <span class="badge badge-phase">Phase 4</span>
-          <span class="badge badge-todo">todo</span>
+          <span class="badge badge-done">done</span>
         </div>
         <h3>Fund exposure</h3>
-        <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
-        <div class="progress-label">0% · branch <code>feat/pipeline-phase-4</code></div>
-        <ul class="deliv-list"><li class="deliv deliv-todo">
-            <span class="badge badge-todo">todo</span>
+        <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+        <div class="progress-label">100% · branch <code>feat/pipeline-phase-4</code></div>
+        <ul class="deliv-list"><li class="deliv deliv-done">
+            <span class="badge badge-done">done</span>
             <strong>IMP-029</strong> CVM INF_DIARIO + CDA
-          </li><li class="deliv deliv-todo">
-            <span class="badge badge-todo">todo</span>
+          </li><li class="deliv deliv-done">
+            <span class="badge badge-done">done</span>
             <strong>IMP-030</strong> SEC EDGAR fund/issuer exposure
           </li></ul>
-        <div class="meta-row">AAR: <span class="muted">no AAR yet</span></div>
+        <div class="meta-row">AAR: <a href="../aar/2026-08-01-pipeline-phase-4-funds.md">2026-08-01-pipeline-phase-4-funds.md</a></div>
       </article>
       <article class="card phase-card">
         <div class="meta-row">

@@ -163,14 +163,14 @@
       "id": 4,
       "name": "Fund exposure",
       "pillar": "1_ingestion",
-      "status": "todo",
-      "aar": null,
+      "status": "done",
+      "aar": "2026-08-01-pipeline-phase-4-funds.md",
       "branch": "feat/pipeline-phase-4",
       "deliverables": [
         {
           "id": "IMP-029",
           "title": "CVM INF_DIARIO + CDA",
-          "status": "todo",
+          "status": "done",
           "evidence": [
             "src/decifra/funds/cvm.py"
           ]
@@ -178,7 +178,7 @@
         {
           "id": "IMP-030",
           "title": "SEC EDGAR fund/issuer exposure",
-          "status": "todo",
+          "status": "done",
           "evidence": [
             "src/decifra/funds/edgar.py"
           ]
