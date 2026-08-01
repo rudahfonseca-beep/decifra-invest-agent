@@ -16,7 +16,7 @@ Related: IMP-039 · IMP-037 (live feed) · IMP-038 (screener assembly).
 | 6 | **Lineage freshness** | Every metric cell shows source freshness string (ITR/ANBIMA/…) | Terminal Dark UX rule |
 | 7 | **Identity enrichment** | Profile shows CNPJ + ISINs from `load_identity` / entities.json | IMP-035 |
 | 8 | **Smoke suite green** | `pytest tests/test_credit.py tests/test_valuation_*.py tests/test_pipeline_phase*.py tests/test_report_*.py -q` | CI / local |
-| 9 | **Ops runbook** | README documents `npm run dev` + `decifra schemas serve` (or export-ui) for analysts | docs |
+| 9 | **Ops runbook** | README documents `decifra ui` (npm ensure + schemas serve + Vite); manual `npm run dev` + `schemas serve` / export-ui still documented | docs |
 
 ## Nice-to-have (non-blocking)
 

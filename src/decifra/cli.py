@@ -14,6 +14,7 @@ from decifra.config import (
     DEFAULT_FORECAST_YEARS,
     DEFAULT_FRE_YEARS,
     DEFAULT_NOTICE_YEARS,
+    PROJECT_ROOT,
     ensure_dirs,
 )
 
@@ -1117,6 +1118,94 @@ def dashboard_cmd(
             ]
         )
     )
+
+
+@app.command("ui")
+def ui_cmd(
+    port: int = typer.Option(5173, help="Vite dev server port"),
+    api_port: int = typer.Option(8765, help="Lake API port (schemas serve)"),
+    skip_install: bool = typer.Option(
+        False, "--skip-install", help="Skip npm install even if node_modules is missing"
+    ),
+    no_api: bool = typer.Option(
+        False, "--no-api", help="Do not start schemas serve (UI falls back to public/sample/)"
+    ),
+) -> None:
+    """Launch the React Terminal Dark UI (npm ensure + optional lake API + Vite)."""
+    import shutil
+    import subprocess
+    import time
+
+    frontend = PROJECT_ROOT / "frontend"
+    if not (frontend / "package.json").is_file():
+        console.print(f"[red]frontend/ not found at[/red] {frontend}")
+        raise typer.Exit(1)
+
+    npm = shutil.which("npm")
+    node = shutil.which("node")
+    if not npm or not node:
+        console.print(
+            "[red]Node.js / npm not found on PATH.[/red] "
+            "Install Node 18+ from https://nodejs.org then retry."
+        )
+        raise typer.Exit(1)
+
+    node_modules = frontend / "node_modules"
+    if not node_modules.is_dir() and not skip_install:
+        console.print(f"Installing frontend deps in {frontend} …")
+        code = subprocess.call([npm, "install"], cwd=str(frontend))
+        if code != 0:
+            console.print("[red]npm install failed.[/red]")
+            raise typer.Exit(code)
+    elif not node_modules.is_dir() and skip_install:
+        console.print(
+            "[red]frontend/node_modules missing.[/red] "
+            "Run without --skip-install, or: cd frontend && npm install"
+        )
+        raise typer.Exit(1)
+
+    api_proc: subprocess.Popen[bytes] | None = None
+    try:
+        if not no_api:
+            console.print(f"Starting lake API on http://127.0.0.1:{api_port} …")
+            api_proc = subprocess.Popen(
+                [
+                    sys.executable,
+                    "-m",
+                    "decifra",
+                    "schemas",
+                    "serve",
+                    "--host",
+                    "127.0.0.1",
+                    "--port",
+                    str(api_port),
+                ],
+                cwd=str(PROJECT_ROOT),
+            )
+            time.sleep(0.6)
+            if api_proc.poll() is not None:
+                console.print(
+                    f"[red]Lake API exited early (code {api_proc.returncode}).[/red]"
+                )
+                raise typer.Exit(api_proc.returncode or 1)
+        else:
+            console.print("[yellow]--no-api:[/yellow] UI will use public/sample/ fixtures.")
+
+        console.print(f"Starting Vite on http://127.0.0.1:{port} …")
+        raise SystemExit(
+            subprocess.call(
+                [npm, "run", "dev", "--", "--port", str(port), "--host", "127.0.0.1"],
+                cwd=str(frontend),
+            )
+        )
+    finally:
+        if api_proc is not None and api_proc.poll() is None:
+            console.print("Stopping lake API …")
+            api_proc.terminate()
+            try:
+                api_proc.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                api_proc.kill()
 
 
 if __name__ == "__main__":

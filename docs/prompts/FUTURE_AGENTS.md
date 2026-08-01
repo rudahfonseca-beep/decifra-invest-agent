@@ -59,11 +59,11 @@ Completed work (do not re-run unless regressing): prices backfill (IMP-001), ASA
 
 ## Ops / hygiene
 
-5. **Rename local folder (IMP-013)**  
-   `After closing Cursor, rename DecifraCR -> decifra-invest-agent, reopen, re-run editable install, confirm decifra CLI.`
-
-6. **Cursor Automation wrapper (AUTO-001 / IMP-008)**  
+5. **Cursor Automation wrapper (AUTO-001 / IMP-008)**  
    `Optionally wrap scripts/sync_pilot.py in a Cursor Automation now that the repo is on GitHub. Dashboard refresh is already part of the pilot closeout.`
 
-7. **Session closeout**  
+6. **Session closeout**  
    `Write an AAR for this session using docs/aar/_TEMPLATE.md (plan / happened / gaps / lessons / improvements). Update docs/aar/INDEX.md, docs/improvements/LOG.md and/or AUTOMATION.md, and run python scripts/update_session_dashboard.py.`
+
+7. **React UI one-command**  
+   `From repo root: .\.venv\Scripts\python.exe -m decifra ui (or scripts/dev_ui.ps1). Installs frontend/node_modules if missing, starts schemas serve + Vite.`

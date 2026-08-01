@@ -11,7 +11,7 @@
     <header>
       <h1>decifra-invest-agent session dashboard</h1>
       <p class="sub">Human view of agent AARs, automation traces, improvements, pipeline roadmap, and future prompts.</p>
-      <p class="meta">Generated 2026-08-01 14:39 UTC · 23 agent · 2 automation AARs</p>
+      <p class="meta">Generated 2026-08-01 17:36 UTC · 23 agent · 2 automation AARs</p>
     </header>
 
     <nav class="tabs" role="tablist">
@@ -24,11 +24,11 @@
       <h2>Coverage snapshot</h2>
       <p class="sub">Live lake via <code>coverage_status</code> (falls back to latest automation AAR).</p>
       <div class="stats">
-      <div class="stat"><div class="label">tickers</div><div class="value">78</div></div>
-      <div class="stat"><div class="label">financials</div><div class="value">78/78</div></div>
-      <div class="stat"><div class="label">prices</div><div class="value">78/78</div></div>
-      <div class="stat"><div class="label">notices</div><div class="value">78/78</div></div>
-      <div class="stat"><div class="label">transcripts</div><div class="value">78/78</div></div>
+      <div class="stat"><div class="label">tickers</div><div class="value">501</div></div>
+      <div class="stat"><div class="label">financials</div><div class="value">78/501</div></div>
+      <div class="stat"><div class="label">prices</div><div class="value">78/501</div></div>
+      <div class="stat"><div class="label">notices</div><div class="value">78/501</div></div>
+      <div class="stat"><div class="label">transcripts</div><div class="value">78/501</div></div>
       </div>
     </section>
 
@@ -141,6 +141,15 @@
           <span class="badge badge-completed">completed</span>
           2026-08-01
         </div>
+        <h3><a href="../aar/2026-08-01-ui-one-command.md">Fix DecifraCR leftovers + one-command React UI</a></h3>
+        <div class="meta-row">2026-08-01-ui-one-command</div>
+      </article>
+      <article class="card">
+        <div class="meta-row">
+          <span class="badge badge-agent">agent</span>
+          <span class="badge badge-completed">completed</span>
+          2026-08-01
+        </div>
         <h3><a href="../aar/2026-08-01-unified-pipeline-toolkit.md">Unified pipeline gap audit + toolkit install</a></h3>
         <div class="meta-row">2026-08-01-unified-pipeline-toolkit</div>
       </article>
@@ -161,15 +170,6 @@
         </div>
         <h3><a href="../aar/2026-07-31-automation-dashboard-track.md">Automation closeout + automation opportunity tracking</a></h3>
         <div class="meta-row">2026-07-31-automation-dashboard-track</div>
-      </article>
-      <article class="card">
-        <div class="meta-row">
-          <span class="badge badge-agent">agent</span>
-          <span class="badge badge-completed">completed</span>
-          2026-07-31
-        </div>
-        <h3><a href="../aar/2026-07-31-credit-report-generation.md">Credit report HTML generation from prompt</a></h3>
-        <div class="meta-row">2026-07-31-credit-report-generation</div>
       </article>
       <article class="card">
         <div class="meta-row">
@@ -276,11 +276,6 @@
           <td>Streamlit credit/status use `list_tickers(scope=)` consistently</td>
           <td class="priority-low">low</td>
           <td>b3-universe-scale</td>
-        </tr><tr>
-          <td>IMP-013</td>
-          <td>Rename local folder `DecifraCR` -&gt; `decifra-invest-agent` after closing Cursor; re-run editable install</td>
-          <td class="priority-med">med</td>
-          <td>rename-and-github</td>
         </tr></tbody></table>
     </section>
 
@@ -362,14 +357,14 @@
           <strong>14. Save sync_pilot Automation</strong>
           <div class="prompt-body">Finish the Cursor Automation draft for scripts/sync_pilot.py (see docs/workflows/sync-pilot-automation.md): set schedule if desired, confirm repo scope, Save.</div>
         </li><li>
-          <strong>5. Rename local folder (IMP-013)</strong>
-          <div class="prompt-body">After closing Cursor, rename DecifraCR -&gt; decifra-invest-agent, reopen, re-run editable install, confirm decifra CLI.</div>
-        </li><li>
-          <strong>6. Cursor Automation wrapper (AUTO-001 / IMP-008)</strong>
+          <strong>5. Cursor Automation wrapper (AUTO-001 / IMP-008)</strong>
           <div class="prompt-body">Optionally wrap scripts/sync_pilot.py in a Cursor Automation now that the repo is on GitHub. Dashboard refresh is already part of the pilot closeout.</div>
         </li><li>
-          <strong>7. Session closeout</strong>
+          <strong>6. Session closeout</strong>
           <div class="prompt-body">Write an AAR for this session using docs/aar/_TEMPLATE.md (plan / happened / gaps / lessons / improvements). Update docs/aar/INDEX.md, docs/improvements/LOG.md and/or AUTOMATION.md, and run python scripts/update_session_dashboard.py.</div>
+        </li><li>
+          <strong>7. React UI one-command</strong>
+          <div class="prompt-body">From repo root: .\.venv\Scripts\python.exe -m decifra ui (or scripts/dev_ui.ps1). Installs frontend/node_modules if missing, starts schemas serve + Vite.</div>
         </li>
       </ul>
     </section>

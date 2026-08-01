@@ -27,6 +27,8 @@ Align the local project with the empty GitHub repo `rudahfonseca-beep/decifra-in
 - Historical automation AARs still mention old absolute paths under `DecifraCR` (left as factual run records).
 - Editable install `direct_url.json` still points at the old folder path until `pip install -e` is re-run after rename.
 
+**Follow-up (2026-08-01):** Folder rename completed (`decifra-invest-agent`); IMP-013 closed after recreating `.venv` + editable install.
+
 ## 4. Lessons
 
 - Renaming the workspace directory cannot succeed while Cursor has that folder open; do branding + git first, rename after close/reopen.
@@ -36,4 +38,4 @@ Align the local project with the empty GitHub repo `rudahfonseca-beep/decifra-in
 
 | ID | Improvement | Priority | Status |
 |----|-------------|----------|--------|
-| IMP-013 | After closing Cursor: rename `DecifraCR` → `decifra-invest-agent`, reopen folder, re-run `pip install -e ".[dev]"` | med | open |
+| IMP-013 | After closing Cursor: rename `DecifraCR` → `decifra-invest-agent`, reopen folder, re-run `pip install -e ".[dev]"` | med | open → done (2026-08-01) |

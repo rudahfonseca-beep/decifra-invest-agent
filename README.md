@@ -19,11 +19,11 @@ For each equity in the local universe:
 
 ## Install
 
+From the repo root (`decifra-invest-agent/`):
+
 ```bash
-cd decifra-invest-agent
 python -m venv .venv
-.venv\Scripts\activate          # Windows
-pip install -e ".[dev]"
+.\.venv\Scripts\python.exe -m pip install -e ".[dev]"
 copy .env.example .env          # optional keys
 ```
 
@@ -164,5 +164,5 @@ End-state vision (equity + credit + fixed income + funds) is documented under [`
 - First `sync financials` downloads multi‑MB yearly ZIPs into `data/cache/cvm/` and is idempotent.
 - Transcripts in Brazil are often slides/audio, not clean text — extraction is best-effort.
 - Universe is **all B3 listed equities** with tiered heavy sync (core = IBOV ∪ watchlist).
-- React Terminal Dark: `frontend/` + `decifra schemas serve` (scoped API + `data/cache/ui/`).
+- React Terminal Dark: `.\.venv\Scripts\python.exe -m decifra ui` (or `.\scripts\dev_ui.ps1`) — npm ensure + lake API + Vite. Scoped API + `data/cache/ui/`.
 - Prefer `.\.venv\Scripts\python.exe -m decifra` on Windows (global `decifra` may not be on PATH).

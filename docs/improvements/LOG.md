@@ -10,12 +10,12 @@ Lessons from AARs turned into trackable follow-ups. Newest first within each sta
 |----|------|------------|-------------|----------|-------|
 | IMP-043 | 2026-08-01 | b3-universe-scale | Live smoke: full `sync universe` + sample `financials --scope all` | med | Network/time; verify equities.json count much larger than 78 |
 | IMP-044 | 2026-08-01 | b3-universe-scale | Streamlit credit/status use `list_tickers(scope=)` consistently | low | Interim UI until React cutover |
-| IMP-013 | 2026-07-31 | rename-and-github | Rename local folder `DecifraCR` -> `decifra-invest-agent` after closing Cursor; re-run editable install | med | Dir locked while workspace open — human step |
 
 ## Done
 
 | ID | Date | Source AAR | Improvement | Resolved |
 |----|------|------------|-------------|----------|
+| IMP-013 | 2026-07-31 | rename-and-github | Rename local folder `DecifraCR` -> `decifra-invest-agent`; re-run editable install | 2026-08-01 -- folder at `decifra-invest-agent`; venv recreated |
 | IMP-041 | 2026-08-01 | ui-load-performance / b3-universe-scale | Persist UI JSON bundle + warm disk cache on sync_pilot closeout | 2026-08-01 -- `export-ui` + `warm-ui-cache` in pilot |
 | IMP-042 | 2026-08-01 | ui-load-performance / b3-universe-scale | Parallelize cold screener row assembly (thread pool) | 2026-08-01 -- `screener.py` ThreadPoolExecutor |
 | IMP-040 | 2026-08-01 | ui-load-performance | Dual credit cache + screener TTL + React load split / SWR | 2026-08-01 -- `ui_cache.py` + App.tsx split fetches |
