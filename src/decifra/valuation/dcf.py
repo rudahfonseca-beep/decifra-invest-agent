@@ -35,6 +35,10 @@ from decifra.valuation.historical import build_annual_history
 from decifra.valuation.market_data import fetch_market_data
 
 _TERMINAL_GROWTH_BUFFER = 0.005
+# CVM statements report monetary accounts in thousands of reais; credit/metrics.py
+# (unlike valuation/historical.py) leaves them at that native scale since it only
+# ever computes scale-invariant ratios.
+_CVM_THOUSANDS_SCALE = 1_000.0
 
 
 def _fade(y1: float, terminal: float, n: int) -> list[float]:
@@ -192,22 +196,30 @@ def discount_cash_flow(
     if assumptions is None:
         assumptions, _ = build_default_assumptions(ticker, peers=peers)
 
+    # `historical.py` normalizes CVM's native thousands-of-reais scale to absolute
+    # reais (to match market data); `credit/metrics.py` does not, since its ratios
+    # are scale-invariant. Any absolute monetary fallback sourced from `kpis` must
+    # be rescaled here, or it will silently corrupt enterprise/equity value by 1000x.
     base_revenue: float | None = None
     if not hist.empty and pd.notna(hist["revenue"].iloc[-1]):
         base_revenue = float(hist["revenue"].iloc[-1])
     elif kpis.get("revenue") is not None:
-        base_revenue = float(kpis["revenue"])
+        base_revenue = float(kpis["revenue"]) * _CVM_THOUSANDS_SCALE
     if not base_revenue or base_revenue <= 0:
         warnings.append("No usable revenue base found locally; projection starts from 0.")
         base_revenue = 0.0
 
-    gross_debt = kpis.get("gross_debt")
-    if gross_debt is None and not hist.empty and pd.notna(hist["gross_debt"].iloc[-1]):
+    gross_debt: float | None = None
+    if not hist.empty and pd.notna(hist["gross_debt"].iloc[-1]):
         gross_debt = float(hist["gross_debt"].iloc[-1])
+    elif kpis.get("gross_debt") is not None:
+        gross_debt = float(kpis["gross_debt"]) * _CVM_THOUSANDS_SCALE
 
-    net_debt = kpis.get("net_debt")
-    if net_debt is None and not hist.empty and pd.notna(hist["net_debt"].iloc[-1]):
+    net_debt: float | None = None
+    if not hist.empty and pd.notna(hist["net_debt"].iloc[-1]):
         net_debt = float(hist["net_debt"].iloc[-1])
+    elif kpis.get("net_debt") is not None:
+        net_debt = float(kpis["net_debt"]) * _CVM_THOUSANDS_SCALE
     if net_debt is None:
         warnings.append("Net debt unavailable locally; showing enterprise value only.")
 

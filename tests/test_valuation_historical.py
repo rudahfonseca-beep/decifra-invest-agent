@@ -103,6 +103,28 @@ def test_cagr_and_trailing_stats(three_year_history: Path) -> None:
     assert trailing_median(hist, "ebit_margin", 3) == pytest.approx(0.20, abs=1e-6)
 
 
+def test_mil_scale_normalized_to_absolute_reais(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """CVM reports monetary accounts in thousands (ESCALA_MOEDA=MIL); historical.py
+    must scale to absolute reais so valuation can safely combine these figures
+    with market data (price x shares), which is already in absolute reais."""
+    monkeypatch.setattr("decifra.valuation.historical.company_dir", lambda t: tmp_path / t.upper())
+    root = tmp_path / "BBB3" / "financials"
+
+    def _mil_row(code: str, desc: str, value: float) -> dict:
+        row = _row("2024-12-31", code, desc, value)
+        row["ESCALA_MOEDA"] = "MIL"
+        return row
+
+    _write_csv(
+        root / "income_statement.csv",
+        [_mil_row("3.01", "Receita de Venda de Bens e/ou Serviços", 490829.0)],
+    )
+
+    hist = build_annual_history("BBB3")
+    # 490,829 thousand reais -> 490,829,000 absolute reais
+    assert hist.loc[0, "revenue"] == pytest.approx(490_829_000.0)
+
+
 def test_empty_history_when_no_files(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr("decifra.valuation.historical.company_dir", lambda t: tmp_path / t.upper())
     hist = build_annual_history("ZZZ9")
