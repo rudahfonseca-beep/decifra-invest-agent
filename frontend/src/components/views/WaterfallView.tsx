@@ -5,17 +5,19 @@ import type { ValuationWaterfall } from "../../types";
 type Props = {
   waterfall: ValuationWaterfall | null;
   loading?: boolean;
+  refreshing?: boolean;
 };
 
-export function WaterfallView({ waterfall, loading }: Props) {
+export function WaterfallView({ waterfall, loading, refreshing }: Props) {
   return (
     <div className="min-h-0 flex-1 overflow-auto">
       <h1 className="text-sm font-semibold text-slate-100">Valuation Waterfall</h1>
       <p className="mt-0.5 mb-4 text-[11px] text-slate-500">
         OCF → FCFE / APV outputs with document provenance
+        {refreshing ? " · refreshing…" : ""}
       </p>
 
-      {loading || !waterfall ? (
+      {(loading && !waterfall) || !waterfall ? (
         <p className="text-xs italic text-slate-500">Loading…</p>
       ) : (
         <>

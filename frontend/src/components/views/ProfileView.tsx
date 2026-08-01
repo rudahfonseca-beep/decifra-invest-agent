@@ -4,14 +4,16 @@ import type { CompanyProfile } from "../../types";
 type Props = {
   profile: CompanyProfile | null;
   loading?: boolean;
+  refreshing?: boolean;
 };
 
-export function ProfileView({ profile, loading }: Props) {
+export function ProfileView({ profile, loading, refreshing }: Props) {
   return (
     <div className="min-h-0 flex-1 overflow-auto">
       <h1 className="text-sm font-semibold text-slate-100">Company Profile</h1>
       <p className="mt-0.5 mb-4 text-[11px] text-slate-500">
         Standardized identity + metrics with source lineage
+        {refreshing ? " · refreshing…" : ""}
       </p>
 
       {loading || !profile ? (

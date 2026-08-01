@@ -11,7 +11,7 @@
     <header>
       <h1>decifra-invest-agent session dashboard</h1>
       <p class="sub">Human view of agent AARs, automation traces, improvements, pipeline roadmap, and future prompts.</p>
-      <p class="meta">Generated 2026-08-01 11:56 UTC · 21 agent · 2 automation AARs</p>
+      <p class="meta">Generated 2026-08-01 12:33 UTC · 22 agent · 2 automation AARs</p>
     </header>
 
     <nav class="tabs" role="tablist">
@@ -116,6 +116,15 @@
         </div>
         <h3><a href="../aar/2026-08-01-terminal-dark-ui.md">Terminal Dark UI revamp (React MVP)</a></h3>
         <div class="meta-row">2026-08-01-terminal-dark-ui</div>
+      </article>
+      <article class="card">
+        <div class="meta-row">
+          <span class="badge badge-agent">agent</span>
+          <span class="badge badge-completed">completed</span>
+          2026-08-01
+        </div>
+        <h3><a href="../aar/2026-08-01-ui-load-performance.md">React / lake API load performance</a></h3>
+        <div class="meta-row">2026-08-01-ui-load-performance</div>
       </article>
       <article class="card">
         <div class="meta-row">
@@ -249,6 +258,16 @@
     <section>
       <h2>Open improvements</h2>
       <table><thead><tr><th>ID</th><th>Improvement</th><th>Priority</th><th>Source</th></tr></thead><tbody><tr>
+          <td>IMP-041</td>
+          <td>Persist UI JSON bundle on sync_pilot closeout (`schemas export-ui`)</td>
+          <td class="priority-med">med</td>
+          <td>ui-load-performance</td>
+        </tr><tr>
+          <td>IMP-042</td>
+          <td>Parallelize cold screener row assembly (thread pool)</td>
+          <td class="priority-low">low</td>
+          <td>ui-load-performance</td>
+        </tr><tr>
           <td>IMP-013</td>
           <td>Rename local folder `DecifraCR` -&gt; `decifra-invest-agent` after closing Cursor; re-run editable install</td>
           <td class="priority-med">med</td>
@@ -328,7 +347,10 @@
           <strong>13. Terminal Dark live feed (IMP-037..039)** — mostly done  
    `React + schemas serve/export-ui + screener assemblers shipped. Follow docs/workflows/streamlit-react-cutover.md for cutover gates. Prefer .venv Scripts python.`
 
-14. **Save sync_pilot Automation</strong>
+13b. **UI load follow-ups (IMP-041..042)</strong>
+          <div class="prompt-body">After lake sync, wire schemas export-ui into sync_pilot closeout so frontend/public/sample stays fresh (IMP-041). Optionally parallelize cold screener row assembly (IMP-042). Keep API signals default false; dual credit + TTL caches live in schemas/ui_cache.py.</div>
+        </li><li>
+          <strong>14. Save sync_pilot Automation</strong>
           <div class="prompt-body">Finish the Cursor Automation draft for scripts/sync_pilot.py (see docs/workflows/sync-pilot-automation.md): set schedule if desired, confirm repo scope, Save.</div>
         </li><li>
           <strong>5. Rename local folder (IMP-013)</strong>

@@ -48,6 +48,9 @@ Completed work (do not re-run unless regressing): prices backfill (IMP-001), ASA
 13. **Terminal Dark live feed (IMP-037..039)** — mostly done  
    `React + schemas serve/export-ui + screener assemblers shipped. Follow docs/workflows/streamlit-react-cutover.md for cutover gates. Prefer .venv Scripts python.`
 
+13b. **UI load follow-ups (IMP-041..042)**  
+   `After lake sync, wire schemas export-ui into sync_pilot closeout so frontend/public/sample stays fresh (IMP-041). Optionally parallelize cold screener row assembly (IMP-042). Keep API signals default false; dual credit + TTL caches live in schemas/ui_cache.py.`
+
 14. **Save sync_pilot Automation**  
    `Finish the Cursor Automation draft for scripts/sync_pilot.py (see docs/workflows/sync-pilot-automation.md): set schedule if desired, confirm repo scope, Save.`
 

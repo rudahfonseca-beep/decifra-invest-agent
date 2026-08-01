@@ -6,9 +6,10 @@ import type { CreditDebtMatrix } from "../../types";
 type Props = {
   debt: CreditDebtMatrix | null;
   loading?: boolean;
+  refreshing?: boolean;
 };
 
-export function DebtView({ debt, loading }: Props) {
+export function DebtView({ debt, loading, refreshing }: Props) {
   const breach = Boolean(debt?.capacity?.any_breach);
 
   return (
@@ -16,9 +17,10 @@ export function DebtView({ debt, loading }: Props) {
       <h1 className="text-sm font-semibold text-slate-100">Credit & Debt Matrix</h1>
       <p className="mt-0.5 mb-4 text-[11px] text-slate-500">
         Facilities, capacity ratios, and covenant breach status
+        {refreshing ? " · refreshing…" : ""}
       </p>
 
-      {loading || !debt ? (
+      {(loading && !debt) || !debt ? (
         <p className="text-xs italic text-slate-500">Loading…</p>
       ) : (
         <>

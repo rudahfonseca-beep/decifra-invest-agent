@@ -5,11 +5,12 @@ import type { TickerListItem } from "../../types";
 type Props = {
   rows: TickerListItem[];
   loading?: boolean;
+  refreshing?: boolean;
   query: string;
   onSelectTicker: (ticker: string) => void;
 };
 
-export function TickersView({ rows, loading, query, onSelectTicker }: Props) {
+export function TickersView({ rows, loading, refreshing, query, onSelectTicker }: Props) {
   const q = query.trim().toLowerCase();
   const filtered = !q
     ? rows
@@ -29,13 +30,14 @@ export function TickersView({ rows, loading, query, onSelectTicker }: Props) {
           <p className="mt-0.5 text-[11px] text-slate-500">
             Universe with industry, credit score, and financial coverage. Click a row for company
             detail.
+            {refreshing ? " · refreshing…" : ""}
           </p>
         </div>
         <div className="text-[10px] text-slate-600">
           {filtered.length} / {rows.length}
         </div>
       </div>
-      {loading ? (
+      {loading && rows.length === 0 ? (
         <p className="text-xs italic text-slate-500">Loading…</p>
       ) : (
         <DataTable

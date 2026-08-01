@@ -5,18 +5,20 @@ import type { IndustryItem } from "../../types";
 type Props = {
   items: IndustryItem[];
   loading?: boolean;
+  refreshing?: boolean;
   onSelectIndustry: (industry: string) => void;
 };
 
-export function IndustriesView({ items, loading, onSelectIndustry }: Props) {
+export function IndustriesView({ items, loading, refreshing, onSelectIndustry }: Props) {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <h1 className="text-sm font-semibold text-slate-100">Industry list</h1>
       <p className="mt-0.5 mb-3 text-[11px] text-slate-500">
         Industry groups with company counts and median peer credit scores. Click to open credit
         overview filtered to that group.
+        {refreshing ? " · refreshing…" : ""}
       </p>
-      {loading ? (
+      {loading && items.length === 0 ? (
         <p className="text-xs italic text-slate-500">Loading…</p>
       ) : (
         <DataTable

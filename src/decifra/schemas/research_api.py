@@ -19,6 +19,7 @@ from decifra.http_util import normalize_ticker
 from decifra.report.catalog import ALL_KPIS, KPI_LABELS, PCT_KPIS, default_kpis, kpi_label
 from decifra.report.generate import build_report_artifacts
 from decifra.report.spec import EntitySelection, ReportSpec, SpecValidationError, validate_spec
+from decifra.schemas.ui_cache import get_cached_credit_df, set_cached_credit_df
 from decifra.valuation.assumptions import DcfAssumptions, build_default_assumptions
 from decifra.valuation.dcf import discount_cash_flow, sensitivity_grid
 from decifra.valuation.multiples import MULTIPLE_LABELS, relative_valuation
@@ -51,16 +52,14 @@ def _df_records(df: pd.DataFrame) -> list[dict[str, Any]]:
     return out
 
 
-_CREDIT_CACHE: dict[str, Any] = {"key": None, "df": None}
-
-
-def get_credit_df(*, include_signals: bool = True, refresh: bool = False) -> pd.DataFrame:
-    key = f"sig={include_signals}"
-    if not refresh and _CREDIT_CACHE.get("key") == key and _CREDIT_CACHE.get("df") is not None:
-        return _CREDIT_CACHE["df"]
+def get_credit_df(*, include_signals: bool = False, refresh: bool = False) -> pd.DataFrame:
+    """Return credit table; keep fundamentals and signals caches independently."""
+    if not refresh:
+        cached = get_cached_credit_df(include_signals=include_signals)
+        if cached is not None:
+            return cached
     df = build_credit_table(include_signals=include_signals)
-    _CREDIT_CACHE["key"] = key
-    _CREDIT_CACHE["df"] = df
+    set_cached_credit_df(include_signals=include_signals, df=df)
     return df
 
 
@@ -92,7 +91,7 @@ def credit_table_payload(
     *,
     industry: str | None = None,
     cohort: str | None = None,
-    include_signals: bool = True,
+    include_signals: bool = False,
     show_incomplete: bool = False,
     refresh: bool = False,
 ) -> dict[str, Any]:
@@ -133,7 +132,7 @@ def credit_table_payload(
     }
 
 
-def industries_payload(*, include_signals: bool = True) -> dict[str, Any]:
+def industries_payload(*, include_signals: bool = False) -> dict[str, Any]:
     df = get_credit_df(include_signals=include_signals)
     view = df[df["has_financials"]].copy() if "has_financials" in df.columns else df
     items: list[dict[str, Any]] = []
@@ -155,7 +154,7 @@ def industries_payload(*, include_signals: bool = True) -> dict[str, Any]:
 def tickers_payload(
     *,
     industry: str | None = None,
-    include_signals: bool = True,
+    include_signals: bool = False,
     show_incomplete: bool = True,
 ) -> dict[str, Any]:
     df = get_credit_df(include_signals=include_signals)
@@ -183,7 +182,7 @@ def tickers_payload(
     return {"tickers": rows, "count": len(rows)}
 
 
-def credit_detail_payload(ticker: str, *, include_signals: bool = True) -> dict[str, Any]:
+def credit_detail_payload(ticker: str, *, include_signals: bool = False) -> dict[str, Any]:
     t = normalize_ticker(ticker)
     # Never rebuild the universe-wide signal scan for one ticker (was causing
     # multi-minute requests / Vite proxy 500s). Use fundamental table, then

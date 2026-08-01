@@ -8,12 +8,15 @@ Lessons from AARs turned into trackable follow-ups. Newest first within each sta
 
 | ID | Date | Source AAR | Improvement | Priority | Notes |
 |----|------|------------|-------------|----------|-------|
+| IMP-041 | 2026-08-01 | ui-load-performance | Persist UI JSON bundle on sync_pilot closeout (`schemas export-ui`) | med | Warm React sample/static path after sync |
+| IMP-042 | 2026-08-01 | ui-load-performance | Parallelize cold screener row assembly (thread pool) | low | TTL only helps warm hits |
 | IMP-013 | 2026-07-31 | rename-and-github | Rename local folder `DecifraCR` -> `decifra-invest-agent` after closing Cursor; re-run editable install | med | Dir locked while workspace open — human step |
 
 ## Done
 
 | ID | Date | Source AAR | Improvement | Resolved |
 |----|------|------------|-------------|----------|
+| IMP-040 | 2026-08-01 | ui-load-performance | Dual credit cache + screener TTL + React load split / SWR | 2026-08-01 -- `ui_cache.py` + App.tsx split fetches |
 | IMP-038 | 2026-08-01 | terminal-dark-ui / backlog-close | Assemble screener rows from APV + Merton + capacity | 2026-08-01 -- `schemas/screener.py` + `schemas screener\|export-ui` |
 | IMP-039 | 2026-08-01 | terminal-dark-ui / backlog-close | Streamlit → React cutover gates | 2026-08-01 -- `docs/workflows/streamlit-react-cutover.md` |
 | IMP-037 | 2026-08-01 | pipeline-phase-5 / backlog-close | Live lake/API feed for React UI | 2026-08-01 -- `schemas/api_server.py` + `schemas serve` + Vite `/api` proxy |

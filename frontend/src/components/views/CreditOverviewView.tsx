@@ -7,6 +7,7 @@ type Props = {
   data: CreditTablePayload | null;
   filters: FilterState;
   loading?: boolean;
+  refreshing?: boolean;
   onFilters: (f: FilterState) => void;
   onRefresh: () => void;
   onSelectTicker: (ticker: string) => void;
@@ -16,6 +17,7 @@ export function CreditOverviewView({
   data,
   filters,
   loading,
+  refreshing,
   onFilters,
   onRefresh,
   onSelectTicker,
@@ -30,6 +32,7 @@ export function CreditOverviewView({
       <h1 className="text-sm font-semibold text-slate-100">Industry overview · Credit</h1>
       <p className="mt-0.5 mb-3 text-[11px] text-slate-500">
         Research-grade peer ranks from local CVM financials — not a bureau rating.
+        {refreshing ? " · refreshing…" : ""}
       </p>
 
       <FilterBar
@@ -75,7 +78,7 @@ export function CreditOverviewView({
         </div>
       )}
 
-      {loading ? (
+      {loading && !data ? (
         <p className="text-xs italic text-slate-500">Loading…</p>
       ) : (
         <DataTable
