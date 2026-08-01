@@ -9,7 +9,7 @@
       "label": "Multi-source ingestion"
     },
     "2_entities": {
-      "grade": "Fail",
+      "grade": "Pass",
       "label": "Entity resolution & fallbacks"
     },
     "3_modeling": {

@@ -11,7 +11,7 @@
     <header>
       <h1>decifra-invest-agent session dashboard</h1>
       <p class="sub">Human view of agent AARs, automation traces, improvements, pipeline roadmap, and future prompts.</p>
-      <p class="meta">Generated 2026-08-01 04:56 UTC · 17 agent · 2 automation AARs</p>
+      <p class="meta">Generated 2026-08-01 04:58 UTC · 18 agent · 2 automation AARs</p>
     </header>
 
     <nav class="tabs" role="tablist">
@@ -36,6 +36,15 @@
       <h2>Session timeline</h2>
       <div class="grid">
         
+      <article class="card">
+        <div class="meta-row">
+          <span class="badge badge-agent">agent</span>
+          <span class="badge badge-completed">completed</span>
+          2026-08-01
+        </div>
+        <h3><a href="../aar/2026-08-01-pipeline-e2e-closeout.md">Unified pipeline E2E closeout (Phases 1–5 on epic)</a></h3>
+        <div class="meta-row">2026-08-01-pipeline-e2e-closeout</div>
+      </article>
       <article class="card">
         <div class="meta-row">
           <span class="badge badge-agent">agent</span>
@@ -309,7 +318,7 @@
     <section>
       <h2>Lessons rollup</h2>
       <div class="lessons">
-        <ul><li><strong>Pipeline Phase 1 — Primary ingestion (FRE, ANBIMA, B3):</strong> Keep pipeline sync stages opt-in on `sync_pilot` so daily pilots do not download FRE/funds by default.</li><li><strong>Pipeline Phase 1 — Primary ingestion (FRE, ANBIMA, B3):</strong> Fixture-backed FI parsers unblock CI and lake shape before opaque vendor APIs stabilize.</li><li><strong>Pipeline Phase 1 — Primary ingestion (FRE, ANBIMA, B3):</strong> Avoid Unicode arrows in Rich CLI strings on Windows cp1252 consoles.</li><li><strong>Pipeline Phase 2 — Entity resolution &amp; fallbacks:</strong> Seed entities from existing Ibovespa meta first; debt ISINs are additive.</li><li><strong>Pipeline Phase 2 — Entity resolution &amp; fallbacks:</strong> Keep Hierarchy of Truth as a shared constant consumed by conflict helpers and docs.</li><li><strong>Pipeline Phase 3 — APV, Merton, capacity, waterfall:</strong> Keep new engines complementary — acceptance is coexistence with DCF/peer scores.</li><li><strong>Pipeline Phase 3 — APV, Merton, capacity, waterfall:</strong> Capacity thresholds (3.5x / 1.25x) belong in named constants for report/schema reuse.</li><li><strong>Pipeline Phase 4 — Fund exposure (CVM + EDGAR):</strong> Keep fund/EDGAR sync offline-default so CI and agents do not pull multi-GB CVM FI dumps accidentally.</li><li><strong>Pipeline Phase 5 — Schemas, alignment, React MVP:</strong> Ship schema contracts + sample UI together so agents can validate lineage shape without waiting for full API.</li><li><strong>Unified pipeline gap audit + toolkit install:</strong> Keep **implemented** vs **target** sources explicit in always-on rules so agents do not invent ANBIMA/FRE sync.</li><li><strong>Unified pipeline gap audit + toolkit install:</strong> Full end-state charter is large; track as IMP/AUTO phases and re-audit after each phase rather than one megapr.</li><li><strong>Unified pipeline gap audit + toolkit install:</strong> Existing FCFF/WACC DCF and peer credit remain complementary — do not treat them as APV/Merton substitutes or delete them.</li></ul>
+        <ul><li><strong>Unified pipeline E2E closeout (Phases 1–5 on epic):</strong> Opt-in pipeline stages on `sync_pilot` prevent accidental multi-GB downloads.</li><li><strong>Unified pipeline E2E closeout (Phases 1–5 on epic):</strong> Avoid Unicode arrows in Windows console scripts (cp1252).</li><li><strong>Unified pipeline E2E closeout (Phases 1–5 on epic):</strong> Progress JSON + dashboard tab makes phase status visible without re-reading all AARs.</li><li><strong>Pipeline Phase 1 — Primary ingestion (FRE, ANBIMA, B3):</strong> Keep pipeline sync stages opt-in on `sync_pilot` so daily pilots do not download FRE/funds by default.</li><li><strong>Pipeline Phase 1 — Primary ingestion (FRE, ANBIMA, B3):</strong> Fixture-backed FI parsers unblock CI and lake shape before opaque vendor APIs stabilize.</li><li><strong>Pipeline Phase 1 — Primary ingestion (FRE, ANBIMA, B3):</strong> Avoid Unicode arrows in Rich CLI strings on Windows cp1252 consoles.</li><li><strong>Pipeline Phase 2 — Entity resolution &amp; fallbacks:</strong> Seed entities from existing Ibovespa meta first; debt ISINs are additive.</li><li><strong>Pipeline Phase 2 — Entity resolution &amp; fallbacks:</strong> Keep Hierarchy of Truth as a shared constant consumed by conflict helpers and docs.</li><li><strong>Pipeline Phase 3 — APV, Merton, capacity, waterfall:</strong> Keep new engines complementary — acceptance is coexistence with DCF/peer scores.</li><li><strong>Pipeline Phase 3 — APV, Merton, capacity, waterfall:</strong> Capacity thresholds (3.5x / 1.25x) belong in named constants for report/schema reuse.</li><li><strong>Pipeline Phase 4 — Fund exposure (CVM + EDGAR):</strong> Keep fund/EDGAR sync offline-default so CI and agents do not pull multi-GB CVM FI dumps accidentally.</li><li><strong>Pipeline Phase 5 — Schemas, alignment, React MVP:</strong> Ship schema contracts + sample UI together so agents can validate lineage shape without waiting for full API.</li></ul>
       </div>
     </section>
 
@@ -383,7 +392,7 @@
       <div class="pillar-card">
         <div class="pillar-head">
           <span>Entity resolution &amp; fallbacks</span>
-          <span class="badge grade-fail">Fail</span>
+          <span class="badge grade-pass">Pass</span>
         </div>
         <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
         <div class="progress-label">100% · 2 deliverables</div>
