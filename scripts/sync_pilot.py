@@ -16,7 +16,10 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-ALL_STAGES = ("universe", "financials", "notices", "transcripts")
+# Core lake stages (default). Pipeline phases 1+ add fre/anbima/b3-* when opted in.
+CORE_STAGES = ("universe", "financials", "notices", "transcripts")
+PIPELINE_STAGES = ("fre", "anbima", "b3-shares", "b3-bonds", "funds", "edgar")
+ALL_STAGES = CORE_STAGES + PIPELINE_STAGES
 
 
 def _python() -> str:
@@ -309,8 +312,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p = argparse.ArgumentParser(description="decifra-invest-agent sync pilot with AAR output")
     p.add_argument(
         "--stages",
-        default=",".join(ALL_STAGES),
-        help=f"Comma-separated stages (default: {','.join(ALL_STAGES)})",
+        default=",".join(CORE_STAGES),
+        help=(
+            f"Comma-separated stages (default: {','.join(CORE_STAGES)}). "
+            f"Pipeline extras: {','.join(PIPELINE_STAGES)}"
+        ),
     )
     p.add_argument("--skip-transcripts", action="store_true", help="Omit transcripts stage")
     p.add_argument("--ticker", default=None, help="Limit non-universe stages to one ticker")

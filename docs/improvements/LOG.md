@@ -8,20 +8,10 @@ Lessons from AARs turned into trackable follow-ups. Newest first within each sta
 
 | ID | Date | Source AAR | Improvement | Priority | Notes |
 |----|------|------------|-------------|----------|-------|
-| IMP-020 | 2026-08-01 | unified-pipeline-toolkit | Phase 1: CVM FRE zip ingest + company extracts (`src/decifra/cvm/fre.py`) | high | Roadmap Phase 1 |
-| IMP-021 | 2026-08-01 | unified-pipeline-toolkit | Phase 1: ANBIMA debentures/CRI/CRA (yields, indexers, covenants) | high | `src/decifra/anbima/` |
-| IMP-022 | 2026-08-01 | unified-pipeline-toolkit | Phase 1: B3 official shares/mcap + Balcão bond registrations | high | Prefer over yfinance-only |
-| IMP-023 | 2026-08-01 | unified-pipeline-toolkit | Phase 2: Entity graph CNPJ↔CVM↔ticker↔ISIN (`entities/` + `entities.json`) | high | |
-| IMP-024 | 2026-08-01 | unified-pipeline-toolkit | Phase 2: Hierarchy of Truth + private-issuer fallback chain | high | See workflow stub |
-| IMP-025 | 2026-08-01 | unified-pipeline-toolkit | Phase 3: APV engine (`valuation/apv.py`) | med | Keep FCFF/WACC |
-| IMP-026 | 2026-08-01 | unified-pipeline-toolkit | Phase 3: Merton / Distance to Default (`credit/merton.py`) | med | |
-| IMP-027 | 2026-08-01 | unified-pipeline-toolkit | Phase 3: Debt capacity flags ND/EBITDA≤3.5x, DSCR≥1.25x | med | `credit/capacity.py` |
-| IMP-028 | 2026-08-01 | unified-pipeline-toolkit | Phase 3: OCF→debt service→FCFE waterfall | med | `valuation/waterfall.py` |
-| IMP-029 | 2026-08-01 | unified-pipeline-toolkit | Phase 4: CVM Funds INF_DIARIO + CDA | med | `src/decifra/funds/cvm.py` |
-| IMP-030 | 2026-08-01 | unified-pipeline-toolkit | Phase 4: SEC EDGAR fund/issuer exposure | low | `funds/edgar.py` |
-| IMP-031 | 2026-08-01 | unified-pipeline-toolkit | Phase 5: Three schemas (Profile, Credit&Debt Matrix, Val Waterfall) + lineage | high | `schemas/` + `docs/schemas/` |
-| IMP-032 | 2026-08-01 | unified-pipeline-toolkit | Phase 5: ITR–debt schedule DT_REFER alignment in credit/valuation readers | med | Today DFP-preferred |
-| IMP-033 | 2026-08-01 | unified-pipeline-toolkit | Phase 5: React dark-mode research UI (`frontend/`); Streamlit interim | med | |
+| IMP-034 | 2026-08-01 | pipeline-phase-1-ingestion | Wire live B3 shares-outstanding detail API into `b3/shares.py` | med | Artifact path exists; network reserved |
+| IMP-035 | 2026-08-01 | pipeline-phase-2-entities | Migrate credit/valuation/report joins to `load_identity` / resolver | med | Helper shipped |
+| IMP-036 | 2026-08-01 | pipeline-phase-3-modeling | Auto-assemble APV/Merton inputs from CVM + market for a ticker | med | Engines are CLI/formula-first |
+| IMP-037 | 2026-08-01 | pipeline-phase-5-schemas-ui | Live lake/API feed for React UI (replace static samples) | med | MVP uses public/sample |
 | IMP-003 | 2026-07-20 | greenfield-pipeline | Expand CVM cache years toward config defaults (2020-2021 DFP/ITR; fato relevante) | med | Partial cache 2022-2025 |
 | IMP-008 | 2026-07-31 | automation-aar | Optionally wrap `sync_pilot.py` in a Cursor Automation once repo is on remote | low | See AUTO-001 |
 | IMP-013 | 2026-07-31 | rename-and-github | Rename local folder `DecifraCR` -> `decifra-invest-agent` after closing Cursor; re-run editable install | med | Dir locked while workspace open |
@@ -34,6 +24,20 @@ Lessons from AARs turned into trackable follow-ups. Newest first within each sta
 
 | ID | Date | Source AAR | Improvement | Resolved |
 |----|------|------------|-------------|----------|
+| IMP-031 | 2026-08-01 | pipeline-phase-5-schemas-ui | Phase 5: Three schemas + lineage | 2026-08-01 -- `schemas/` + `docs/schemas/` |
+| IMP-032 | 2026-08-01 | pipeline-phase-5-schemas-ui | Phase 5: ITR–debt DT_REFER alignment | 2026-08-01 -- `schemas/alignment.py` |
+| IMP-033 | 2026-08-01 | pipeline-phase-5-schemas-ui | Phase 5: React dark-mode MVP | 2026-08-01 -- `frontend/` |
+| IMP-029 | 2026-08-01 | pipeline-phase-4-funds | Phase 4: CVM INF_DIARIO + CDA | 2026-08-01 -- `funds/cvm.py` |
+| IMP-030 | 2026-08-01 | pipeline-phase-4-funds | Phase 4: SEC EDGAR exposure | 2026-08-01 -- `funds/edgar.py` |
+| IMP-025 | 2026-08-01 | pipeline-phase-3-modeling | Phase 3: APV engine | 2026-08-01 -- `valuation/apv.py` |
+| IMP-026 | 2026-08-01 | pipeline-phase-3-modeling | Phase 3: Merton / DtD | 2026-08-01 -- `credit/merton.py` |
+| IMP-027 | 2026-08-01 | pipeline-phase-3-modeling | Phase 3: Debt capacity flags | 2026-08-01 -- `credit/capacity.py` |
+| IMP-028 | 2026-08-01 | pipeline-phase-3-modeling | Phase 3: OCF→FCFE waterfall | 2026-08-01 -- `valuation/waterfall.py` |
+| IMP-023 | 2026-08-01 | pipeline-phase-2-entities | Phase 2: Entity graph CNPJ↔CVM↔ticker↔ISIN | 2026-08-01 -- `entities/` + `entities sync` |
+| IMP-024 | 2026-08-01 | pipeline-phase-2-entities | Phase 2: Hierarchy of Truth + private-issuer fallback | 2026-08-01 -- resolve + CLI + workflow |
+| IMP-020 | 2026-08-01 | pipeline-phase-1-ingestion | Phase 1: CVM FRE zip ingest + company extracts | 2026-08-01 -- `cvm/fre.py` + `decifra sync fre` |
+| IMP-021 | 2026-08-01 | pipeline-phase-1-ingestion | Phase 1: ANBIMA debentures/CRI/CRA | 2026-08-01 -- `anbima/` + cache/fixture sync |
+| IMP-022 | 2026-08-01 | pipeline-phase-1-ingestion | Phase 1: B3 shares/mcap + Balcão bonds | 2026-08-01 -- `b3/` + CLI stages |
 | IMP-001 | 2026-07-20 | greenfield-pipeline | Backfill `prices.csv` for all Ibovespa tickers | 2026-07-31 -- BRAPI backfill via `scripts/backfill_prices.py`; lake now 78/78 |
 | IMP-014 | 2026-07-31 | dashboard-refresh | Session dashboard coverage from live lake (not stale automation AAR) + clean prompt parse | 2026-07-31 |
 | IMP-002 | 2026-07-20 | greenfield-pipeline | Investigate ASAI3 missing DFP/ITR financials; document if CVM dump gap | 2026-07-31 -- CNPJ 06057223000171 (Sendas) maps correctly, DFP has 2020 data only; 2021+ absent after GPA spinoff. Known CVM gap. |

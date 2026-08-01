@@ -13,13 +13,18 @@ DATA_DIR = Path(os.getenv("DECIFRA_DATA_DIR", PROJECT_ROOT / "data")).resolve()
 UNIVERSE_DIR = DATA_DIR / "universe"
 CACHE_DIR = DATA_DIR / "cache"
 CVM_CACHE_DIR = CACHE_DIR / "cvm"
+ANBIMA_CACHE_DIR = CACHE_DIR / "anbima"
 MARKET_CACHE_DIR = CACHE_DIR / "market"
 COMPANIES_DIR = DATA_DIR / "companies"
 REPORTS_DIR = DATA_DIR / "reports"
 VALUATIONS_DIR = DATA_DIR / "valuations"
+FUNDS_DIR = DATA_DIR / "funds"
+ENTITIES_JSON = UNIVERSE_DIR / "entities.json"
 
 IBOVESPA_JSON = UNIVERSE_DIR / "ibovespa.json"
 CADASTRO_CSV = CVM_CACHE_DIR / "cad_cia_aberta.csv"
+B3_SHARES_JSON = UNIVERSE_DIR / "b3_shares.json"
+B3_BALCAO_JSON = UNIVERSE_DIR / "b3_balcao_bonds.json"
 
 BRAPI_API_KEY = os.getenv("BRAPI_API_KEY", "").strip()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "").strip()
@@ -39,8 +44,16 @@ CVM_CADASTRO_URL = f"{CVM_BASE}/CAD/DADOS/cad_cia_aberta.csv"
 CVM_DFP_ZIP = f"{CVM_BASE}/DOC/DFP/DADOS/dfp_cia_aberta_{{year}}.zip"
 CVM_ITR_ZIP = f"{CVM_BASE}/DOC/ITR/DADOS/itr_cia_aberta_{{year}}.zip"
 CVM_IPE_ZIP = f"{CVM_BASE}/DOC/IPE/DADOS/ipe_cia_aberta_{{year}}.zip"
+CVM_FRE_ZIP = f"{CVM_BASE}/DOC/FRE/DADOS/fre_cia_aberta_{{year}}.zip"
 CVM_FATO_ZIP = f"{CVM_BASE}/DOC/FATO_RELEVANTE/DADOS/fato_relevante_cia_aberta_{{year}}.zip"
 CVM_FATO_CSV = f"{CVM_BASE}/DOC/FATO_RELEVANTE/DADOS/fato_relevante_cia_aberta_{{year}}.csv"
+
+# CVM Funds (FI)
+CVM_FUNDS_BASE = "https://dados.cvm.gov.br/dados/FI"
+CVM_INF_DIARIO_ZIP = f"{CVM_FUNDS_BASE}/DOC/INF_DIARIO/DADOS/inf_diario_fi_{{yyyymm}}.zip"
+CVM_CDA_ZIP = f"{CVM_FUNDS_BASE}/DOC/CDA/DADOS/cda_fi_{{yyyymm}}.zip"
+
+DEFAULT_FRE_YEARS = list(range(2022, 2027))
 
 B3_IBOV_PORTFOLIO_URL = (
     "https://sistemaswebb3-listados.b3.com.br/indexProxy/indexCall/GetPortfolioDay/"
@@ -69,9 +82,11 @@ def ensure_dirs() -> None:
         UNIVERSE_DIR,
         CACHE_DIR,
         CVM_CACHE_DIR,
+        ANBIMA_CACHE_DIR,
         MARKET_CACHE_DIR,
         COMPANIES_DIR,
         REPORTS_DIR,
         VALUATIONS_DIR,
+        FUNDS_DIR,
     ):
         path.mkdir(parents=True, exist_ok=True)

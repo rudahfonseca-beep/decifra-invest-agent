@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import json
 import re
 import sys
 from datetime import datetime, timezone
@@ -16,6 +17,7 @@ AUTO_DIR = AAR_DIR / "automation"
 IMPROVEMENTS = DOCS / "improvements" / "LOG.md"
 AUTOMATION_IMPROVEMENTS = DOCS / "improvements" / "AUTOMATION.md"
 PROMPTS = DOCS / "prompts" / "FUTURE_AGENTS.md"
+PIPELINE_PROGRESS = DOCS / "architecture" / "pipeline-progress.json"
 OUT_HTML = DOCS / "dashboard" / "index.html"
 CSS_HREF = "assets/dashboard.css"
 
@@ -189,12 +191,178 @@ def summarize_coverage(aars: list[dict]) -> dict[str, str]:
     return {}
 
 
+def load_pipeline_progress() -> dict:
+    if not PIPELINE_PROGRESS.exists():
+        return {}
+    try:
+        return json.loads(PIPELINE_PROGRESS.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+
+def _status_pct(statuses: list[str]) -> int:
+    if not statuses:
+        return 0
+    weights = {"done": 1.0, "in_progress": 0.5, "blocked": 0.25, "todo": 0.0}
+    return int(round(100 * sum(weights.get(s, 0.0) for s in statuses) / len(statuses)))
+
+
+def render_pipeline_tab(progress: dict) -> str:
+    if not progress:
+        return '<p class="empty">No pipeline-progress.json yet.</p>'
+
+    phases = progress.get("phases") or []
+    all_d = [d for p in phases for d in p.get("deliverables") or []]
+    overall_pct = _status_pct([d.get("status", "todo") for d in all_d])
+
+    pillar_html = []
+    for key, meta in (progress.get("pillars") or {}).items():
+        # deliverables linked via phase.pillar
+        statuses = [
+            d.get("status", "todo")
+            for p in phases
+            if p.get("pillar") == key
+            for d in p.get("deliverables") or []
+        ]
+        pct = _status_pct(statuses)
+        grade = meta.get("grade", "?")
+        grade_cls = "grade-pass" if str(grade).lower() == "pass" else "grade-fail"
+        pillar_html.append(
+            f"""
+      <div class="pillar-card">
+        <div class="pillar-head">
+          <span>{escape(meta.get("label", key))}</span>
+          <span class="badge {grade_cls}">{escape(str(grade))}</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:{pct}%"></div></div>
+        <div class="progress-label">{pct}% · {len(statuses)} deliverables</div>
+      </div>"""
+        )
+
+    phase_cards = []
+    for p in phases:
+        dels = p.get("deliverables") or []
+        pct = _status_pct([d.get("status", "todo") for d in dels])
+        aar = p.get("aar")
+        aar_html = (
+            f'<a href="../aar/{escape(aar)}">{escape(aar)}</a>'
+            if aar
+            else '<span class="muted">no AAR yet</span>'
+        )
+        items = []
+        for d in dels:
+            st = d.get("status", "todo")
+            items.append(
+                f"""<li class="deliv deliv-{escape(st)}">
+            <span class="badge badge-{escape(st)}">{escape(st)}</span>
+            <strong>{escape(d.get("id", ""))}</strong> {escape(d.get("title", ""))}
+          </li>"""
+            )
+        phase_cards.append(
+            f"""
+      <article class="card phase-card">
+        <div class="meta-row">
+          <span class="badge badge-phase">Phase {escape(str(p.get("id", "")))}</span>
+          <span class="badge badge-{escape(p.get("status", "todo"))}">{escape(p.get("status", "todo"))}</span>
+        </div>
+        <h3>{escape(p.get("name", ""))}</h3>
+        <div class="progress-bar"><div class="progress-fill" style="width:{pct}%"></div></div>
+        <div class="progress-label">{pct}% · branch <code>{escape(p.get("branch", ""))}</code></div>
+        <ul class="deliv-list">{"".join(items)}</ul>
+        <div class="meta-row">AAR: {aar_html}</div>
+      </article>"""
+        )
+
+    baseline_items = []
+    for b in progress.get("baseline") or []:
+        baseline_items.append(
+            f'<li><span class="badge badge-done">done</span> {escape(b.get("title", b.get("id", "")))}</li>'
+        )
+
+    end_state_svg = """
+<svg class="end-state-svg" viewBox="0 0 960 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Unified pipeline end state">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1a3a32"/><stop offset="100%" stop-color="#1a2838"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="420" fill="url(#g1)" rx="8"/>
+  <text x="24" y="36" fill="#8b9aab" font-size="13" font-family="Segoe UI,sans-serif">Desired end state — Unified Financial Data Pipeline</text>
+  <!-- Pillar 1 -->
+  <rect x="24" y="56" width="200" height="300" rx="8" fill="#1a222c" stroke="#2e3a48"/>
+  <text x="40" y="82" fill="#3d9a7a" font-size="12" font-weight="600">1 Ingestion</text>
+  <rect x="40" y="98" width="168" height="36" rx="4" fill="#243040"/><text x="52" y="120" fill="#e8eef4" font-size="11">CVM DFP/ITR</text>
+  <rect x="40" y="144" width="168" height="36" rx="4" fill="#243040"/><text x="52" y="166" fill="#e8eef4" font-size="11">CVM FRE</text>
+  <rect x="40" y="190" width="168" height="36" rx="4" fill="#243040"/><text x="52" y="212" fill="#e8eef4" font-size="11">ANBIMA FI</text>
+  <rect x="40" y="236" width="168" height="36" rx="4" fill="#243040"/><text x="52" y="258" fill="#e8eef4" font-size="11">B3 shares / Balcão</text>
+  <rect x="40" y="282" width="168" height="36" rx="4" fill="#243040"/><text x="52" y="304" fill="#e8eef4" font-size="11">Funds + EDGAR</text>
+  <!-- Arrow -->
+  <path d="M232 206 H268" stroke="#3d9a7a" stroke-width="2" marker-end="url(#arr)"/>
+  <!-- Pillar 2 -->
+  <rect x="276" y="100" width="180" height="210" rx="8" fill="#1a222c" stroke="#2e3a48"/>
+  <text x="292" y="126" fill="#3d9a7a" font-size="12" font-weight="600">2 Entities</text>
+  <rect x="292" y="142" width="148" height="36" rx="4" fill="#243040"/><text x="304" y="164" fill="#e8eef4" font-size="11">Resolve graph</text>
+  <rect x="292" y="188" width="148" height="36" rx="4" fill="#243040"/><text x="304" y="210" fill="#e8eef4" font-size="11">Hierarchy of Truth</text>
+  <rect x="292" y="234" width="148" height="36" rx="4" fill="#243040"/><text x="304" y="256" fill="#e8eef4" font-size="11">Private fallback</text>
+  <path d="M464 206 H500" stroke="#3d9a7a" stroke-width="2"/>
+  <!-- Pillar 3 -->
+  <rect x="508" y="56" width="200" height="300" rx="8" fill="#1a222c" stroke="#2e3a48"/>
+  <text x="524" y="82" fill="#3d9a7a" font-size="12" font-weight="600">3 Modeling</text>
+  <rect x="524" y="98" width="168" height="36" rx="4" fill="#243040"/><text x="536" y="120" fill="#e8eef4" font-size="11">FCFF/WACC (keep)</text>
+  <rect x="524" y="144" width="168" height="36" rx="4" fill="#243040"/><text x="536" y="166" fill="#e8eef4" font-size="11">APV</text>
+  <rect x="524" y="190" width="168" height="36" rx="4" fill="#243040"/><text x="536" y="212" fill="#e8eef4" font-size="11">Merton / DtD</text>
+  <rect x="524" y="236" width="168" height="36" rx="4" fill="#243040"/><text x="536" y="258" fill="#e8eef4" font-size="11">Debt capacity</text>
+  <rect x="524" y="282" width="168" height="36" rx="4" fill="#243040"/><text x="536" y="304" fill="#e8eef4" font-size="11">OCF→FCFE waterfall</text>
+  <path d="M716 206 H752" stroke="#3d9a7a" stroke-width="2"/>
+  <!-- Pillar 4 -->
+  <rect x="760" y="100" width="176" height="210" rx="8" fill="#1a222c" stroke="#2e3a48"/>
+  <text x="776" y="126" fill="#3d9a7a" font-size="12" font-weight="600">4 Outputs</text>
+  <rect x="776" y="142" width="144" height="36" rx="4" fill="#243040"/><text x="788" y="164" fill="#e8eef4" font-size="11">3 schemas + lineage</text>
+  <rect x="776" y="188" width="144" height="36" rx="4" fill="#243040"/><text x="788" y="210" fill="#e8eef4" font-size="11">Streamlit interim</text>
+  <rect x="776" y="234" width="144" height="36" rx="4" fill="#243040"/><text x="788" y="256" fill="#e8eef4" font-size="11">React dark MVP</text>
+</svg>"""
+
+    return f"""
+    <section>
+      <h2>Overall progress</h2>
+      <p class="sub">Tracked in <code>docs/architecture/pipeline-progress.json</code> ·
+        <a href="../architecture/unified-pipeline-roadmap.md">roadmap</a> ·
+        <a href="../architecture/unified-pipeline-gap-analysis.md">gap analysis</a> ·
+        <a href="../architecture/unified-pipeline-branches.md">branches</a></p>
+      <div class="progress-bar progress-bar-lg"><div class="progress-fill" style="width:{overall_pct}%"></div></div>
+      <div class="progress-label">{overall_pct}% · status <code>{escape(progress.get("overall_status", "?"))}</code> · updated {escape(str(progress.get("updated", "")))}</div>
+    </section>
+
+    <section>
+      <h2>Pillars</h2>
+      <div class="pillar-grid">{"".join(pillar_html)}</div>
+    </section>
+
+    <section>
+      <h2>End-state architecture</h2>
+      <p class="sub">Target flow: ingestion → entity resolution → modeling → schemas/UI. Existing DCF and peer credit remain complementary.</p>
+      <div class="end-state-wrap">{end_state_svg}</div>
+    </section>
+
+    <section>
+      <h2>Baseline (already shipped)</h2>
+      <ul class="deliv-list">{"".join(baseline_items) if baseline_items else '<li class="empty">None listed</li>'}</ul>
+    </section>
+
+    <section>
+      <h2>Phases</h2>
+      <div class="grid">{"".join(phase_cards)}</div>
+    </section>
+"""
+
+
 def render_html(
     aars: list[dict],
     improvements: list[dict[str, str]],
     automation_opps: list[dict[str, str]],
     prompts: list[dict[str, str]],
     coverage: dict[str, str],
+    pipeline: dict | None = None,
 ) -> str:
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     agent_n = sum(1 for a in aars if a.get("session_type") == "agent")
@@ -256,6 +424,8 @@ def render_html(
             + "</tbody></table>"
         )
 
+    pipeline_body = render_pipeline_tab(pipeline or {})
+
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -268,10 +438,16 @@ def render_html(
   <div class="wrap">
     <header>
       <h1>decifra-invest-agent session dashboard</h1>
-      <p class="sub">Human view of agent AARs, automation traces, improvements, and future prompts.</p>
+      <p class="sub">Human view of agent AARs, automation traces, improvements, pipeline roadmap, and future prompts.</p>
       <p class="meta">Generated {escape(now)} · {agent_n} agent · {auto_n} automation AARs</p>
     </header>
 
+    <nav class="tabs" role="tablist">
+      <button type="button" class="tab active" data-tab="session" role="tab" aria-selected="true">Session</button>
+      <button type="button" class="tab" data-tab="pipeline" role="tab" aria-selected="false">Pipeline</button>
+    </nav>
+
+    <div id="tab-session" class="tab-panel active" role="tabpanel">
     <section>
       <h2>Coverage snapshot</h2>
       <p class="sub">Live lake via <code>coverage_status</code> (falls back to latest automation AAR).</p>
@@ -310,13 +486,41 @@ def render_html(
         {"".join(prompt_lis) if prompt_lis else '<p class="empty">No prompts seeded.</p>'}
       </ul>
     </section>
+    </div>
+
+    <div id="tab-pipeline" class="tab-panel" role="tabpanel" hidden>
+    {pipeline_body}
+    </div>
 
     <footer>
       Agent sources: <code>docs/aar/</code> · Improvements: <code>docs/improvements/LOG.md</code> ·
       Automation: <code>docs/improvements/AUTOMATION.md</code> ·
+      Pipeline: <code>docs/architecture/pipeline-progress.json</code> ·
       Update: <code>python scripts/update_session_dashboard.py</code> (also via <code>sync_pilot</code>)
     </footer>
   </div>
+  <script>
+    document.querySelectorAll('.tab').forEach(function(btn) {{
+      btn.addEventListener('click', function() {{
+        var id = btn.getAttribute('data-tab');
+        document.querySelectorAll('.tab').forEach(function(b) {{
+          b.classList.toggle('active', b === btn);
+          b.setAttribute('aria-selected', b === btn ? 'true' : 'false');
+        }});
+        document.querySelectorAll('.tab-panel').forEach(function(p) {{
+          var on = p.id === 'tab-' + id;
+          p.classList.toggle('active', on);
+          if (on) p.removeAttribute('hidden'); else p.setAttribute('hidden', '');
+        }});
+        if (location.hash !== '#' + id) history.replaceState(null, '', '#' + id);
+      }});
+    }});
+    var h = (location.hash || '').replace('#','');
+    if (h === 'pipeline' || h === 'session') {{
+      var t = document.querySelector('.tab[data-tab="' + h + '"]');
+      if (t) t.click();
+    }}
+  </script>
 </body>
 </html>
 """
@@ -334,12 +538,14 @@ def main() -> int:
     )
     prompts = parse_prompts(PROMPTS.read_text(encoding="utf-8") if PROMPTS.exists() else "")
     coverage = summarize_coverage(aars)
-    html = render_html(aars, improvements, automation_opps, prompts, coverage)
+    pipeline = load_pipeline_progress()
+    html = render_html(aars, improvements, automation_opps, prompts, coverage, pipeline)
     OUT_HTML.parent.mkdir(parents=True, exist_ok=True)
     OUT_HTML.write_text(html, encoding="utf-8")
     print(
         f"Wrote {OUT_HTML} ({len(aars)} AARs, {len(improvements)} open improvements, "
-        f"{len(automation_opps)} automation opps, {len(prompts)} prompts)"
+        f"{len(automation_opps)} automation opps, {len(prompts)} prompts, "
+        f"pipeline phases={len(pipeline.get('phases') or [])})"
     )
     return 0
 

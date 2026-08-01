@@ -1,11 +1,10 @@
 # Unified Financial Data Pipeline — Gap Analysis
 
-**Date:** 2026-08-01  
-**Grade:** **FAIL** against the ideal Unified Financial Data Pipeline  
+**Date:** 2026-08-01 (re-audit after Phases 1–5 implementation)  
+**Grade:** **PARTIAL PASS** — core pillars 2–4 ship research-grade modules; Pillar 1 still missing rating-agency parsers and full live Balcão/FRE coverage.  
 **Scope:** Full end-state architecture (equity + credit + fixed income + funds).  
-**Note:** Decifra today is a solid Ibovespa + CVM research lake with peer credit scores and FCFF/WACC valuation. That does not satisfy the four pillars below.
 
-Related: [unified-pipeline-roadmap.md](unified-pipeline-roadmap.md) · auditor prompt [`docs/prompts/unified-pipeline-auditor.md`](../prompts/unified-pipeline-auditor.md) · skill [`.cursor/skills/decifra-pipeline-auditor/SKILL.md`](../../.cursor/skills/decifra-pipeline-auditor/SKILL.md)
+Related: [unified-pipeline-roadmap.md](unified-pipeline-roadmap.md) · [pipeline-progress.json](pipeline-progress.json) · auditor prompt [`docs/prompts/unified-pipeline-auditor.md`](../prompts/unified-pipeline-auditor.md)
 
 ---
 
@@ -13,118 +12,96 @@ Related: [unified-pipeline-roadmap.md](unified-pipeline-roadmap.md) · auditor p
 
 | Pillar | Grade | Verdict |
 |--------|-------|---------|
-| 1 Multi-source ingestion | **Fail** | Strong CVM DFP/ITR + B3 universe; missing FRE, ANBIMA, Balcão bonds, rating scrapers, funds/EDGAR |
-| 2 Entity resolution & fallbacks | **Fail** | Heuristic ticker↔CNPJ↔CVM only; no ISIN, Hierarchy of Truth, or private-issuer fallback |
-| 3 Integrated modeling | **Fail** | FCFF/WACC DCF + peer credit exist; APV, Merton/DtD, capacity covenants, FCFE waterfall missing |
-| 4 Output schema & validation | **Fail** | Ad-hoc JSON/DataFrames + Streamlit; named schemas, full lineage, React UI missing |
+| 1 Multi-source ingestion | **Fail** | DFP/ITR + FRE/ANBIMA/B3/funds/EDGAR modules exist; **rating agency parsers** still missing; FRE/ANBIMA/Balcão often fixture/cache-backed |
+| 2 Entity resolution & fallbacks | **Pass** | `entities/` + `entities.json`; Hierarchy of Truth; private-issuer fallback CLI (rating step stub) |
+| 3 Integrated modeling | **Pass** | FCFF/WACC + peer credit kept; APV, Merton/DtD, capacity, OCF→FCFE waterfall added |
+| 4 Output schema & validation | **Pass** | Three schemas + lineage assemblers; ITR–debt alignment; React dark MVP; Streamlit interim |
 
-**Pipeline overall: FAIL** — implement Phases 1–5 in the roadmap before claiming a unified equity/credit pipeline.
+**Pipeline overall: PARTIAL PASS** — roadmap Phases 1–5 code landed on `feat/unified-pipeline`; do not claim production-grade live ANBIMA/Balcão/rating coverage until lake sync is proven at scale.
 
 ---
 
-## 2. Missing Components
+## 2. Missing Components (remaining)
 
 ### Pillar 1 — Ingestion
 
-- CVM **FRE** (Formulário de Referência) programmatic ingest
-- **ANBIMA** debentures, CRI, CRA (yields, CDI/IPCA+ indexers, covenants)
-- Official **B3** share counts / market cap sync (today: yfinance on demand)
-- **B3 Balcão** private corporate bond registrations
 - Credit rating agency parsers (Fitch / Moody's / S&P) for Adjusted Net Debt / Adjusted EBITDA
-- CVM Funds **INF_DIARIO** (daily NAV) and **CDA** (monthly holdings)
-- **SEC EDGAR** fund/issuer exposure where relevant
+- Hardened live FRE year coverage across universe (cache warm-up)
+- Official B3 shares-outstanding network detail API (IMP-034)
+- Production ANBIMA feed (beyond cache/fixture CSV)
 
 ### Pillar 2 — Entity resolution
 
-- ISIN mapping and reverse lookups
-- Canonical entity store (`data/universe/entities.json` + `src/decifra/entities/`)
-- Declared **Hierarchy of Truth**: CVM Open Data > ANBIMA > Rating Agency > Web screeners
-- **Private issuer fallback**: no Cat. A filings → ANBIMA prospectus → B3 Balcão → rating releases
+- Full migration of credit/valuation/report joins to `load_identity` (IMP-035)
+- Rating-agency step in private-issuer chain (still stub)
 
 ### Pillar 3 — Modeling
 
-- **APV:** \(V_L = V_U + \mathrm{PV}(\text{Tax Shield}) - \mathrm{PV}(\text{Financial Distress Costs})\)
-- **Merton** structural model / Distance to Default (equity as call on assets)
-- Debt capacity flags: Net Debt/EBITDA ≤ 3.5x, DSCR ≥ 1.25x
-- Cash flow waterfall: OCF → mandatory debt service → FCFE
+- Auto-assemble APV/Merton inputs from CVM + market for a ticker (IMP-036)
 
 ### Pillar 4 — Outputs / UI
 
-- Standardized tables: Company Profile, Integrated Credit & Debt Matrix, Valuation Waterfall
-- Per-metric lineage tags (document-level provenance on every KPI)
-- ITR reporting dates aligned with debt schedules (today credit/valuation prefer latest DFP only)
-- React dark-mode investment UI (Streamlit remains interim research UI)
+- Live lake/API feed for React UI (IMP-037)
+- Automated Streamlit → React cutover gates
 
 ---
 
 ## 3. What Exists (evidence paths)
 
-### Pillar 1 — partial
+### Pillar 1
 
 | Capability | Path |
 |------------|------|
-| CVM DFP/ITR BS / IS / CF | `src/decifra/cvm/financials.py`, `src/decifra/cvm/download.py`, `src/decifra/config.py` |
-| Lake CSVs | `data/companies/{TICKER}/financials/{income_statement,balance_sheet,cash_flow}.csv` |
-| Row tags | `SOURCE_DOC` (`DFP`/`ITR`), `SOURCE_YEAR` |
-| IPE / fatos relevantes | `src/decifra/cvm/notices.py` |
-| B3 Ibovespa + CNPJ | `src/decifra/universe/ibovespa.py`, `src/decifra/universe/b3_cnpj.py` |
-| Prices / market snapshot | brapi → yfinance in financials sync; `src/decifra/valuation/market_data.py` |
-| RI transcripts | `src/decifra/ri/` |
+| CVM DFP/ITR | `src/decifra/cvm/financials.py` |
+| CVM FRE | `src/decifra/cvm/fre.py` · `decifra sync fre` |
+| ANBIMA debt | `src/decifra/anbima/` · `decifra sync anbima` |
+| B3 shares / Balcão | `src/decifra/b3/` · `decifra sync b3-shares\|b3-bonds` |
+| CVM Funds + EDGAR | `src/decifra/funds/` · `decifra sync funds\|edgar` |
 
-### Pillar 2 — partial
+### Pillar 2
 
 | Capability | Path |
 |------------|------|
-| Per-ticker identity | `data/companies/{TICKER}/meta.json` via `src/decifra/store/folders.py` |
-| Fields | `ticker`, `cnpj`, `cvm_code`, company name, sector, `source: "ibovespa"` |
-| Join for statements | CNPJ filter (+ name/stem heuristics) in `cvm/financials.py` |
+| Entity graph | `src/decifra/entities/resolve.py` · `data/universe/entities.json` |
+| Hierarchy of Truth | `HIERARCHY_OF_TRUTH` in `entities/resolve.py` |
+| Private issuer fallback | `decifra entities private-issuer` · workflow doc |
+| Identity hook | `store.folders.load_identity` |
 
-Ad hoc precedence (not product policy): B3 listed CNPJ ≫ cadastro name ≫ DFP stem; consol ≫ individual; DFP ≫ ITR for annual KPIs.
-
-### Pillar 3 — partial
-
-| Capability | Path |
-|------------|------|
-| FCFF / WACC DCF | `src/decifra/valuation/dcf.py`, `assumptions.py`, `historical.py` |
-| Trading multiples | `src/decifra/valuation/multiples.py` |
-| Peer credit score | `src/decifra/credit/metrics.py`, `scoring.py`, `signals.py` |
-| Related ratios | interest coverage, `ocf_to_net_debt`, leverage-ish peers — **not** 3.5x / DSCR gates |
-
-### Pillar 4 — partial
+### Pillar 3
 
 | Capability | Path |
 |------------|------|
-| Report / valuation context JSON | `src/decifra/report/assemble.py`, `src/decifra/valuation/assemble.py` |
-| Streamlit UI | `src/decifra/dashboard/app.py` |
-| BRL scale for valuation | `valuation/historical.py` (`ESCALA_MOEDA` → absolute R$) |
-| Light lineage | `SOURCE_DOC` / `SOURCE_YEAR`; valuation `methodology[]` notes — not per-metric audit tags |
+| FCFF/WACC DCF | `valuation/dcf.py` (kept) |
+| Peer credit | `credit/scoring.py` (kept) |
+| APV | `valuation/apv.py` |
+| Merton / DtD | `credit/merton.py` |
+| Capacity | `credit/capacity.py` |
+| OCF→FCFE waterfall | `valuation/waterfall.py` |
+
+### Pillar 4
+
+| Capability | Path |
+|------------|------|
+| Schemas | `docs/schemas/` · `src/decifra/schemas/` |
+| ITR–debt alignment | `schemas/alignment.py` |
+| React dark MVP | `frontend/` |
+| Streamlit interim | `src/decifra/dashboard/app.py` |
+| Pipeline monitor | HTML dashboard **Pipeline** tab · `pipeline-progress.json` |
 
 ---
 
-## 4. Code Corrections (targets, not shipped here)
+## 4. Phase AARs
 
-This audit slice installs docs/skills/rules only. Recommended module targets for follow-on sessions (see roadmap):
-
-```text
-src/decifra/cvm/fre.py
-src/decifra/anbima/
-src/decifra/b3/                    # shares/mcap + Balcão
-src/decifra/entities/              # CNPJ↔CVM↔ticker↔ISIN + Hierarchy
-src/decifra/valuation/apv.py
-src/decifra/valuation/waterfall.py
-src/decifra/credit/merton.py
-src/decifra/credit/capacity.py
-src/decifra/funds/cvm.py           # INF_DIARIO, CDA
-src/decifra/funds/edgar.py
-src/decifra/schemas/               # Profile, Credit&Debt Matrix, Val Waterfall
-frontend/                          # React dark-mode UI
-docs/schemas/                      # JSON Schema contracts
-```
-
-Do **not** replace or “patch away” working FCFF/WACC DCF or peer credit scoring; add complementary engines and unified output schemas on top.
+| Phase | AAR |
+|-------|-----|
+| 1 | [2026-08-01-pipeline-phase-1-ingestion.md](../aar/2026-08-01-pipeline-phase-1-ingestion.md) |
+| 2 | [2026-08-01-pipeline-phase-2-entities.md](../aar/2026-08-01-pipeline-phase-2-entities.md) |
+| 3 | [2026-08-01-pipeline-phase-3-modeling.md](../aar/2026-08-01-pipeline-phase-3-modeling.md) |
+| 4 | [2026-08-01-pipeline-phase-4-funds.md](../aar/2026-08-01-pipeline-phase-4-funds.md) |
+| 5 | [2026-08-01-pipeline-phase-5-schemas-ui.md](../aar/2026-08-01-pipeline-phase-5-schemas-ui.md) |
 
 ---
 
-## 5. Improvement IDs
+## 5. Improvement IDs (open follow-ups)
 
-Tracked in [`docs/improvements/LOG.md`](../improvements/LOG.md) as `IMP-020`… and automation stubs in [`AUTOMATION.md`](../improvements/AUTOMATION.md) as `AUTO-008`….
+See [`docs/improvements/LOG.md`](../improvements/LOG.md): IMP-034..037 and remaining non-pipeline IMPs. Automation: AUTO-008..010 still open for Cursor Automation wraps.

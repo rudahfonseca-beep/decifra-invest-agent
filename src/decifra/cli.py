@@ -9,13 +9,23 @@ from rich.console import Console
 from rich.table import Table
 
 from decifra import __version__
-from decifra.config import DEFAULT_FINANCIAL_YEARS, DEFAULT_FORECAST_YEARS, DEFAULT_NOTICE_YEARS, ensure_dirs
+from decifra.config import (
+    DEFAULT_FINANCIAL_YEARS,
+    DEFAULT_FORECAST_YEARS,
+    DEFAULT_FRE_YEARS,
+    DEFAULT_NOTICE_YEARS,
+    ensure_dirs,
+)
 
 app = typer.Typer(help="decifra-invest-agent — Ibovespa research data pipeline and CLI", no_args_is_help=True)
 sync_app = typer.Typer(help="Sync data from B3/CVM/RI sources")
+entities_app = typer.Typer(help="Entity graph: CNPJ/CVM/ticker/ISIN + private-issuer fallback")
+schemas_app = typer.Typer(help="Standardized Profile / Credit&Debt / Valuation Waterfall schemas")
 report_app = typer.Typer(help="Build credit/equity research report prompts and HTML")
 valuation_app = typer.Typer(help="Equity valuation: DCF (FCFF/WACC) and trading multiples")
 app.add_typer(sync_app, name="sync")
+app.add_typer(entities_app, name="entities")
+app.add_typer(schemas_app, name="schemas")
 app.add_typer(report_app, name="report")
 app.add_typer(valuation_app, name="valuation")
 console = Console()
@@ -142,6 +152,97 @@ def sync_transcripts_cmd(
     console.print(f"[green]Transcripts OK[/green]: wrote indexes for {len(result['written'])} tickers")
 
 
+@sync_app.command("fre")
+def sync_fre_cmd(
+    ticker: Optional[str] = typer.Option(None, help="Single ticker"),
+    years: Optional[str] = typer.Option(None, help="Year range, e.g. 2022-2026"),
+    force: bool = typer.Option(False, help="Re-download FRE zips"),
+    cache_only: bool = typer.Option(False, help="Only use data/cache/cvm FRE zips"),
+) -> None:
+    """Download CVM Formulário de Referência (FRE) and write company extracts."""
+    from decifra.cvm.fre import sync_fre
+
+    y = _parse_years(years, DEFAULT_FRE_YEARS)
+    with console.status("Syncing FRE..."):
+        result = sync_fre(ticker=ticker, years=y, force=force, from_cache_only=cache_only)
+    console.print(
+        f"[green]FRE OK[/green]: {len(result['written'])} extracts · "
+        f"{len(result.get('errors') or [])} warnings"
+    )
+
+
+@sync_app.command("anbima")
+def sync_anbima_cmd(
+    ticker: Optional[str] = typer.Option(None, help="Single ticker"),
+) -> None:
+    """Sync ANBIMA debentures/CRI/CRA into company debt folders (cache/fixture)."""
+    from decifra.anbima import sync_anbima
+
+    with console.status("Syncing ANBIMA debt instruments..."):
+        result = sync_anbima(ticker=ticker)
+    console.print(
+        f"[green]ANBIMA OK[/green]: {result['instruments']} instruments · "
+        f"wrote {len(result['written'])} tickers"
+    )
+
+
+@sync_app.command("b3-shares")
+def sync_b3_shares_cmd(
+    ticker: Optional[str] = typer.Option(None, help="Single ticker"),
+    force: bool = typer.Option(False, help="Refresh all rows"),
+) -> None:
+    """Build B3 shares/mcap universe artifact from local meta (+ optional network)."""
+    from decifra.b3 import sync_b3_shares
+
+    with console.status("Syncing B3 shares artifact..."):
+        result = sync_b3_shares(ticker=ticker, force=force)
+    console.print(f"[green]B3 shares OK[/green]: {len(result['updated'])} tickers -> {result['path']}")
+
+
+@sync_app.command("b3-bonds")
+def sync_b3_bonds_cmd(
+    ticker: Optional[str] = typer.Option(None, help="Single ticker"),
+) -> None:
+    """Sync B3 Balcão bond registrations into company debt folders."""
+    from decifra.b3 import sync_b3_bonds
+
+    with console.status("Syncing B3 Balcão bonds..."):
+        result = sync_b3_bonds(ticker=ticker)
+    console.print(
+        f"[green]B3 Balcão OK[/green]: {result['bonds']} bonds · wrote {len(result['written'])} tickers"
+    )
+
+
+@sync_app.command("funds")
+def sync_funds_cmd(
+    year: int = typer.Option(2026, help="Reference year"),
+    month: int = typer.Option(7, help="Reference month"),
+    network: bool = typer.Option(False, help="Download CVM zips (default: fixture/cache)"),
+) -> None:
+    """Sync CVM Funds INF_DIARIO + CDA into data/funds/."""
+    from decifra.funds import sync_cvm_funds
+
+    with console.status("Syncing CVM funds..."):
+        result = sync_cvm_funds(year=year, month=month, from_cache_only=not network)
+    console.print(
+        f"[green]Funds OK[/green]: wrote {len(result.get('written') or [])} files · "
+        f"{len(result.get('errors') or [])} warnings"
+    )
+
+
+@sync_app.command("edgar")
+def sync_edgar_cmd(
+    query: Optional[str] = typer.Option(None, help="Issuer search query"),
+    network: bool = typer.Option(False, help="Hit SEC EDGAR (default: sample fixture)"),
+) -> None:
+    """Sync SEC EDGAR ADR/foreign exposure snapshot."""
+    from decifra.funds import sync_edgar
+
+    with console.status("Syncing EDGAR exposure..."):
+        result = sync_edgar(query=query, use_network=network)
+    console.print(f"[green]EDGAR OK[/green]: {result['count']} exposures -> {result['path']}")
+
+
 @sync_app.command("all")
 def sync_all_cmd(
     ticker: Optional[str] = typer.Option(None, help="Limit to one ticker after universe sync"),
@@ -153,6 +254,100 @@ def sync_all_cmd(
     sync_financials_cmd(ticker=ticker, years=financial_years, no_prices=False)
     sync_notices_cmd(ticker=ticker, years=years, no_pdfs=False, max_pdfs=40)
     sync_transcripts_cmd(ticker=ticker, years=years, no_download=False, no_ri=False, max_docs=20)
+
+
+@entities_app.command("sync")
+def entities_sync_cmd() -> None:
+    """Build data/universe/entities.json from Ibovespa meta + debt ISINs."""
+    from decifra.entities.resolve import sync_entities
+
+    with console.status("Building entity graph..."):
+        result = sync_entities(write=True)
+    console.print(
+        f"[green]Entities OK[/green]: {result.get('count', 0)} entities -> {result.get('path', '')}"
+    )
+
+
+@entities_app.command("resolve")
+def entities_resolve_cmd(
+    ticker: Optional[str] = typer.Option(None, help="B3 ticker"),
+    cnpj: Optional[str] = typer.Option(None, help="CNPJ digits or formatted"),
+    isin: Optional[str] = typer.Option(None, help="ISIN"),
+    cvm_code: Optional[str] = typer.Option(None, "--cvm", help="CVM code"),
+) -> None:
+    """Resolve CNPJ <-> CVM <-> ticker <-> ISIN via entities.json (+ meta fallback)."""
+    from decifra.entities.resolve import resolve_entity
+
+    if not any([ticker, cnpj, isin, cvm_code]):
+        console.print("[red]Provide --ticker, --cnpj, --isin, or --cvm[/red]")
+        raise typer.Exit(2)
+    ent = resolve_entity(ticker=ticker, cnpj=cnpj, isin=isin, cvm_code=cvm_code)
+    if not ent:
+        console.print("[yellow]No entity found[/yellow]")
+        raise typer.Exit(1)
+    console.print_json(json.dumps(ent, ensure_ascii=False))
+
+
+@entities_app.command("private-issuer")
+def entities_private_issuer_cmd(
+    cnpj: str = typer.Option(..., help="Issuer CNPJ"),
+) -> None:
+    """Run private-issuer fallback chain (ANBIMA -> Balcao -> rating stub)."""
+    from decifra.entities.resolve import private_issuer_fallback
+
+    result = private_issuer_fallback(cnpj)
+    console.print_json(json.dumps(result, ensure_ascii=False))
+
+
+@schemas_app.command("assemble")
+def schemas_assemble_cmd(
+    ticker: str = typer.Option(..., "--ticker", help="Ticker"),
+    ocf: float = typer.Option(250.0, help="OCF for waterfall sample"),
+    interest: float = typer.Option(80.0, help="Interest for waterfall"),
+    amortization: float = typer.Option(20.0, help="Mandatory amortization"),
+    out: Optional[str] = typer.Option(None, help="Output directory for JSON bundle"),
+) -> None:
+    """Assemble Company Profile, Credit&Debt Matrix, Valuation Waterfall with lineage."""
+    from pathlib import Path
+
+    from decifra.schemas.assemble import (
+        assemble_company_profile,
+        assemble_credit_debt_matrix,
+        assemble_valuation_waterfall,
+        write_sample_bundle,
+    )
+
+    if out:
+        paths = write_sample_bundle(Path(out), ticker=ticker)
+        for name, path in paths.items():
+            console.print(f"{name}: {path}")
+        return
+    profile = assemble_company_profile(ticker)
+    matrix = assemble_credit_debt_matrix(
+        ticker, net_debt=700, ebitda=200, ocf=ocf, debt_service=interest + amortization
+    )
+    waterfall = assemble_valuation_waterfall(
+        ticker, ocf=ocf, interest=interest, amortization=amortization
+    )
+    console.print_json(
+        json.dumps(
+            {"profile": profile, "credit_debt_matrix": matrix, "valuation_waterfall": waterfall},
+            ensure_ascii=False,
+        )
+    )
+
+
+@schemas_app.command("align")
+def schemas_align_cmd(
+    statements: str = typer.Option(..., help="Comma-separated statement DT_REFER dates"),
+    debt: str = typer.Option(..., help="Comma-separated debt schedule dates"),
+    max_days: int = typer.Option(45, help="Max day delta for a match"),
+) -> None:
+    """Align ITR DT_REFER dates with debt schedule dates."""
+    from decifra.schemas.alignment import align_itr_debt_dates
+
+    result = align_itr_debt_dates(_split_csv(statements), _split_csv(debt), max_days=max_days)
+    console.print_json(json.dumps(result, ensure_ascii=False))
 
 
 @app.command("status")
@@ -210,6 +405,62 @@ def ask_cmd(
         raise typer.Exit(1)
     console.print(f"[bold]{result['ticker']}[/bold] · intent={result['intent']} · year={result.get('year')}")
     console.print(result.get("answer") or "")
+
+
+@app.command("merton")
+def merton_cmd(
+    asset_value: float = typer.Option(..., help="Asset value V"),
+    debt_face: float = typer.Option(..., help="Debt face value D"),
+    risk_free: float = typer.Option(0.07, help="Risk-free rate"),
+    horizon: float = typer.Option(1.0, help="Horizon years T"),
+    asset_vol: float = typer.Option(..., help="Asset volatility sigma_V"),
+    json_out: bool = typer.Option(False, "--json", help="Print JSON"),
+) -> None:
+    """Merton structural model / Distance to Default."""
+    from decifra.credit.merton import merton_dtd
+
+    result = merton_dtd(
+        asset_value=asset_value,
+        debt_face=debt_face,
+        risk_free=risk_free,
+        horizon_years=horizon,
+        asset_vol=asset_vol,
+    )
+    if json_out:
+        console.print_json(json.dumps(result.to_dict(), ensure_ascii=False))
+        return
+    console.print(
+        f"Equity={result.equity_value:,.2f}  DtD={result.distance_to_default:.3f}  "
+        f"PD={result.default_probability:.2%}"
+    )
+
+
+@app.command("capacity")
+def capacity_cmd(
+    net_debt: float = typer.Option(..., help="Net debt"),
+    ebitda: float = typer.Option(..., help="EBITDA"),
+    ocf: float = typer.Option(..., help="OCF or EBITDA proxy for DSCR numerator"),
+    debt_service: float = typer.Option(..., help="Debt service (interest + mandatory amort)"),
+    json_out: bool = typer.Option(False, "--json", help="Print JSON"),
+) -> None:
+    """Debt capacity flags: ND/EBITDA <= 3.5x and DSCR >= 1.25x."""
+    from decifra.credit.capacity import evaluate_capacity
+
+    result = evaluate_capacity(
+        net_debt=net_debt,
+        ebitda=ebitda,
+        ocf_or_ebitda_proxy=ocf,
+        debt_service=debt_service,
+    )
+    if json_out:
+        console.print_json(json.dumps(result.to_dict(), ensure_ascii=False))
+        return
+    nd = result.net_debt_ebitda
+    ds = result.dscr
+    console.print(
+        f"ND/EBITDA={nd.value} (breach={nd.breach})  DSCR={ds.value} (breach={ds.breach})  "
+        f"any_breach={result.any_breach}"
+    )
 
 
 @app.command("credit")
@@ -458,6 +709,64 @@ def valuation_dcf_cmd(
         console.print(f"Value per share: {result.value_per_share:.2f} (current: {price}, upside {upside})")
     for w in result.warnings:
         console.print(f"[yellow]Warning:[/yellow] {w}")
+
+
+@valuation_app.command("apv")
+def valuation_apv_cmd(
+    fcff: str = typer.Option(..., help="Comma-separated unlevered FCFF path"),
+    ku: float = typer.Option(..., "--ku", help="Unlevered cost of capital"),
+    interest: Optional[str] = typer.Option(None, help="Comma-separated interest path"),
+    tax_rate: float = typer.Option(0.34, help="Corporate tax rate"),
+    distress_pv: float = typer.Option(0.0, help="PV of financial distress costs"),
+    terminal_growth: float = typer.Option(0.0, help="Gordon growth on terminal FCFF"),
+    json_out: bool = typer.Option(False, "--json", help="Print JSON"),
+) -> None:
+    """Adjusted Present Value: V_L = V_U + PV(tax shield) - PV(distress)."""
+    from decifra.valuation.apv import compute_apv
+
+    fcff_path = [float(x) for x in _split_csv(fcff)]
+    interest_path = [float(x) for x in _split_csv(interest)] if interest else None
+    result = compute_apv(
+        unlevered_fcff=fcff_path,
+        unlevered_cost_of_capital=ku,
+        debt_interest=interest_path,
+        tax_rate=tax_rate,
+        distress_cost_pv=distress_pv,
+        terminal_growth=terminal_growth,
+    )
+    if json_out:
+        console.print_json(json.dumps(result.to_dict(), ensure_ascii=False))
+        return
+    console.print(f"V_U={result.v_u:,.2f}  PV(TS)={result.pv_tax_shield:,.2f}  "
+                  f"PV(distress)={result.pv_distress_costs:,.2f}  V_L={result.v_l:,.2f}")
+
+
+@valuation_app.command("waterfall")
+def valuation_waterfall_cmd(
+    ocf: float = typer.Option(..., help="Operating cash flow"),
+    interest: float = typer.Option(..., help="Interest expense"),
+    amortization: float = typer.Option(0.0, help="Mandatory debt amortization"),
+    equity_capex: float = typer.Option(0.0, help="Equity-financed capex"),
+    net_borrowing: float = typer.Option(0.0, help="Net borrowing (+ inflow)"),
+    json_out: bool = typer.Option(False, "--json", help="Print JSON"),
+) -> None:
+    """OCF -> mandatory debt service -> residual FCFE waterfall."""
+    from decifra.valuation.waterfall import ocf_to_fcfe_waterfall
+
+    result = ocf_to_fcfe_waterfall(
+        ocf=ocf,
+        interest=interest,
+        mandatory_amortization=amortization,
+        capex_equity_financed=equity_capex,
+        net_borrowing=net_borrowing,
+    )
+    if json_out:
+        console.print_json(json.dumps(result.to_dict(), ensure_ascii=False))
+        return
+    console.print(
+        f"OCF={result.ocf:,.2f}  debt_service={result.debt_service:,.2f}  "
+        f"FCFE={result.fcfe:,.2f}  covered={result.covered}"
+    )
 
 
 @valuation_app.command("multiples")

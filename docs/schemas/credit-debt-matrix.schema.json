@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://decifra.local/schemas/credit-debt-matrix.schema.json",
+  "title": "IntegratedCreditDebtMatrix",
+  "type": "object",
+  "required": ["ticker", "facilities", "capacity"],
+  "properties": {
+    "ticker": { "type": "string" },
+    "as_of": { "type": "string" },
+    "facilities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["isin_or_code", "instrument_type", "lineage"],
+        "properties": {
+          "isin_or_code": { "type": "string" },
+          "instrument_type": { "type": "string" },
+          "indexer": { "type": "string" },
+          "yield_pct": { "type": ["number", "null"] },
+          "maturity": { "type": "string" },
+          "outstanding_brl": { "type": ["number", "null"] },
+          "covenant_text": { "type": "string" },
+          "lineage": {
+            "type": "object",
+            "required": ["source_doc"],
+            "properties": { "source_doc": { "type": "string" } }
+          }
+        }
+      }
+    },
+    "capacity": {
+      "type": "object",
+      "properties": {
+        "net_debt_ebitda": { "type": ["number", "null"] },
+        "dscr": { "type": ["number", "null"] },
+        "any_breach": { "type": "boolean" },
+        "lineage": {
+          "type": "object",
+          "required": ["source_doc"],
+          "properties": { "source_doc": { "type": "string" } }
+        }
+      }
+    }
+  }
+}

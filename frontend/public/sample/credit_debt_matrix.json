@@ -1,0 +1,22 @@
+{
+  "ticker": "PETR4",
+  "as_of": "2026-07-31",
+  "facilities": [
+    {
+      "isin_or_code": "BRPETRDBS0A1",
+      "instrument_type": "DEBENTURE",
+      "indexer": "CDI+",
+      "yield_pct": 1.15,
+      "maturity": "2030-06-15",
+      "outstanding_brl": 1000000000,
+      "covenant_text": "Net Debt/EBITDA <= 3.5x",
+      "lineage": { "source_doc": "ANBIMA" }
+    }
+  ],
+  "capacity": {
+    "net_debt_ebitda": 3.5,
+    "dscr": 2.5,
+    "any_breach": false,
+    "lineage": { "source_doc": "capacity" }
+  }
+}

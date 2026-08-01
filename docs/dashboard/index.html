@@ -10,10 +10,16 @@
   <div class="wrap">
     <header>
       <h1>decifra-invest-agent session dashboard</h1>
-      <p class="sub">Human view of agent AARs, automation traces, improvements, and future prompts.</p>
-      <p class="meta">Generated 2026-08-01 03:44 UTC · 12 agent · 2 automation AARs</p>
+      <p class="sub">Human view of agent AARs, automation traces, improvements, pipeline roadmap, and future prompts.</p>
+      <p class="meta">Generated 2026-08-01 04:58 UTC · 18 agent · 2 automation AARs</p>
     </header>
 
+    <nav class="tabs" role="tablist">
+      <button type="button" class="tab active" data-tab="session" role="tab" aria-selected="true">Session</button>
+      <button type="button" class="tab" data-tab="pipeline" role="tab" aria-selected="false">Pipeline</button>
+    </nav>
+
+    <div id="tab-session" class="tab-panel active" role="tabpanel">
     <section>
       <h2>Coverage snapshot</h2>
       <p class="sub">Live lake via <code>coverage_status</code> (falls back to latest automation AAR).</p>
@@ -30,6 +36,60 @@
       <h2>Session timeline</h2>
       <div class="grid">
         
+      <article class="card">
+        <div class="meta-row">
+          <span class="badge badge-agent">agent</span>
+          <span class="badge badge-completed">completed</span>
+          2026-08-01
+        </div>
+        <h3><a href="../aar/2026-08-01-pipeline-e2e-closeout.md">Unified pipeline E2E closeout (Phases 1–5 on epic)</a></h3>
+        <div class="meta-row">2026-08-01-pipeline-e2e-closeout</div>
+      </article>
+      <article class="card">
+        <div class="meta-row">
+          <span class="badge badge-agent">agent</span>
+          <span class="badge badge-completed">completed</span>
+          2026-08-01
+        </div>
+        <h3><a href="../aar/2026-08-01-pipeline-phase-1-ingestion.md">Pipeline Phase 1 — Primary ingestion (FRE, ANBIMA, B3)</a></h3>
+        <div class="meta-row">2026-08-01-pipeline-phase-1-ingestion</div>
+      </article>
+      <article class="card">
+        <div class="meta-row">
+          <span class="badge badge-agent">agent</span>
+          <span class="badge badge-completed">completed</span>
+          2026-08-01
+        </div>
+        <h3><a href="../aar/2026-08-01-pipeline-phase-2-entities.md">Pipeline Phase 2 — Entity resolution &amp; fallbacks</a></h3>
+        <div class="meta-row">2026-08-01-pipeline-phase-2-entities</div>
+      </article>
+      <article class="card">
+        <div class="meta-row">
+          <span class="badge badge-agent">agent</span>
+          <span class="badge badge-completed">completed</span>
+          2026-08-01
+        </div>
+        <h3><a href="../aar/2026-08-01-pipeline-phase-3-modeling.md">Pipeline Phase 3 — APV, Merton, capacity, waterfall</a></h3>
+        <div class="meta-row">2026-08-01-pipeline-phase-3-modeling</div>
+      </article>
+      <article class="card">
+        <div class="meta-row">
+          <span class="badge badge-agent">agent</span>
+          <span class="badge badge-completed">completed</span>
+          2026-08-01
+        </div>
+        <h3><a href="../aar/2026-08-01-pipeline-phase-4-funds.md">Pipeline Phase 4 — Fund exposure (CVM + EDGAR)</a></h3>
+        <div class="meta-row">2026-08-01-pipeline-phase-4-funds</div>
+      </article>
+      <article class="card">
+        <div class="meta-row">
+          <span class="badge badge-agent">agent</span>
+          <span class="badge badge-completed">completed</span>
+          2026-08-01
+        </div>
+        <h3><a href="../aar/2026-08-01-pipeline-phase-5-schemas-ui.md">Pipeline Phase 5 — Schemas, alignment, React MVP</a></h3>
+        <div class="meta-row">2026-08-01-pipeline-phase-5-schemas-ui</div>
+      </article>
       <article class="card">
         <div class="meta-row">
           <span class="badge badge-agent">agent</span>
@@ -162,75 +222,25 @@
     <section>
       <h2>Open improvements</h2>
       <table><thead><tr><th>ID</th><th>Improvement</th><th>Priority</th><th>Source</th></tr></thead><tbody><tr>
-          <td>IMP-020</td>
-          <td>Phase 1: CVM FRE zip ingest + company extracts (`src/decifra/cvm/fre.py`)</td>
-          <td class="priority-high">high</td>
-          <td>unified-pipeline-toolkit</td>
-        </tr><tr>
-          <td>IMP-021</td>
-          <td>Phase 1: ANBIMA debentures/CRI/CRA (yields, indexers, covenants)</td>
-          <td class="priority-high">high</td>
-          <td>unified-pipeline-toolkit</td>
-        </tr><tr>
-          <td>IMP-022</td>
-          <td>Phase 1: B3 official shares/mcap + Balcão bond registrations</td>
-          <td class="priority-high">high</td>
-          <td>unified-pipeline-toolkit</td>
-        </tr><tr>
-          <td>IMP-023</td>
-          <td>Phase 2: Entity graph CNPJ↔CVM↔ticker↔ISIN (`entities/` + `entities.json`)</td>
-          <td class="priority-high">high</td>
-          <td>unified-pipeline-toolkit</td>
-        </tr><tr>
-          <td>IMP-024</td>
-          <td>Phase 2: Hierarchy of Truth + private-issuer fallback chain</td>
-          <td class="priority-high">high</td>
-          <td>unified-pipeline-toolkit</td>
-        </tr><tr>
-          <td>IMP-025</td>
-          <td>Phase 3: APV engine (`valuation/apv.py`)</td>
+          <td>IMP-034</td>
+          <td>Wire live B3 shares-outstanding detail API into `b3/shares.py`</td>
           <td class="priority-med">med</td>
-          <td>unified-pipeline-toolkit</td>
+          <td>pipeline-phase-1-ingestion</td>
         </tr><tr>
-          <td>IMP-026</td>
-          <td>Phase 3: Merton / Distance to Default (`credit/merton.py`)</td>
+          <td>IMP-035</td>
+          <td>Migrate credit/valuation/report joins to `load_identity` / resolver</td>
           <td class="priority-med">med</td>
-          <td>unified-pipeline-toolkit</td>
+          <td>pipeline-phase-2-entities</td>
         </tr><tr>
-          <td>IMP-027</td>
-          <td>Phase 3: Debt capacity flags ND/EBITDA≤3.5x, DSCR≥1.25x</td>
+          <td>IMP-036</td>
+          <td>Auto-assemble APV/Merton inputs from CVM + market for a ticker</td>
           <td class="priority-med">med</td>
-          <td>unified-pipeline-toolkit</td>
+          <td>pipeline-phase-3-modeling</td>
         </tr><tr>
-          <td>IMP-028</td>
-          <td>Phase 3: OCF→debt service→FCFE waterfall</td>
+          <td>IMP-037</td>
+          <td>Live lake/API feed for React UI (replace static samples)</td>
           <td class="priority-med">med</td>
-          <td>unified-pipeline-toolkit</td>
-        </tr><tr>
-          <td>IMP-029</td>
-          <td>Phase 4: CVM Funds INF_DIARIO + CDA</td>
-          <td class="priority-med">med</td>
-          <td>unified-pipeline-toolkit</td>
-        </tr><tr>
-          <td>IMP-030</td>
-          <td>Phase 4: SEC EDGAR fund/issuer exposure</td>
-          <td class="priority-low">low</td>
-          <td>unified-pipeline-toolkit</td>
-        </tr><tr>
-          <td>IMP-031</td>
-          <td>Phase 5: Three schemas (Profile, Credit&amp;Debt Matrix, Val Waterfall) + lineage</td>
-          <td class="priority-high">high</td>
-          <td>unified-pipeline-toolkit</td>
-        </tr><tr>
-          <td>IMP-032</td>
-          <td>Phase 5: ITR–debt schedule DT_REFER alignment in credit/valuation readers</td>
-          <td class="priority-med">med</td>
-          <td>unified-pipeline-toolkit</td>
-        </tr><tr>
-          <td>IMP-033</td>
-          <td>Phase 5: React dark-mode research UI (`frontend/`); Streamlit interim</td>
-          <td class="priority-med">med</td>
-          <td>unified-pipeline-toolkit</td>
+          <td>pipeline-phase-5-schemas-ui</td>
         </tr><tr>
           <td>IMP-003</td>
           <td>Expand CVM cache years toward config defaults (2020-2021 DFP/ITR; fato relevante)</td>
@@ -308,7 +318,7 @@
     <section>
       <h2>Lessons rollup</h2>
       <div class="lessons">
-        <ul><li><strong>Unified pipeline gap audit + toolkit install:</strong> Keep **implemented** vs **target** sources explicit in always-on rules so agents do not invent ANBIMA/FRE sync.</li><li><strong>Unified pipeline gap audit + toolkit install:</strong> Full end-state charter is large; track as IMP/AUTO phases and re-audit after each phase rather than one megapr.</li><li><strong>Unified pipeline gap audit + toolkit install:</strong> Existing FCFF/WACC DCF and peer credit remain complementary — do not treat them as APV/Merton substitutes or delete them.</li><li><strong>Automation + AAR memory:</strong> Encoding sync + AAR in one runner prevents “silent” collection runs with no handoff.</li><li><strong>Automation + AAR memory:</strong> Retrospective AARs from transcripts immediately reduce re-explore cost for the next agent.</li><li><strong>Automation + AAR memory:</strong> Human HTML should be generated from agent markdown sources, not maintained by hand.</li><li><strong>Automation closeout + automation opportunity tracking:</strong> Dashboard refresh belonging to the runner is not enough if failures are swallowed — closeout must be checked.</li><li><strong>Automation closeout + automation opportunity tracking:</strong> Product gaps (`IMP-*`) and automation meta (`AUTO-*`) mix poorly in one table; split keeps the human dashboard scannable.</li><li><strong>Automation closeout + automation opportunity tracking:</strong> Frozen automation AAR coverage must not be the dashboard source of truth after lake mutations (already fixed via live coverage).</li><li><strong>Refresh session dashboard (live coverage):</strong> Dashboard coverage must read the lake (or re-capture after agent backfills); automation AARs freeze mid-run gaps.</li><li><strong>Refresh session dashboard (live coverage):</strong> Closing an improvement in an AAR without moving it in `LOG.md` leaves the human dashboard wrong.</li><li><strong>Implement all FUTURE_AGENTS prompts:</strong> `3.06.02` sub-account mapping is critical for interest coverage on companies whose financial revenue exceeds expenses (making parent `3.06` net positive).</li><li><strong>Implement all FUTURE_AGENTS prompts:</strong> `BRAPI_API_KEY` enables fast, complete OHLCV price backfills (2,482 bars/ticker) across the entire Ibovespa universe in under 2 minutes.</li><li><strong>Implement all FUTURE_AGENTS prompts:</strong> Jinja2 + Plotly offline rendering allows zero-latency interactive HTML reports without LLM API dependency.</li></ul>
+        <ul><li><strong>Unified pipeline E2E closeout (Phases 1–5 on epic):</strong> Opt-in pipeline stages on `sync_pilot` prevent accidental multi-GB downloads.</li><li><strong>Unified pipeline E2E closeout (Phases 1–5 on epic):</strong> Avoid Unicode arrows in Windows console scripts (cp1252).</li><li><strong>Unified pipeline E2E closeout (Phases 1–5 on epic):</strong> Progress JSON + dashboard tab makes phase status visible without re-reading all AARs.</li><li><strong>Pipeline Phase 1 — Primary ingestion (FRE, ANBIMA, B3):</strong> Keep pipeline sync stages opt-in on `sync_pilot` so daily pilots do not download FRE/funds by default.</li><li><strong>Pipeline Phase 1 — Primary ingestion (FRE, ANBIMA, B3):</strong> Fixture-backed FI parsers unblock CI and lake shape before opaque vendor APIs stabilize.</li><li><strong>Pipeline Phase 1 — Primary ingestion (FRE, ANBIMA, B3):</strong> Avoid Unicode arrows in Rich CLI strings on Windows cp1252 consoles.</li><li><strong>Pipeline Phase 2 — Entity resolution &amp; fallbacks:</strong> Seed entities from existing Ibovespa meta first; debt ISINs are additive.</li><li><strong>Pipeline Phase 2 — Entity resolution &amp; fallbacks:</strong> Keep Hierarchy of Truth as a shared constant consumed by conflict helpers and docs.</li><li><strong>Pipeline Phase 3 — APV, Merton, capacity, waterfall:</strong> Keep new engines complementary — acceptance is coexistence with DCF/peer scores.</li><li><strong>Pipeline Phase 3 — APV, Merton, capacity, waterfall:</strong> Capacity thresholds (3.5x / 1.25x) belong in named constants for report/schema reuse.</li><li><strong>Pipeline Phase 4 — Fund exposure (CVM + EDGAR):</strong> Keep fund/EDGAR sync offline-default so CI and agents do not pull multi-GB CVM FI dumps accidentally.</li><li><strong>Pipeline Phase 5 — Schemas, alignment, React MVP:</strong> Ship schema contracts + sample UI together so agents can validate lineage shape without waiting for full API.</li></ul>
       </div>
     </section>
 
@@ -354,12 +364,241 @@
         </li>
       </ul>
     </section>
+    </div>
+
+    <div id="tab-pipeline" class="tab-panel" role="tabpanel" hidden>
+    
+    <section>
+      <h2>Overall progress</h2>
+      <p class="sub">Tracked in <code>docs/architecture/pipeline-progress.json</code> ·
+        <a href="../architecture/unified-pipeline-roadmap.md">roadmap</a> ·
+        <a href="../architecture/unified-pipeline-gap-analysis.md">gap analysis</a> ·
+        <a href="../architecture/unified-pipeline-branches.md">branches</a></p>
+      <div class="progress-bar progress-bar-lg"><div class="progress-fill" style="width:100%"></div></div>
+      <div class="progress-label">100% · status <code>done</code> · updated 2026-08-01</div>
+    </section>
+
+    <section>
+      <h2>Pillars</h2>
+      <div class="pillar-grid">
+      <div class="pillar-card">
+        <div class="pillar-head">
+          <span>Multi-source ingestion</span>
+          <span class="badge grade-fail">Fail</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+        <div class="progress-label">100% · 5 deliverables</div>
+      </div>
+      <div class="pillar-card">
+        <div class="pillar-head">
+          <span>Entity resolution &amp; fallbacks</span>
+          <span class="badge grade-pass">Pass</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+        <div class="progress-label">100% · 2 deliverables</div>
+      </div>
+      <div class="pillar-card">
+        <div class="pillar-head">
+          <span>Integrated modeling</span>
+          <span class="badge grade-pass">Pass</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+        <div class="progress-label">100% · 4 deliverables</div>
+      </div>
+      <div class="pillar-card">
+        <div class="pillar-head">
+          <span>Output schema &amp; UI</span>
+          <span class="badge grade-pass">Pass</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+        <div class="progress-label">100% · 3 deliverables</div>
+      </div></div>
+    </section>
+
+    <section>
+      <h2>End-state architecture</h2>
+      <p class="sub">Target flow: ingestion → entity resolution → modeling → schemas/UI. Existing DCF and peer credit remain complementary.</p>
+      <div class="end-state-wrap">
+<svg class="end-state-svg" viewBox="0 0 960 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Unified pipeline end state">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1a3a32"/><stop offset="100%" stop-color="#1a2838"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="420" fill="url(#g1)" rx="8"/>
+  <text x="24" y="36" fill="#8b9aab" font-size="13" font-family="Segoe UI,sans-serif">Desired end state — Unified Financial Data Pipeline</text>
+  <!-- Pillar 1 -->
+  <rect x="24" y="56" width="200" height="300" rx="8" fill="#1a222c" stroke="#2e3a48"/>
+  <text x="40" y="82" fill="#3d9a7a" font-size="12" font-weight="600">1 Ingestion</text>
+  <rect x="40" y="98" width="168" height="36" rx="4" fill="#243040"/><text x="52" y="120" fill="#e8eef4" font-size="11">CVM DFP/ITR</text>
+  <rect x="40" y="144" width="168" height="36" rx="4" fill="#243040"/><text x="52" y="166" fill="#e8eef4" font-size="11">CVM FRE</text>
+  <rect x="40" y="190" width="168" height="36" rx="4" fill="#243040"/><text x="52" y="212" fill="#e8eef4" font-size="11">ANBIMA FI</text>
+  <rect x="40" y="236" width="168" height="36" rx="4" fill="#243040"/><text x="52" y="258" fill="#e8eef4" font-size="11">B3 shares / Balcão</text>
+  <rect x="40" y="282" width="168" height="36" rx="4" fill="#243040"/><text x="52" y="304" fill="#e8eef4" font-size="11">Funds + EDGAR</text>
+  <!-- Arrow -->
+  <path d="M232 206 H268" stroke="#3d9a7a" stroke-width="2" marker-end="url(#arr)"/>
+  <!-- Pillar 2 -->
+  <rect x="276" y="100" width="180" height="210" rx="8" fill="#1a222c" stroke="#2e3a48"/>
+  <text x="292" y="126" fill="#3d9a7a" font-size="12" font-weight="600">2 Entities</text>
+  <rect x="292" y="142" width="148" height="36" rx="4" fill="#243040"/><text x="304" y="164" fill="#e8eef4" font-size="11">Resolve graph</text>
+  <rect x="292" y="188" width="148" height="36" rx="4" fill="#243040"/><text x="304" y="210" fill="#e8eef4" font-size="11">Hierarchy of Truth</text>
+  <rect x="292" y="234" width="148" height="36" rx="4" fill="#243040"/><text x="304" y="256" fill="#e8eef4" font-size="11">Private fallback</text>
+  <path d="M464 206 H500" stroke="#3d9a7a" stroke-width="2"/>
+  <!-- Pillar 3 -->
+  <rect x="508" y="56" width="200" height="300" rx="8" fill="#1a222c" stroke="#2e3a48"/>
+  <text x="524" y="82" fill="#3d9a7a" font-size="12" font-weight="600">3 Modeling</text>
+  <rect x="524" y="98" width="168" height="36" rx="4" fill="#243040"/><text x="536" y="120" fill="#e8eef4" font-size="11">FCFF/WACC (keep)</text>
+  <rect x="524" y="144" width="168" height="36" rx="4" fill="#243040"/><text x="536" y="166" fill="#e8eef4" font-size="11">APV</text>
+  <rect x="524" y="190" width="168" height="36" rx="4" fill="#243040"/><text x="536" y="212" fill="#e8eef4" font-size="11">Merton / DtD</text>
+  <rect x="524" y="236" width="168" height="36" rx="4" fill="#243040"/><text x="536" y="258" fill="#e8eef4" font-size="11">Debt capacity</text>
+  <rect x="524" y="282" width="168" height="36" rx="4" fill="#243040"/><text x="536" y="304" fill="#e8eef4" font-size="11">OCF→FCFE waterfall</text>
+  <path d="M716 206 H752" stroke="#3d9a7a" stroke-width="2"/>
+  <!-- Pillar 4 -->
+  <rect x="760" y="100" width="176" height="210" rx="8" fill="#1a222c" stroke="#2e3a48"/>
+  <text x="776" y="126" fill="#3d9a7a" font-size="12" font-weight="600">4 Outputs</text>
+  <rect x="776" y="142" width="144" height="36" rx="4" fill="#243040"/><text x="788" y="164" fill="#e8eef4" font-size="11">3 schemas + lineage</text>
+  <rect x="776" y="188" width="144" height="36" rx="4" fill="#243040"/><text x="788" y="210" fill="#e8eef4" font-size="11">Streamlit interim</text>
+  <rect x="776" y="234" width="144" height="36" rx="4" fill="#243040"/><text x="788" y="256" fill="#e8eef4" font-size="11">React dark MVP</text>
+</svg></div>
+    </section>
+
+    <section>
+      <h2>Baseline (already shipped)</h2>
+      <ul class="deliv-list"><li><span class="badge badge-done">done</span> CVM DFP/ITR financials</li><li><span class="badge badge-done">done</span> Industry peer credit scores</li><li><span class="badge badge-done">done</span> FCFF/WACC DCF + multiples</li><li><span class="badge badge-done">done</span> Streamlit research UI (interim)</li></ul>
+    </section>
+
+    <section>
+      <h2>Phases</h2>
+      <div class="grid">
+      <article class="card phase-card">
+        <div class="meta-row">
+          <span class="badge badge-phase">Phase 1</span>
+          <span class="badge badge-done">done</span>
+        </div>
+        <h3>Primary ingestion</h3>
+        <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+        <div class="progress-label">100% · branch <code>feat/pipeline-phase-1</code></div>
+        <ul class="deliv-list"><li class="deliv deliv-done">
+            <span class="badge badge-done">done</span>
+            <strong>IMP-020</strong> CVM FRE zip ingest + extracts
+          </li><li class="deliv deliv-done">
+            <span class="badge badge-done">done</span>
+            <strong>IMP-021</strong> ANBIMA debentures/CRI/CRA
+          </li><li class="deliv deliv-done">
+            <span class="badge badge-done">done</span>
+            <strong>IMP-022</strong> B3 shares/mcap + Balcão bonds
+          </li></ul>
+        <div class="meta-row">AAR: <a href="../aar/2026-08-01-pipeline-phase-1-ingestion.md">2026-08-01-pipeline-phase-1-ingestion.md</a></div>
+      </article>
+      <article class="card phase-card">
+        <div class="meta-row">
+          <span class="badge badge-phase">Phase 2</span>
+          <span class="badge badge-done">done</span>
+        </div>
+        <h3>Entity resolution &amp; fallbacks</h3>
+        <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+        <div class="progress-label">100% · branch <code>feat/pipeline-phase-2</code></div>
+        <ul class="deliv-list"><li class="deliv deliv-done">
+            <span class="badge badge-done">done</span>
+            <strong>IMP-023</strong> Entity graph CNPJ↔CVM↔ticker↔ISIN
+          </li><li class="deliv deliv-done">
+            <span class="badge badge-done">done</span>
+            <strong>IMP-024</strong> Hierarchy of Truth + private-issuer fallback
+          </li></ul>
+        <div class="meta-row">AAR: <a href="../aar/2026-08-01-pipeline-phase-2-entities.md">2026-08-01-pipeline-phase-2-entities.md</a></div>
+      </article>
+      <article class="card phase-card">
+        <div class="meta-row">
+          <span class="badge badge-phase">Phase 3</span>
+          <span class="badge badge-done">done</span>
+        </div>
+        <h3>Valuation &amp; credit modeling</h3>
+        <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+        <div class="progress-label">100% · branch <code>feat/pipeline-phase-3</code></div>
+        <ul class="deliv-list"><li class="deliv deliv-done">
+            <span class="badge badge-done">done</span>
+            <strong>IMP-025</strong> APV engine
+          </li><li class="deliv deliv-done">
+            <span class="badge badge-done">done</span>
+            <strong>IMP-026</strong> Merton / Distance to Default
+          </li><li class="deliv deliv-done">
+            <span class="badge badge-done">done</span>
+            <strong>IMP-027</strong> Debt capacity flags
+          </li><li class="deliv deliv-done">
+            <span class="badge badge-done">done</span>
+            <strong>IMP-028</strong> OCF→FCFE waterfall
+          </li></ul>
+        <div class="meta-row">AAR: <a href="../aar/2026-08-01-pipeline-phase-3-modeling.md">2026-08-01-pipeline-phase-3-modeling.md</a></div>
+      </article>
+      <article class="card phase-card">
+        <div class="meta-row">
+          <span class="badge badge-phase">Phase 4</span>
+          <span class="badge badge-done">done</span>
+        </div>
+        <h3>Fund exposure</h3>
+        <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+        <div class="progress-label">100% · branch <code>feat/pipeline-phase-4</code></div>
+        <ul class="deliv-list"><li class="deliv deliv-done">
+            <span class="badge badge-done">done</span>
+            <strong>IMP-029</strong> CVM INF_DIARIO + CDA
+          </li><li class="deliv deliv-done">
+            <span class="badge badge-done">done</span>
+            <strong>IMP-030</strong> SEC EDGAR fund/issuer exposure
+          </li></ul>
+        <div class="meta-row">AAR: <a href="../aar/2026-08-01-pipeline-phase-4-funds.md">2026-08-01-pipeline-phase-4-funds.md</a></div>
+      </article>
+      <article class="card phase-card">
+        <div class="meta-row">
+          <span class="badge badge-phase">Phase 5</span>
+          <span class="badge badge-done">done</span>
+        </div>
+        <h3>Standardization &amp; UI</h3>
+        <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+        <div class="progress-label">100% · branch <code>feat/pipeline-phase-5</code></div>
+        <ul class="deliv-list"><li class="deliv deliv-done">
+            <span class="badge badge-done">done</span>
+            <strong>IMP-031</strong> Three schemas + lineage
+          </li><li class="deliv deliv-done">
+            <span class="badge badge-done">done</span>
+            <strong>IMP-032</strong> ITR–debt DT_REFER alignment
+          </li><li class="deliv deliv-done">
+            <span class="badge badge-done">done</span>
+            <strong>IMP-033</strong> React dark-mode research UI
+          </li></ul>
+        <div class="meta-row">AAR: <a href="../aar/2026-08-01-pipeline-phase-5-schemas-ui.md">2026-08-01-pipeline-phase-5-schemas-ui.md</a></div>
+      </article></div>
+    </section>
+
+    </div>
 
     <footer>
       Agent sources: <code>docs/aar/</code> · Improvements: <code>docs/improvements/LOG.md</code> ·
       Automation: <code>docs/improvements/AUTOMATION.md</code> ·
+      Pipeline: <code>docs/architecture/pipeline-progress.json</code> ·
       Update: <code>python scripts/update_session_dashboard.py</code> (also via <code>sync_pilot</code>)
     </footer>
   </div>
+  <script>
+    document.querySelectorAll('.tab').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var id = btn.getAttribute('data-tab');
+        document.querySelectorAll('.tab').forEach(function(b) {
+          b.classList.toggle('active', b === btn);
+          b.setAttribute('aria-selected', b === btn ? 'true' : 'false');
+        });
+        document.querySelectorAll('.tab-panel').forEach(function(p) {
+          var on = p.id === 'tab-' + id;
+          p.classList.toggle('active', on);
+          if (on) p.removeAttribute('hidden'); else p.setAttribute('hidden', '');
+        });
+        if (location.hash !== '#' + id) history.replaceState(null, '', '#' + id);
+      });
+    });
+    var h = (location.hash || '').replace('#','');
+    if (h === 'pipeline' || h === 'session') {
+      var t = document.querySelector('.tab[data-tab="' + h + '"]');
+      if (t) t.click();
+    }
+  </script>
 </body>
 </html>
