@@ -157,9 +157,22 @@ def sync_financials(
     *,
     include_prices: bool = True,
     scope: str = "all",
+    tickers: list[str] | None = None,
 ) -> dict[str, Any]:
     years = years or DEFAULT_FINANCIAL_YEARS
-    tickers = list_tickers(ticker, scope=scope)  # type: ignore[arg-type]
+    if tickers:
+        from decifra.http_util import normalize_ticker
+
+        names = [normalize_ticker(t) for t in tickers if str(t).strip()]
+        seen: set[str] = set()
+        ordered: list[str] = []
+        for t in names:
+            if t and t not in seen:
+                seen.add(t)
+                ordered.append(t)
+        tickers = ordered
+    else:
+        tickers = list_tickers(ticker, scope=scope)  # type: ignore[arg-type]
     if not tickers:
         raise RuntimeError("No universe loaded. Run: decifra sync universe")
 

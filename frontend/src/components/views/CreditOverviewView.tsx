@@ -1,7 +1,9 @@
+import { useMemo } from "react";
 import { DataTable } from "../DataTable";
 import { FilterBar } from "../FilterBar";
 import { fmtMetric, fmtScore } from "../../lib/format";
-import type { CreditTablePayload, FilterState } from "../../types";
+import { formatCnpj, groupByCompany } from "../../lib/groupCompanies";
+import type { CreditRow, CreditTablePayload, FilterState } from "../../types";
 
 type Props = {
   data: CreditTablePayload | null;
@@ -12,6 +14,30 @@ type Props = {
   onRefresh: () => void;
   onSelectTicker: (ticker: string) => void;
 };
+
+type CompanyCreditRow = {
+  key: string;
+  company: string;
+  cnpj: string;
+  tickers: string[];
+  primaryTicker: string;
+  industry_group?: string;
+  credit_score?: number | null;
+  fundamental_score?: number | null;
+  qualitative_penalty?: number | null;
+  debt_to_equity?: number | null;
+  interest_coverage?: number | null;
+  net_margin?: number | null;
+  peer_benchmark?: boolean;
+};
+
+function pickNum(members: CreditRow[], key: keyof CreditRow): number | null {
+  for (const m of members) {
+    const v = m[key];
+    if (typeof v === "number" && !Number.isNaN(v)) return v;
+  }
+  return null;
+}
 
 export function CreditOverviewView({
   data,
@@ -27,11 +53,42 @@ export function CreditOverviewView({
   const labels = data?.peer_median_labels || {};
   const pct = new Set(data?.pct_kpis || []);
 
+  const companies = useMemo(() => {
+    const groups = groupByCompany(data?.rows || []);
+    return groups.map((g): CompanyCreditRow => {
+      const primary = (g.members.find((m) => m.ticker === g.primaryTicker) ||
+        g.members[0]) as CreditRow;
+      const bestScore = g.members.reduce<number | null>((acc, m) => {
+        if (m.credit_score == null) return acc;
+        if (acc == null) return m.credit_score;
+        return Math.max(acc, m.credit_score);
+      }, null);
+      return {
+        key: g.key,
+        company: g.company,
+        cnpj: g.cnpj,
+        tickers: g.tickers,
+        primaryTicker: g.primaryTicker,
+        industry_group: primary.industry_group,
+        credit_score: bestScore,
+        fundamental_score: primary.fundamental_score ?? pickNum(g.members as CreditRow[], "fundamental_score"),
+        qualitative_penalty:
+          primary.qualitative_penalty ?? pickNum(g.members as CreditRow[], "qualitative_penalty"),
+        debt_to_equity: primary.debt_to_equity ?? pickNum(g.members as CreditRow[], "debt_to_equity"),
+        interest_coverage:
+          primary.interest_coverage ?? pickNum(g.members as CreditRow[], "interest_coverage"),
+        net_margin: primary.net_margin ?? pickNum(g.members as CreditRow[], "net_margin"),
+        peer_benchmark: g.members.some((m) => m.peer_benchmark),
+      };
+    });
+  }, [data?.rows]);
+
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <h1 className="text-sm font-semibold text-slate-100">Industry overview · Credit</h1>
       <p className="mt-0.5 mb-3 text-[11px] text-slate-500">
-        Research-grade peer ranks from local CVM financials — not a bureau rating.
+        Research-grade peer ranks from local CVM financials — not a bureau rating. One row per
+        issuer; tickers listed under the company name.
         {refreshing ? " · refreshing…" : ""}
       </p>
 
@@ -45,7 +102,7 @@ export function CreditOverviewView({
 
       <div className="mb-3 grid grid-cols-4 gap-2">
         {[
-          ["Companies", summary?.companies ?? "—"],
+          ["Companies", summary?.companies ?? companies.length ?? "—"],
           ["Median score", fmtScore(summary?.median_credit_score ?? null)],
           ["Mean score", fmtScore(summary?.mean_credit_score ?? null)],
           ["Peer benchmark", summary?.with_peer_benchmark ?? "—"],
@@ -82,16 +139,24 @@ export function CreditOverviewView({
         <p className="text-xs italic text-slate-500">Loading…</p>
       ) : (
         <DataTable
-          rows={data?.rows || []}
+          rows={companies}
           empty="No companies match filters."
-          onRowClick={(r) => onSelectTicker(r.ticker)}
+          onRowClick={(r) => onSelectTicker(r.primaryTicker)}
           columns={[
             {
-              key: "ticker",
-              header: "Ticker",
-              render: (r) => <span className="font-medium text-slate-100">{r.ticker}</span>,
+              key: "company",
+              header: "Company",
+              width: "minmax(220px, 2.5fr)",
+              render: (r) => (
+                <div>
+                  <div className="font-medium text-slate-100">{r.company || "—"}</div>
+                  <div className="text-[10px] text-slate-500">CNPJ {formatCnpj(r.cnpj)}</div>
+                  <div className="mt-0.5 text-[10px] tabular-nums tracking-wide text-slate-400">
+                    {r.tickers.join(" · ")}
+                  </div>
+                </div>
+              ),
             },
-            { key: "company", header: "Company", render: (r) => r.company || "—" },
             { key: "industry", header: "Industry", render: (r) => r.industry_group || "—" },
             {
               key: "score",

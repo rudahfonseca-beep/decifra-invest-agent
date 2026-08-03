@@ -1,7 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { CatalystFeed } from "./components/CatalystFeed";
-import { Header } from "./components/Header";
+import { Header, type UniverseScope } from "./components/Header";
 import { Sidebar } from "./components/Sidebar";
 import { CreditDetailView } from "./components/views/CreditDetailView";
 import { CreditOverviewView } from "./components/views/CreditOverviewView";
@@ -37,7 +37,17 @@ const DEFAULT_FILTERS: FilterState = {
   showIncomplete: false,
 };
 
-const SCOPE = "core";
+const SCOPE_KEY = "decifra.universeScope";
+
+function readScope(): UniverseScope {
+  try {
+    const v = localStorage.getItem(SCOPE_KEY);
+    if (v === "all" || v === "core") return v;
+  } catch {
+    /* ignore */
+  }
+  return "core";
+}
 
 export default function App() {
   const queryClient = useQueryClient();
@@ -46,39 +56,60 @@ export default function App() {
   const debouncedQuery = useDebounced(query, 250);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [selectedTicker, setSelectedTicker] = useState("PETR4");
+  const [scope, setScope] = useState<UniverseScope>(readScope);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(SCOPE_KEY, scope);
+    } catch {
+      /* ignore */
+    }
+  }, [scope]);
+
+  function refreshResearchFeeds() {
+    queryClient.invalidateQueries({ queryKey: ["shell"] });
+    queryClient.invalidateQueries({ queryKey: ["tickers"] });
+    queryClient.invalidateQueries({ queryKey: ["credit"] });
+  }
 
   const shellQuery = useQuery({
-    queryKey: ["shell", SCOPE],
+    queryKey: ["shell", scope],
     queryFn: async () => {
       const [s, c, ind, tix] = await Promise.all([
         fetchJson<ScreenerPayload>([
-          `/api/screener${qs({ limit: 12, scope: SCOPE })}`,
+          `/api/screener${qs({ limit: 12, scope })}`,
           "/sample/opportunity_screener.json",
         ]),
         fetchJson<CatalystPayload>([
-          `/api/catalysts${qs({ limit: 12, scope: SCOPE })}`,
+          `/api/catalysts${qs({ limit: 12, scope })}`,
           "/sample/catalyst_feed.json",
         ]),
         fetchJson<{ industries: IndustryItem[] }>([
-          `/api/industries${qs({ signals: false, scope: SCOPE })}`,
+          `/api/industries${qs({ signals: false, scope })}`,
           "/sample/industries.json",
         ]),
         fetchJson<{ tickers: TickerListItem[] }>([
           `/api/tickers${qs({
             incomplete: true,
             signals: false,
-            scope: SCOPE,
+            scope,
             q: undefined,
+            limit: scope === "all" ? 250 : undefined,
           })}`,
           "/sample/tickers.json",
         ]),
       ]);
-      return { screener: s, catalysts: c, industries: ind.industries || [], tickers: tix.tickers || [] };
+      return {
+        screener: s,
+        catalysts: c,
+        industries: ind.industries || [],
+        tickers: tix.tickers || [],
+      };
     },
   });
 
   const tickersSearchQuery = useQuery({
-    queryKey: ["tickers", SCOPE, debouncedQuery],
+    queryKey: ["tickers", scope, debouncedQuery],
     enabled: Boolean(debouncedQuery.trim()),
     placeholderData: (prev) => prev,
     queryFn: async () => {
@@ -86,7 +117,7 @@ export default function App() {
         `/api/tickers${qs({
           incomplete: true,
           signals: false,
-          scope: SCOPE,
+          scope,
           q: debouncedQuery.trim(),
           limit: 200,
         })}`,
@@ -97,7 +128,7 @@ export default function App() {
   });
 
   const creditQuery = useQuery({
-    queryKey: ["credit", SCOPE, filters],
+    queryKey: ["credit", scope, filters],
     placeholderData: (prev) => prev,
     queryFn: () =>
       fetchJson<CreditTablePayload>([
@@ -106,7 +137,7 @@ export default function App() {
           cohort: filters.cohort,
           signals: filters.includeSignals,
           incomplete: filters.showIncomplete,
-          scope: SCOPE,
+          scope,
         })}`,
         "/sample/credit_table.json",
       ]),
@@ -151,26 +182,11 @@ export default function App() {
       ? String(shellQuery.error || creditQuery.error || tickerDetailQuery.error)
       : null;
 
-  const feedSource: "api" | "sample" =
-    industries.length > 3 ? "api" : "sample";
+  const feedSource: "api" | "sample" = industries.length > 3 ? "api" : "sample";
 
   const loadingShell = shellQuery.isLoading || shellQuery.isFetching;
   const loadingCredit = creditQuery.isLoading || creditQuery.isFetching;
   const loadingTicker = tickerDetailQuery.isLoading || tickerDetailQuery.isFetching;
-
-  const filteredScreener = useMemo(() => {
-    const rows = screener?.rows ?? [];
-    const q = query.trim().toLowerCase();
-    if (!q) return rows;
-    return rows.filter(
-      (row) =>
-        row.ticker.toLowerCase().includes(q) ||
-        row.cnpj.includes(q.replace(/\D/g, "")) ||
-        row.cnpj.toLowerCase().includes(q) ||
-        row.isin.toLowerCase().includes(q) ||
-        row.company_name.toLowerCase().includes(q)
-    );
-  }, [screener, query]);
 
   function goTicker(ticker: string) {
     setSelectedTicker(ticker);
@@ -194,7 +210,12 @@ export default function App() {
       <Sidebar active={view} onNavigate={setView} />
 
       <div className="flex min-w-0 flex-1 flex-col bg-[#0B1120]">
-        <Header query={query} onQueryChange={setQuery} />
+        <Header
+          query={query}
+          onQueryChange={setQuery}
+          scope={scope}
+          onScopeChange={setScope}
+        />
 
         <div className="flex min-h-0 flex-1">
           <main className="flex min-w-0 flex-1 flex-col px-4 py-4">
@@ -202,16 +223,18 @@ export default function App() {
               <p className="mb-3 text-xs text-rose-400">Failed to load data: {error}</p>
             )}
             <p className="mb-2 text-[10px] text-slate-600">
-              Feed: {feedSource === "api" ? "lake API" : "sample JSON"} · scope={SCOPE} ·{" "}
+              Feed: {feedSource === "api" ? "lake API" : "sample JSON"} · scope={scope}
+              {scope === "core" ? " (IBOV ∪ watchlist)" : " (all listed)"} ·{" "}
               `decifra schemas serve`
               {(loadingShell || loadingCredit || loadingTicker) && " · refreshing…"}
             </p>
 
             {view === "screener" && (
               <ScreenerView
-                rows={filteredScreener}
+                rows={screener?.rows ?? []}
                 loading={shellBlocking}
                 refreshing={loadingShell && !shellBlocking}
+                query={query}
               />
             )}
             {view === "industries" && (
@@ -241,7 +264,7 @@ export default function App() {
                 refreshing={loadingCredit && !creditBlocking}
                 onFilters={setFilters}
                 onRefresh={() =>
-                  queryClient.invalidateQueries({ queryKey: ["credit", SCOPE, filters] })
+                  queryClient.invalidateQueries({ queryKey: ["credit", scope, filters] })
                 }
                 onSelectTicker={goTicker}
               />
@@ -256,7 +279,12 @@ export default function App() {
             )}
             {view === "valuation" && <ValuationView initialTicker={selectedTicker} />}
             {view === "report" && <ReportView />}
-            {view === "coverage" && <CoverageView onSelectTicker={goTicker} />}
+            {view === "coverage" && (
+              <CoverageView
+                onSelectTicker={goTicker}
+                onResearchDataChanged={refreshResearchFeeds}
+              />
+            )}
             {view === "profile" && (
               <ProfileView
                 profile={profile}
