@@ -101,17 +101,37 @@ def list_tickers(
     """List universe tickers.
 
     ``scope='all'`` — every listed equity in equities.json (or legacy IBOV).
-    ``scope='core'`` — IBOV ∪ watchlist (``sync_tier=core``).
+    ``scope='core'`` — IBOV ∪ live ``watchlist.json`` ∪ constituents with ``sync_tier=core``.
     """
     if ticker:
         return [normalize_ticker(ticker)]
     data = load_universe()
+    constituents = data.get("constituents", [])
     out: list[str] = []
-    for c in data.get("constituents", []):
+    seen: set[str] = set()
+    universe_set: set[str] = set()
+    for c in constituents:
         t = normalize_ticker(c.get("ticker") or "")
         if not t:
             continue
+        universe_set.add(t)
         if scope == "core" and not _is_core(c):
             continue
-        out.append(t)
+        if t not in seen:
+            seen.add(t)
+            out.append(t)
+
+    if scope == "core":
+        # Live watchlist elevates tickers without re-running sync universe.
+        try:
+            from decifra.universe.listed import load_watchlist
+
+            for t in load_watchlist():
+                if not t or t in seen:
+                    continue
+                if t in universe_set or meta_path(t).exists():
+                    seen.add(t)
+                    out.append(t)
+        except Exception:
+            pass
     return out

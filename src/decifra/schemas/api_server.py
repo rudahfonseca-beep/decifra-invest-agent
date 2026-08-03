@@ -1,4 +1,4 @@
-"""Read-only (plus report POST) lake API for the React Terminal Dark UI."""
+"""Lake API for the React Terminal Dark UI (GET research + POST sync/report)."""
 
 from __future__ import annotations
 
@@ -232,7 +232,163 @@ def handle_api_post(path: str, body: dict[str, Any]) -> tuple[int, dict[str, Any
         result = report_build_payload(body)
         return (200 if result.get("ok") else 400), result
 
-    return 404, {"error": "not_found", "path": path}
+    if path in ("/api/sync/financials", "/api/sync/financials/"):
+        return _sync_financials_post(body)
+
+    if path in ("/api/watchlist", "/api/watchlist/"):
+        return _watchlist_post(body)
+
+    return 404, {
+        "error": (
+            "not_found — lake API has no route for this path. "
+            "Restart `decifra schemas serve` so /api/sync/financials is loaded "
+            f"(got path={path!r})."
+        ),
+        "path": path,
+    }
+
+
+def _sync_financials_post(body: dict[str, Any]) -> tuple[int, dict[str, Any]]:
+    """POST body: { tickers: string[], year_from?: int, year_to?: int, include_prices?: bool }."""
+    from decifra.config import DEFAULT_FINANCIAL_YEARS
+    from decifra.cvm.financials import sync_financials
+
+    raw_tickers = body.get("tickers") or body.get("ticker")
+    if isinstance(raw_tickers, str):
+        names = [raw_tickers]
+    elif isinstance(raw_tickers, list):
+        names = [str(t) for t in raw_tickers]
+    else:
+        return 400, {"error": "tickers required (list of equity codes)"}
+
+    names = [normalize_ticker(t) for t in names if str(t).strip()]
+    if not names:
+        return 400, {"error": "tickers required (list of equity codes)"}
+
+    y_from = body.get("year_from", body.get("from"))
+    y_to = body.get("year_to", body.get("to"))
+    if y_from is None and y_to is None:
+        years = list(DEFAULT_FINANCIAL_YEARS)
+    else:
+        try:
+            start = int(y_from if y_from is not None else y_to)
+            end = int(y_to if y_to is not None else y_from)
+        except (TypeError, ValueError):
+            return 400, {"error": "year_from / year_to must be integers"}
+        if start > end:
+            start, end = end, start
+        if start < 2000 or end > 2035:
+            return 400, {"error": "years must be between 2000 and 2035"}
+        years = list(range(start, end + 1))
+
+    include_prices = bool(body.get("include_prices", True))
+    add_to_watchlist = bool(body.get("add_to_watchlist", True))
+    try:
+        result = sync_financials(
+            tickers=names,
+            years=years,
+            include_prices=include_prices,
+        )
+    except Exception as exc:
+        return 500, {"ok": False, "error": str(exc)}
+
+    # Credit / UI memory caches may be stale after new financial CSVs.
+    try:
+        from decifra.schemas.ui_cache import clear_all_ui_caches
+
+        clear_all_ui_caches()
+    except Exception:
+        pass
+
+    written = result.get("written") or {}
+    watchlist_info: dict[str, Any] | None = None
+    if add_to_watchlist:
+        wl_code, wl_payload = _watchlist_post({"tickers": names})
+        if wl_code == 200:
+            watchlist_info = wl_payload
+
+    return 200, {
+        "ok": True,
+        "tickers": names,
+        "years": years,
+        "cnpj_mapped": result.get("cnpj_mapped"),
+        "ticker_count": result.get("tickers"),
+        "written": {t: written.get(t, []) for t in names},
+        "watchlist": watchlist_info,
+        "coverage": coverage_payload(scope="all"),
+    }
+
+
+def _watchlist_post(body: dict[str, Any]) -> tuple[int, dict[str, Any]]:
+    """POST body: { tickers: string[] } — append to watchlist.json (promotes to core scope)."""
+    import json
+    from pathlib import Path
+
+    from decifra.config import WATCHLIST_JSON, ensure_dirs
+    from decifra.store.folders import load_meta, load_universe, save_meta
+    from decifra.universe.listed import load_watchlist
+
+    raw = body.get("tickers") or body.get("ticker")
+    if isinstance(raw, str):
+        names = [raw]
+    elif isinstance(raw, list):
+        names = [str(t) for t in raw]
+    else:
+        return 400, {"error": "tickers required"}
+
+    names = [normalize_ticker(t) for t in names if str(t).strip()]
+    if not names:
+        return 400, {"error": "tickers required"}
+
+    ensure_dirs()
+    existing = load_watchlist()
+    added: list[str] = []
+    for t in names:
+        if t not in existing:
+            existing.append(t)
+            added.append(t)
+
+    path = Path(WATCHLIST_JSON)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps({"tickers": existing}, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
+    # Patch equities.json + meta sync_tier so caches/export stay consistent.
+    try:
+        data = load_universe()
+        by_ticker = {
+            normalize_ticker(c.get("ticker") or ""): c for c in data.get("constituents", [])
+        }
+        for t in names:
+            if t in by_ticker:
+                by_ticker[t]["sync_tier"] = "core"
+            meta = load_meta(t)
+            meta["sync_tier"] = "core"
+            save_meta(t, meta)
+        from decifra.config import EQUITIES_JSON
+
+        if EQUITIES_JSON.exists():
+            EQUITIES_JSON.write_text(
+                json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8"
+            )
+    except Exception:
+        pass
+
+    try:
+        from decifra.schemas.ui_cache import clear_all_ui_caches
+
+        clear_all_ui_caches()
+    except Exception:
+        pass
+
+    return 200, {
+        "ok": True,
+        "watchlist": existing,
+        "added": added,
+        "count": len(existing),
+    }
 
 
 class LakeAPIHandler(BaseHTTPRequestHandler):

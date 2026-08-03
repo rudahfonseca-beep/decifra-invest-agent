@@ -55,11 +55,33 @@ def test_list_tickers_scope(tmp_path: Path, monkeypatch):
     eq_path.write_text(json.dumps(equities), encoding="utf-8")
     monkeypatch.setattr("decifra.store.folders.EQUITIES_JSON", eq_path)
     monkeypatch.setattr("decifra.store.folders.IBOVESPA_JSON", tmp_path / "missing.json")
+    empty_wl = tmp_path / "watchlist.json"
+    empty_wl.write_text(json.dumps([]), encoding="utf-8")
+    monkeypatch.setattr("decifra.universe.listed.WATCHLIST_JSON", empty_wl)
 
     assert len(load_universe().get("constituents", [])) == 3
     assert list_tickers(scope="all") == ["PETR4", "ABCD3", "WXYZ4"]
     assert list_tickers(scope="core") == ["PETR4", "WXYZ4"]
     assert list_tickers("abcd3") == ["ABCD3"]
+
+
+def test_list_tickers_core_includes_live_watchlist(tmp_path: Path, monkeypatch):
+    equities = {
+        "index": "B3_LISTED",
+        "constituents": [
+            {"ticker": "PETR4", "sync_tier": "core", "indexes": ["IBOV"]},
+            {"ticker": "ALPA4", "sync_tier": "index", "indexes": []},
+        ],
+    }
+    eq_path = tmp_path / "equities.json"
+    eq_path.write_text(json.dumps(equities), encoding="utf-8")
+    monkeypatch.setattr("decifra.store.folders.EQUITIES_JSON", eq_path)
+    monkeypatch.setattr("decifra.store.folders.IBOVESPA_JSON", tmp_path / "missing.json")
+    wl = tmp_path / "watchlist.json"
+    wl.write_text(json.dumps(["ALPA4"]), encoding="utf-8")
+    monkeypatch.setattr("decifra.universe.listed.WATCHLIST_JSON", wl)
+
+    assert list_tickers(scope="core") == ["PETR4", "ALPA4"]
 
 
 def test_load_universe_ibov_fallback(tmp_path: Path, monkeypatch):
@@ -71,6 +93,9 @@ def test_load_universe_ibov_fallback(tmp_path: Path, monkeypatch):
     ibov_path.write_text(json.dumps(ibov), encoding="utf-8")
     monkeypatch.setattr("decifra.store.folders.EQUITIES_JSON", tmp_path / "no_equities.json")
     monkeypatch.setattr("decifra.store.folders.IBOVESPA_JSON", ibov_path)
+    empty_wl = tmp_path / "watchlist.json"
+    empty_wl.write_text(json.dumps([]), encoding="utf-8")
+    monkeypatch.setattr("decifra.universe.listed.WATCHLIST_JSON", empty_wl)
 
     data = load_universe()
     assert data["constituents"][0]["sync_tier"] == "core"

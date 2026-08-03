@@ -6,6 +6,8 @@ type Col<T> = {
   header: string;
   render: (row: T) => ReactNode;
   className?: string;
+  /** CSS grid track for this column (default `minmax(0,1fr)`). */
+  width?: string;
 };
 
 type Props<T> = {
@@ -17,7 +19,7 @@ type Props<T> = {
   virtualThreshold?: number;
 };
 
-const ROW_H = 36;
+const ROW_H = 44;
 
 export function DataTable<T>({
   rows,
@@ -35,86 +37,76 @@ export function DataTable<T>({
     overscan: 12,
   });
 
+  const template = columns.map((c) => c.width || "minmax(0,1fr)").join(" ");
+
+  const rowClass = `grid items-start border-b border-slate-800/80 text-slate-300 ${
+    onRowClick ? "cursor-pointer hover:bg-slate-800/30" : "hover:bg-slate-800/20"
+  }`;
+
+  function cells(row: T) {
+    return columns.map((c) => (
+      <div key={c.key} role="cell" className={`min-w-0 px-2 py-2 ${c.className || ""}`}>
+        {c.render(row)}
+      </div>
+    ));
+  }
+
   return (
-    <div ref={parentRef} className="min-h-0 flex-1 overflow-auto">
-      <table className="w-full border-collapse text-xs">
-        <thead className="sticky top-0 z-10 bg-[#0B1120]">
-          <tr className="border-b border-slate-800">
-            {columns.map((c) => (
-              <th
-                key={c.key}
-                className={`px-2 py-2 text-left text-[11px] font-medium uppercase tracking-wider text-slate-400 ${c.className || ""}`}
-              >
-                {c.header}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        {useVirtual ? (
-          <tbody style={{ height: virtualizer.getTotalSize(), position: "relative" }}>
-            {virtualizer.getVirtualItems().map((vRow) => {
-              const row = rows[vRow.index];
-              return (
-                <tr
-                  key={vRow.key}
-                  className={`absolute w-full border-b border-slate-800/80 text-slate-300 ${
-                    onRowClick ? "cursor-pointer hover:bg-slate-800/30" : "hover:bg-slate-800/20"
-                  }`}
-                  style={{
-                    height: vRow.size,
-                    transform: `translateY(${vRow.start}px)`,
-                  }}
-                  onClick={onRowClick ? () => onRowClick(row) : undefined}
-                >
-                  {columns.map((c) => (
-                    <td key={c.key} className={`px-2 py-2 align-top ${c.className || ""}`}>
-                      {c.render(row)}
-                    </td>
-                  ))}
-                </tr>
-              );
-            })}
-            {rows.length === 0 && (
-              <tr>
-                <td
-                  colSpan={columns.length}
-                  className="px-2 py-8 text-center text-xs italic text-slate-500"
-                >
-                  {empty || "No rows."}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        ) : (
-          <tbody>
-            {rows.map((row, i) => (
-              <tr
-                key={i}
-                className={`border-b border-slate-800/80 text-slate-300 ${
-                  onRowClick ? "cursor-pointer hover:bg-slate-800/30" : "hover:bg-slate-800/20"
-                }`}
-                onClick={onRowClick ? () => onRowClick(row) : undefined}
-              >
-                {columns.map((c) => (
-                  <td key={c.key} className={`px-2 py-2 align-top ${c.className || ""}`}>
-                    {c.render(row)}
-                  </td>
-                ))}
-              </tr>
-            ))}
-            {rows.length === 0 && (
-              <tr>
-                <td
-                  colSpan={columns.length}
-                  className="px-2 py-8 text-center text-xs italic text-slate-500"
-                >
-                  {empty || "No rows."}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        )}
-      </table>
+    <div ref={parentRef} role="table" className="min-h-0 flex-1 overflow-auto text-xs">
+      <div
+        role="row"
+        className="sticky top-0 z-10 grid border-b border-slate-800 bg-[#0B1120]"
+        style={{ gridTemplateColumns: template }}
+      >
+        {columns.map((c) => (
+          <div
+            key={c.key}
+            role="columnheader"
+            className={`px-2 py-2 text-left text-[11px] font-medium uppercase tracking-wider text-slate-400 ${c.className || ""}`}
+          >
+            {c.header}
+          </div>
+        ))}
+      </div>
+
+      {rows.length === 0 ? (
+        <div className="px-2 py-8 text-center text-xs italic text-slate-500">
+          {empty || "No rows."}
+        </div>
+      ) : useVirtual ? (
+        <div style={{ height: virtualizer.getTotalSize(), position: "relative" }}>
+          {virtualizer.getVirtualItems().map((vRow) => (
+            <div
+              key={vRow.key}
+              role="row"
+              data-index={vRow.index}
+              ref={virtualizer.measureElement}
+              className={`absolute left-0 top-0 w-full ${rowClass}`}
+              style={{
+                gridTemplateColumns: template,
+                transform: `translateY(${vRow.start}px)`,
+              }}
+              onClick={onRowClick ? () => onRowClick(rows[vRow.index]) : undefined}
+            >
+              {cells(rows[vRow.index])}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div>
+          {rows.map((row, i) => (
+            <div
+              key={i}
+              role="row"
+              className={rowClass}
+              style={{ gridTemplateColumns: template }}
+              onClick={onRowClick ? () => onRowClick(row) : undefined}
+            >
+              {cells(row)}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

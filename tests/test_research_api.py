@@ -1,4 +1,4 @@
-from decifra.schemas.api_server import handle_api
+from decifra.schemas.api_server import handle_api, handle_api_post
 from decifra.schemas.research_api import industries_payload, tickers_payload
 
 
@@ -16,3 +16,15 @@ def test_api_routes_credit_industries_tickers():
         code, payload = handle_api(path, {})
         assert code == 200, path
         assert isinstance(payload, dict)
+
+
+def test_sync_financials_post_validation():
+    code, payload = handle_api_post("/api/sync/financials", {})
+    assert code == 400
+    assert "tickers" in payload["error"]
+
+    code, payload = handle_api_post(
+        "/api/sync/financials", {"tickers": ["PETR4"], "year_from": 1990, "year_to": 2020}
+    )
+    assert code == 400
+    assert "years" in payload["error"]

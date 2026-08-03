@@ -16,7 +16,7 @@ import type { ViewId } from "../types";
 const NAV: { id: ViewId; label: string; icon: typeof LayoutGrid }[] = [
   { id: "screener", label: "Opportunity Screener", icon: LayoutGrid },
   { id: "industries", label: "Industries", icon: Factory },
-  { id: "tickers", label: "Tickers", icon: List },
+  { id: "tickers", label: "Companies", icon: List },
   { id: "credit", label: "Credit overview", icon: BarChart3 },
   { id: "detail", label: "Company detail", icon: Building2 },
   { id: "valuation", label: "Valuation", icon: LineChart },
